@@ -47,7 +47,7 @@ test('no coincident generated attacks across the field; personal sources stay ou
 
 test('four-region field has distinct rhythmic anchors, no duplicate attacks, and unchanged v1 scores',async()=>{
  const {readFileSync}=await import('node:fs');const {createHash}=await import('node:crypto');
- const expected=JSON.parse(readFileSync(new URL('./fixtures/legacy-v1-scores.json',import.meta.url),'utf8'));
+ const expected=JSON.parse(readFileSync(new URL('../fixtures/legacy-v1-scores.json',import.meta.url),'utf8'));
  for(const point of expected)assert.equal(createHash('sha256').update(JSON.stringify(at(seed(),point.x,point.y).notes)).digest('hex'),point.sha256);
  const signatures=[];
  for(let i=0;i<=300;i++){

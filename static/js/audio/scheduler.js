@@ -862,6 +862,20 @@ export class LookaheadScheduler {
   _serviceAutomaticAnswer() {
     if (!this.automaticAnswers || this.jamAnswerReadiness().state !== 'ready' || this.liveNotes.size) return;
     const now = this.audioCtx.currentTime;
+    // Let a promised next-bar melodic adoption sound before an automatic echo
+    // occupies its slot. Explicit Answer this remains a separate user request.
+    const formAnswer = this.leadAnswer && {phraseOrdinal: this.leadAnswer.phraseOrdinal,
+      commitStep: this.leadAnswer.step, events: [{evolution: {answered: {source_note_id: this.leadAnswer.sourceNoteId}}}]};
+    for (const adoption of [this.pendingJamLead, this.activeJamLead, formAnswer]) {
+      if (adoption && adoption.commitStep !== undefined
+        && (adoption.phraseOrdinal > this.jamPhraseOrdinal
+          || (adoption.phraseOrdinal === this.jamPhraseOrdinal && this.currentStep < adoption.commitStep + 16))) {
+        const waiting = adoption.events.some(e => e.evolution?.answered?.source_note_id
+          && !(this.performanceTake?.events || []).some(r => r.time <= now
+            && r.event?.evolution?.answered?.source_note_id === e.evolution.answered.source_note_id));
+        if (waiting) return;
+      }
+    }
     const fresh = (this.performanceTake?.events || []).filter(record =>
       record.occurrence > (this.answeredThrough || 0)
       && record.event?.provenance === 'user_placed' && record.event.source_note_id?.startsWith('jam-live-')

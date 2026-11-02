@@ -167,3 +167,40 @@ test('actual successful pad auditions produce one four-note automatic answer',()
  assert.deepEqual(s.jamAnswer.events.map(item=>item.event.response_to[0]),[0,1,2,3].map(i=>'jam-live-actual'+i));
  assert.deepEqual(s.performanceTake.events,originals);
 });
+
+test('automatic echo yields to next-bar adoption until its audio-clock attack, without consuming the personal phrase',()=>{
+ const {s}=setup();s.performanceTake.events=[];s.performanceTake.sequence=0;s.setAutomaticAnswers(true);
+ const own={...personal('adopt',1,.25,67,1),released_at:1.25};
+ s.performanceTake.events.push(own);s.performanceTake.sequence=1;s.jamPhraseOrdinal=0;
+ const event={provenance:'jam_generated',role:'lead',evolution:{answered:{source_note_id:'jam-live-adopt',midi:67}}};
+ s.pendingJamLead={phraseOrdinal:0,commitStep:16,events:[event]};
+ s._serviceAutomaticAnswer();assert.equal(s.jamAnswer,undefined,'pending adoption takes priority');
+ assert.equal(s.answeredThrough,0,'waiting does not consume personal input');
+ s.activeJamLead=s.pendingJamLead;s.pendingJamLead=null;s.currentStep=18;
+ s.pendingJamLead={phraseOrdinal:1,events:[{provenance:'jam_generated',role:'lead'}]};
+ s.performanceTake.events.push({event,time:2.2,duration:.25,occurrence:2});
+ s._serviceAutomaticAnswer();assert.equal(s.jamAnswer,undefined,'scheduled future adoption is not realized');
+ s.audioCtx.currentTime=2.21;s._serviceAutomaticAnswer();assert.equal(s.jamAnswer.automatic,true);
+ assert.deepEqual(s.performanceTake.events[0],own);
+});
+
+test('expired adoption does not starve automatic echoes; explicit Answer this is still available while adoption waits',()=>{
+ const {s}=setup();s.performanceTake.events=[];s.performanceTake.sequence=0;s.setAutomaticAnswers(true);
+ s.performanceTake.events.push({...personal('manual',1,.25,67,1),released_at:1.25});s.performanceTake.sequence=1;
+ s.jamPhraseOrdinal=0;s.pendingJamLead={phraseOrdinal:0,commitStep:16,events:[{evolution:{answered:{source_note_id:'jam-live-manual'}}}]};
+ assert.match(s.requestJamAnswer(),/queued/,'an explicit request is not blocked');
+ const {s:t}=setup();t.performanceTake.events=[];t.performanceTake.sequence=0;t.setAutomaticAnswers(true);
+ t.performanceTake.events.push({...personal('late',1,.25,67,1),released_at:1.25});t.performanceTake.sequence=1;
+ t.jamPhraseOrdinal=1;t.activeJamLead=s.pendingJamLead;t._serviceAutomaticAnswer();assert.equal(t.jamAnswer.automatic,true);
+});
+
+test('fixed-form melodic adoption also has priority until its emitted attack reaches the audio clock',()=>{
+ const {s}=setup();s.performanceTake.events=[];s.performanceTake.sequence=0;s.setAutomaticAnswers(true);
+ s.performanceTake.events.push({...personal('form',1,.25,67,1),released_at:1.25});s.performanceTake.sequence=1;
+ s.jamPhraseOrdinal=0;s.leadAnswer={phraseOrdinal:0,step:16,sourceNoteId:'jam-live-form',used:false};
+ s._serviceAutomaticAnswer();assert.equal(s.jamAnswer,undefined);
+ s.leadAnswer.used=true;s.currentStep=18;
+ s.performanceTake.events.push({time:2.2,duration:.25,occurrence:2,event:{evolution:{answered:{source_note_id:'jam-live-form'}}}});
+ s._serviceAutomaticAnswer();assert.equal(s.jamAnswer,undefined,'used is not yet realized');
+ s.audioCtx.currentTime=2.21;s._serviceAutomaticAnswer();assert.equal(s.jamAnswer.automatic,true);
+});

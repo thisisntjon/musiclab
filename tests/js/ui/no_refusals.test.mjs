@@ -53,6 +53,7 @@ const keysOf = html => [...html.matchAll(/<button[^>]*data-key="([^"]+)"[^>]*>/g
 async function fuzz(seed, presses) {
   const { flow, scheduler, announced } = setup();
   const rand = seeded(seed), refusals = new Set(), errors = new Set(), visited = {};
+  flow.explorationRandom = rand;                 // the opening style comes from the seed too, so a failure reproduces
   const press = key => flow._onClick({ target: { closest: () => ({ dataset: { key }, focus() {} }) } });
   for (let i = 0; i < presses; i++) {
     try { flow.render(); } catch (error) { errors.add(`render ${flow.stage}: ${String(error.message).slice(0, 80)}`); }

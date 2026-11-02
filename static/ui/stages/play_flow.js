@@ -10,6 +10,7 @@ import {CHORD_VOICE_SCENES} from '../../js/theory/style_traits.js';
 import { scoreFromEvents, toMusicXML, fromMusicXML, renderSheetSvg, eventsFromTake } from '../../js/theory/score_sheet.js';
 import { dealCards, applyCard, cardSeek } from '../../js/theory/adjust_cards.js';
 import { visualBars, partOfRole, describeElements } from '../../js/theory/visual_tokens.js';
+import { optimizeNotes, optimizeArrangement, chordTonesByBar, describeOptimisation } from '../../js/theory/optimize.js';
 import {planMelodicPhrase,restoreMelodicPhrase,playedResponseSources,anchorPhraseToPlaying,fitToBarChord} from '../../js/theory/melodic_evolution.js';
 import {loadStyleFavorites,saveStyleFavorites} from '../../js/theory/style_favorites.js';
 import {stepsPerBar} from '../../js/theory/musical_time.js';
@@ -219,8 +220,7 @@ export class PlayFlow {
     this.liveHolds = new Map(); // "key:a" / "pointer:1" -> scheduler live note id, until released
     this.jamPointer = null; // the pointer press that already sounded a jam pad
     this.tunePage = 0;
-    this.detailsOpen = true;
-    this.songMoreOpen = true;
+    this.detailsOpen = false;
     this.aboutOpen = false;
     this.comfortOpen = false;
     this.allAtOnce = false;
@@ -563,6 +563,7 @@ export class PlayFlow {
 
   _editPart(index, stage = "tune") {
     if (!Number.isInteger(index) || !this.doc.song_cards?.[index]) return;
+    this.detailHub = false;   // a part's Open means its notes, not the hub
     const wasPlaying = Boolean(this.app.scheduler?.isPlaying);
     this._stopForScopeChange();
     this._finishPartEdit();
@@ -704,7 +705,6 @@ export class PlayFlow {
   _journeyHtml() {
     const current = this._journeyLevel(), inJam = this.stage === "jam", hasJam = Boolean(this.doc?.jam_session);
     const levels = [["find", "Find", hasJam], ["play", "Play", hasJam], ["shape", "Shape", true],
-      ["beat", "1. Beat", !inJam], ["tune", "2. Tune", !inJam], ["under", "3. Backing", !inJam],
       ["detail", "Detail", !inJam], ["share", "Share", !inJam]];
     const steps = levels.map(([id, label, reachable]) => {
       const here = id === current, attrs = here ? 'aria-current="step"' : reachable ? "" : "disabled";
@@ -712,8 +712,9 @@ export class PlayFlow {
       return `<li>${this._btn(`journey:${id}`, label, "pf-btn pf-small pf-journey-step", `${attrs}${title}`)}</li>`;
     }).join("");
     const adjust = current && current !== "find" ? this._btn("adjust-open", "Adjust", "pf-btn pf-small pf-adjust-btn", `aria-expanded="${Boolean(this.adjustOpen)}"`) : "";
+    const nicer = current && current !== "find" ? this._btn("optimize", "Make it nicer", "pf-btn pf-small pf-nicer-btn") : "";
     const what = this._btn("legend-open", "What is this?", "pf-btn pf-small pf-legend-btn", `aria-expanded="${Boolean(this.legendOpen)}"`);
-    return `<nav class="pf-journey" aria-label="Your song's journey"><ol>${steps}</ol>${adjust}${what}</nav>`;
+    return `<nav class="pf-journey" aria-label="Your song's journey"><ol>${steps}</ol>${nicer}${adjust}${what}</nav>`;
   }
 
   _refreshJourney() {
@@ -722,6 +723,8 @@ export class PlayFlow {
   }
 
   _journey(level) {
+    // Detail pressed from inside an editor brings the three tiles back.
+    if (level === "detail" && this._journeyLevel() === "detail") { this.detailHub = true; return this.render(); }
     if (level === this._journeyLevel()) return;
     if (level === "find" || level === "play") {
       if (this.stage === "jam" || !this.doc.jam_session) return;
@@ -730,8 +733,7 @@ export class PlayFlow {
     }
     if (level === "shape") return this.stage === "jam" ? this._captureDirection() : this._go("song");
     if (this.stage === "jam") return;
-    if (level === "beat" || level === "tune" || level === "under") return this._go(level);
-    if (level === "detail") return this._go(this._capturedDevelopmentStage());
+    if (level === "detail") { this.detailHub = true; return this._go(this._capturedDevelopmentStage()); }
     if (level === "share") return this._go("keep");
   }
 
@@ -759,6 +761,7 @@ export class PlayFlow {
   }
 
   _go(stage, { back = false } = {}) {
+    if (!["beat", "tune", "under"].includes(stage)) this.detailHub = false;
     if(this.partComparison) {
       this.comparisonGeneration=(this.comparisonGeneration||0)+1;
       this._stopForScopeChange();this.partComparison=null;
@@ -785,8 +788,7 @@ export class PlayFlow {
     // Mutes and Focus live only in the "All at once" deck: nothing stays silent or quiet unseen.
     this.app.scheduler?.clearMuteLayers();
     this.app.scheduler?.setSpotlightRole(null);
-    this.detailsOpen = true;
-    this.songMoreOpen = true;
+    this.detailsOpen = false;
     this.aboutOpen = false;
     this.comfortOpen = false;
     this.slotsFull = false;
@@ -933,6 +935,8 @@ export class PlayFlow {
       this.root.innerHTML = this._renderStart();
     } else if (this.stage === "jam") {
       this.root.innerHTML = this._renderJam();
+    } else if (this.detailHub && ["beat", "tune", "under"].includes(this.stage)) {
+      this.root.innerHTML = this._renderDetailHub();
     } else if (this.stage === "beat") {
       this.root.innerHTML = this._renderBeat();
     } else if (this.stage === "tune") {
@@ -953,8 +957,7 @@ export class PlayFlow {
     if (this.stage !== "start" && this.doc && this.adjustOpen) this.root.insertAdjacentHTML("afterbegin", this._adjustHtml());
     if (this.stage !== "start" && this.doc) this.root.insertAdjacentHTML("afterbegin", this._journeyHtml());
     if(this.stage!=='start'&&!(this.stage==='jam'&&(this.doc?.jam_session?.music_field||this.doc?.jam_session?.exploration_map)))this.root.insertAdjacentHTML('beforeend',`<section aria-label="Help and access"><div class="pf-row">
-      ${this._btn('settings',this.comfortOpen?'Close help and settings':'Help and settings','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}
-      ${this._btn('speak-screen','Read this','pf-btn pf-small')}</div>${this.comfortOpen?this._renderComfort():''}</section>`);
+      ${this._btn('settings',this.comfortOpen?'Close help':'Help','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}</div>${this.comfortOpen?this._helpPanelHtml():''}</section>`);
     if(this.partComparison && this.stage==='song')this.root.insertAdjacentHTML('afterbegin',this._comparisonHtml());
     if (this.pianoMessage) this.root.insertAdjacentHTML('afterbegin', `<p role="status">${esc(this.pianoMessage)}</p>`);
     if (this.deleteMessage) this.root.insertAdjacentHTML('afterbegin', `<p role="status">${esc(this.deleteMessage)}</p>`);
@@ -964,7 +967,7 @@ export class PlayFlow {
     if (this.draftSaveFailed) this.root.insertAdjacentHTML("afterbegin",
       '<p role="alert">Your new edits are not saved. Keep this page open. Use Download project. Keep that file.</p>'
       + this._btn('dl-project', 'Download project', 'pf-btn'));
-    if (this.editingCard != null && !(this.stage === "tune" && this.tuneGrid.eventEditor)) {
+    if (!this.detailHub && this.editingCard != null && !(this.stage === "tune" && this.tuneGrid.eventEditor)) {
       const partBars = normalizeSongCards(this.doc.song_cards)[this.editingCard]?.bars || 4;
         const barUnit = partBars === 1 ? "bar" : "bars";
         const lengthNote = partBars < 4
@@ -980,7 +983,7 @@ export class PlayFlow {
         ${this._btn("to-song", "Back to song", "pf-btn pf-small")}
       </div>`);
     }
-    if (this.doc && ["beat", "tune", "under"].includes(this.stage) && !this.allAtOnce) {
+    if (!this.detailHub && this.doc && ["beat", "tune", "under"].includes(this.stage) && !this.allAtOnce) {
       this.root.insertAdjacentHTML("afterbegin", this._songOverviewHtml());
     }
     this._syncWaterFlowDom();
@@ -1566,10 +1569,10 @@ export class PlayFlow {
       <details class="pf-demo-tools" ${this.demoToolsOpen?'open':''}><summary data-key="demo-tools">More</summary>
         ${jam.live_keys?`<div class="pf-row">${this._btn('jam-answer','Answer this','pf-btn pf-small')}${this._btn('jam-auto-answer','Band answers me','pf-btn pf-small',`aria-pressed="${jam.auto_answer===true}"`)}</div>
         <p id="pf-answer-status" class="pf-sub" role="status">${jam.auto_answer===true?'Play, then pause. The band plays your notes back.':'Play and let go. Answer this plays your last notes back.'}</p>`:''}
-        ${jam.exploration_map?this._btn('enter-field','Six-region continuous blend (up to 160 BPM)','pf-btn pf-small'):this._btn('enter-circle','Playable circle (up to 160 BPM)','pf-btn pf-small')}
+        ${stepsPerBar(this.doc)!==16?'':jam.exploration_map?this._btn('enter-field','Slide between six styles','pf-btn pf-small'):this._btn('enter-circle','Back to the circle','pf-btn pf-small')}
         ${this._jamParticipationHtml()}
-        <div class="pf-row">${this._btn('settings',this.comfortOpen?'Close help and settings':'Help and settings','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}${this._btn('speak-screen','Read this','pf-btn pf-small')}${this._backBtn()}</div>
-        ${this.comfortOpen?this._renderComfort():''}
+        <div class="pf-row">${this._btn('settings',this.comfortOpen?'Close help':'Help','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}${this._backBtn()}</div>
+        ${this.comfortOpen?this._helpPanelHtml():''}
       </details>
     </div>`;
     return `<div class="pf-stage pf-listening-stage"><h1 class="pf-heading">Find your groove</h1>
@@ -2381,8 +2384,7 @@ export class PlayFlow {
     // Everything else stays available, behind More.
     const layerSwitches = CARD_LAYERS.map(l => this._choice(`card-layer:${activeIdx}:${l.id}`, `${icon(l.icon)} ${l.label}`, Boolean(activeCard[l.id]))).join("");
     const fxBtns = CARD_FX.map(f => this._choice(`card-fx:${activeIdx}:${f.id}`, `${icon(f.icon)} ${f.label}`, activeCard?.fx === f.id, "pf-btn pf-small")).join("");
-    const more = embedded ? "" : `<details class="pf-demo-tools pf-song-more" ${this.songMoreOpen !== false ? "open" : ""}><summary data-key="song-more">More</summary>
-        <div class="pf-row" role="group" aria-label="Studio steps">${this._btn("edit-scope:beat", "Edit beat", "pf-btn pf-small")}${this._btn("edit-scope:tune", "Edit tune", "pf-btn pf-small")}${this._btn("edit-scope:under", "Edit backing", "pf-btn pf-small")}</div>
+    const more = embedded ? "" : `<details class="pf-demo-tools pf-song-more" ${this.songMoreOpen ? "open" : ""}><summary data-key="song-more">More</summary>
         <p class="pf-sub">These change the part you touched last: part ${activeIdx + 1}.</p>
         <div class="pf-row" role="group" aria-label="Part ${activeIdx + 1} length">
           ${this._btn(`card-bars:${activeIdx}:${activeCard.bars - 1}`, "Shorter", "pf-btn pf-small", activeCard.bars <= 1 ? "disabled" : "")}
@@ -2414,6 +2416,87 @@ export class PlayFlow {
         ${embedded ? "" : this._sheetBoxHtml()}
         ${more}
       </div>`;
+  }
+
+  /** Detail arrives as three tiles: Beat, Tune, Backing. Each says what it holds; Open goes in. The music keeps playing. */
+  _renderDetailHub() {
+    const notes = this.doc.notes || [], own = n => n.provenance === "user_placed" || n.provenance === "hummed_confirmed";
+    const lead = notes.filter(n => n.role === "lead"), drums = notes.filter(n => n.role === "drums");
+    const kit = KITS.find(k => k.id === (this.doc.drum_kit || "punchy"))?.label || "Punchy";
+    const feel = FEELS.find(f => f.id === this.doc.underneath?.feel)?.label || "Just beat and tune";
+    const scope = this.editingCard != null ? `Part ${this.editingCard + 1}` : "Your song";
+    const playing = Boolean(this.app.scheduler?.isPlaying);
+    const playBtn = this._btn("play", playing ? `${icon("stop")} Stop` : `${icon("play")} Play`, "pf-btn pf-play");
+    const tile = (id, title, line, hint) => `<div class="pf-song-card pf-hub-tile" data-hub="${id}">
+        <p class="pf-song-card-title">${title}</p>
+        <p class="pf-sub">${esc(line)}</p>
+        <p class="pf-sub">${esc(hint)}</p>
+        <div class="pf-row">${this._btn(`hub-open:${id}`, "Open", "pf-btn pf-small", `aria-label="Open ${title.toLowerCase()}"`)}</div>
+      </div>`;
+    return `<div class="pf-stage pf-detail-hub">
+      <div class="pf-head-row"><h1 class="pf-heading">Go deeper</h1>${playBtn}</div>
+      <p class="pf-say">${scope}. Pick a part to work on. The song keeps playing.</p>
+      ${this._timelineHtml()}
+      <div class="pf-song-cards">
+        ${tile("beat", "Beat", `${drums.length} ${drums.length === 1 ? "hit" : "hits"}. Drum sound: ${kit}.`, "Tap pads to add or take away hits.")}
+        ${tile("tune", "Tune", `${lead.length} ${lead.length === 1 ? "note" : "notes"}, ${lead.filter(own).length} yours.`, "Drag notes up, down, left and right.")}
+        ${tile("under", "Backing", `${feel}.`, "Chords and bass under the tune.")}
+      </div>
+      <div class="pf-row">${this._btn("to-song", `${icon("back")} Back to shape`, "pf-btn pf-small")}</div>
+    </div>`;
+  }
+
+  /** One Help control: read this screen aloud, then the comfort settings. */
+  _helpPanelHtml() {
+    return `<div class="pf-help-panel"><div class="pf-row">${this._btn('speak-screen','Read this screen','pf-btn pf-small')}</div>${this._renderComfort()}</div>`;
+  }
+
+  /* ---- Make it nicer: one tap to the nearest version known to sound better, on every level, with Undo. ---- */
+  _optimize() {
+    const level = this._journeyLevelForCards();
+    if (!level) return;
+    const g = this.doc.global_context || {}, spb = stepsPerBar(this.doc), root = ((Number(g.root_pc) || 0) % 12 + 12) % 12, minor = /minor|dorian|phrygian|aeolian/.test(g.scale_type || "");
+    if (level === "play") {
+      // The keys move to the band's register, so what you play sits where the band sings.
+      const lead = (this.app.scheduler?.committedJamBacking || []).filter(e => e.role === "lead" && Number.isFinite(e.concrete?.midi_pitch)).map(e => e.concrete.midi_pitch).sort((a, b) => a - b);
+      const median = lead.length ? lead[Math.floor(lead.length / 2)] : 64, home = this._liveJamPads()[0]?.midi ?? 60;
+      const shift = Math.max(-1, Math.min(1, Math.round((median - home) / 12)));
+      if (shift === 0) { this.app._announce("The keys fit the band now."); return this.render(); }
+      this.padOctave = Math.max(-1, Math.min(1, (this.padOctave || 0) + shift));
+      this.app._announce(shift > 0 ? "Keys moved up to fit the band." : "Keys moved down to fit the band.");
+      return this.render();
+    }
+    const song = this.app.compiledSong, bars = Math.max(1, Math.ceil((song?.total_steps || 64) / spb));
+    const tones = chordTonesByBar(song?.events || [], { bars, stepsPerBar: spb, root, minor });
+    this._pushUndo();
+    let notesResult = null, arrangementResult = null;
+    if (level === "detail") {
+      notesResult = optimizeNotes(this.doc.notes, { tonesByBar: tones, stepsPerBar: spb, root, minor });
+      if (notesResult.changed) this.doc.notes = notesResult.notes;
+    } else {
+      const canonical = this._canonicalDoc();
+      arrangementResult = optimizeArrangement(canonical.song_cards, canonical.global_context?.bpm || 100);
+      notesResult = optimizeNotes(canonical.notes, { tonesByBar: tones, stepsPerBar: spb, root, minor });
+      const cards = arrangementResult.cards.map(card => {
+        if (!card.material?.notes) return card;
+        const r = optimizeNotes(card.material.notes, { tonesByBar: tones, stepsPerBar: spb, root, minor });
+        if (r.changed) { notesResult.changes.chord += r.changes.chord; notesResult.changes.grid += r.changes.grid; notesResult.changes.overlap += r.changes.overlap; if (r.changes.home) notesResult.changes.home = true; notesResult.changed = true; }
+        return r.changed ? { ...card, material: { ...card.material, notes: r.notes } } : card;
+      });
+      const next = { ...canonical, song_cards: cards, global_context: { ...canonical.global_context, bpm: arrangementResult.bpm }, notes: notesResult.changed ? notesResult.notes : canonical.notes };
+      if (this.editingCard != null && this.sharedMaterial) {
+        this.doc = { ...this.doc, global_context: next.global_context, song_cards: next.song_cards };
+        this.sharedMaterial = extractSongMaterial(next);
+      } else this.doc = { ...this.doc, ...next };
+    }
+    const changed = Boolean(notesResult?.changed || arrangementResult?.changed);
+    if (!changed) this.undoStack.pop();
+    this.tuneGrid = this.tuneGrid?.eventEditor ? { ...tuneGridFromNotes(this.doc.notes, this._partBars()), eventEditor: true } : tuneGridForBars(this.tuneGrid, this.doc.notes, this._partBars());
+    if (changed) recordAct(this.doc, "optimize", { level, ...(notesResult?.changes || {}), arrangement: arrangementResult?.changes || [] });
+    this._compile();
+    this.jamMessage = "";
+    this.app._announce(describeOptimisation({ notes: notesResult, arrangement: arrangementResult }));
+    this.render();
   }
 
   /* ---- "What is this?": every element on the screen, named in words, with its colour and shape. ---- */
@@ -3548,6 +3631,8 @@ export class PlayFlow {
       this.root.querySelector('[data-key="play"]')?.focus();return;
     }
     if(key==='enter-field'&&this.stage==='jam') {
+      // The slide field is four-beat music; a three-beat style keeps its own time instead of throwing.
+      if(stepsPerBar(this.doc)!==16){this.jamMessage='This style keeps its own time. The slide field is for four-beat styles.';this.app._announce(this.jamMessage);return this.render();}
       this._pushUndo();this._fitTempo();this.exploreTour=null;
       this._acceptJamDoc(setJamDirection(this.doc,{music_field:{version:4,x:.5,y:.5}}));
       this.render();this._paintMusicField();this.root.querySelector('[data-music-field]')?.focus();return;
@@ -3963,8 +4048,9 @@ export class PlayFlow {
       return this._back();
     }
     if (key.startsWith("edit-card:")) return this._editPart(Number(key.slice("edit-card:".length)));
-    if (key.startsWith("edit-scope:")) return this._go(key.slice("edit-scope:".length));
+    if (key.startsWith("edit-scope:")) { this.detailHub = false; return this._go(key.slice("edit-scope:".length)); }
     if (key === "edit-shared") {
+      this.detailHub = false;
       this._finishPartEdit();
       this._go("tune");
       return this.app._announce("Edit the shared tune. Linked parts follow these notes.");
@@ -4121,6 +4207,8 @@ export class PlayFlow {
       return this.render();
     }
     if (key.startsWith("pad-octave:")) return this._shiftPadOctave(Number(key.slice("pad-octave:".length)));
+    if (key === "optimize") return this._optimize();
+    if (key.startsWith("hub-open:")) { const to = key.slice("hub-open:".length); this.detailHub = false; if (!["beat", "tune", "under"].includes(to)) return; this._go(to); return this.render(); }
     if (key === "legend-open") { this.legendOpen = !this.legendOpen; if (this.legendOpen) this.app._announce(this._legendElements().map(e => e.says).join(" ")); return this.render(); }
     if (key.startsWith("visual-mode:")) { this._setVisualMode(key.slice("visual-mode:".length)); return this.render(); }
     if (key === "adjust-open") { if (this.adjustOpen) return this._closeAdjust(); this.adjustShuffle = (this.adjustShuffle || 0); this._openAdjust(); return this.render(); }
@@ -4300,7 +4388,7 @@ export class PlayFlow {
     }
     if (key === "save-phrase") {
       const res = savePhraseToShelf(window.localStorage, this.doc);
-      this.app._announce(res.ok ? `Saved "${res.entry.title}" to your shelf.` : "Tap a box to save a tune.");
+      this.app._announce(res.ok ? `Saved "${res.entry.title}" to your shelf.` : "Add a note first to save a phrase.");
       return this.render();
     }
     if (key.startsWith("use-phrase:")) {
@@ -4318,7 +4406,7 @@ export class PlayFlow {
     if (key.startsWith("deja:")) {
       const mode = key.slice("deja:".length);
       if (!this.tuneGrid.main.some(Boolean) && !this.tuneGrid.ending.some(Boolean)) {
-        return this.app._announce("Tap a box to add a note.");
+        return this.app._announce("Add a note first, then mix it.");
       }
       this._pushUndo();
       this.tuneGrid = applyDejaVu(this.tuneGrid, mode, this.diceSeed++, this.tuneTab);

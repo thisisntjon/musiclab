@@ -30,10 +30,10 @@ class TestStudioIntegration(unittest.TestCase):
                                      'd91b0d72d61dfe6260ac420746a3a5a123cd813db320698bfc19345169d0c549')
                     continue
                 content = asset.read_text(encoding="utf-8")
-                if asset.suffix == ".svg":
-                    # SVG's standard namespace identifies markup; it is not a fetched resource.
-                    # Any external image, script, stylesheet or link URL still fails below.
-                    content = content.replace('xmlns="http://www.w3.org/2000/svg"', "")
+                # SVG's standard namespace identifies markup; it is not a fetched resource,
+                # whether in an .svg file or in script that draws SVG (the sheet in score_sheet.js).
+                # Any external image, script, stylesheet or link URL still fails below.
+                content = content.replace('xmlns="http://www.w3.org/2000/svg"', "")
                 self.assertFalse("http://" in content, f"External http:// URL found in {asset}")
                 self.assertFalse("https://" in content, f"External https:// URL found in {asset}")
 

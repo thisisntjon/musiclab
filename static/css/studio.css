@@ -2666,3 +2666,10 @@ body.pf-less-motion [data-enter] > *, body.pf-less-motion [data-enter] .pf-song-
 .pf-name-row input { min-width: 12ch; flex: 1 1 14ch; }
 .pf-name-ideas summary { cursor: pointer; padding: 8px 0; }
 .pf-name-ideas[open] { flex-basis: 100%; }
+
+.pf-nicer-btn { margin-left: auto; white-space: nowrap; background: var(--pf-next); border-color: var(--pf-next-line); }
+.pf-adjust-btn { margin-left: 6px; }
+
+/* Detail's three tiles: the same shape as Shape's parts, so the depth reads at a glance. */
+.pf-detail-hub .pf-song-cards { display: flex; flex-wrap: wrap; gap: 12px; }
+.pf-hub-tile { flex: 1 1 200px; min-width: 0; }
