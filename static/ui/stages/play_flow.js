@@ -280,6 +280,8 @@ export class PlayFlow {
     this._styleVolumeLock();
     this.root.addEventListener("click", (e) => this._onClick(e));
     this.root.addEventListener('pointerdown', e => {
+      const timeline=e.target.closest?.('[data-timeline]');
+      if(timeline&&e.button===0){e.preventDefault();return this._beginScrub(e,timeline);}
       const picture=e.target.closest?.('[data-phrase-picture]');
       if(picture&&e.button===0&&this.stage==='tune'&&this.tuneGrid.eventEditor){e.preventDefault();return this._beginNoteDrag(e,picture);}
       const field=e.target.closest('[data-music-field], [data-music-circle]');
@@ -288,15 +290,17 @@ export class PlayFlow {
       this.fieldPointer=e.pointerId;this.fieldGesture=false;this._pointMusicField(e,field);
     });
     this.root.addEventListener('pointermove', e => {
+      if(this.scrub?.pointerId===e.pointerId)return this._scrubTo(e);
       if(this.noteDrag?.pointerId===e.pointerId)return this._moveNoteDrag(e);
       if(this.fieldPointer===e.pointerId)this._pointMusicField(e,e.target.closest('[data-music-field], [data-music-circle]'));
     });
     this.root.addEventListener('pointerup', e => {
+      if(this.scrub?.pointerId===e.pointerId)return this._endScrub();
       if(this.noteDrag?.pointerId===e.pointerId)return this._endNoteDrag();
       if(this.fieldPointer!==e.pointerId)return;
       this._flushMusicField();this.fieldPointer=null;this.fieldGesture=false;
     });
-    this.root.addEventListener('pointercancel', () => { if (this.noteDrag) this._endNoteDrag({ cancelled: true }); this.cancelFieldGesture(); });
+    this.root.addEventListener('pointercancel', () => { this._endScrub(); if (this.noteDrag) this._endNoteDrag({ cancelled: true }); this.cancelFieldGesture(); });
     this.root.addEventListener('input', e => {
       if(e.target.matches('[data-circle-blend]')){const x=Number(e.target.value);this._requestCircle(['ska-v1','rocksteady-v1','reggae-v1'][Math.round(x*2)],true,{version:5,x,y:.5});return;}
       const axis=e.target.dataset?.fieldAxis;if(!axis)return;
@@ -988,6 +992,7 @@ export class PlayFlow {
   onTick(stepEvt, isPlaying) {
     this._showBandAnswers(stepEvt);
     this._paintSheet();
+    this._paintTimeline();
     this._paintListeningVisual(isPlaying);
     const eventTransport=this.root?.querySelector('[data-event-transport]');
     if(eventTransport){
@@ -2018,6 +2023,7 @@ export class PlayFlow {
       <div class="pf-head-row"><div><h1 class="pf-heading">Shape your tune</h1><p class="pf-sub">${scope}. ${this.editingCard==null?'Edits affect linked parts.':'Edits stay in this part.'}</p></div>
       ${this._btn('play',transportLabel,'pf-btn pf-play pf-big','data-event-transport')}</div>
       <p class="pf-say">Drag a note up or down to change it. Drag it left or right to move it. Press an empty spot to add one.</p>
+      ${this._timelineHtml()}
       <div class="pf-row" role="group" aria-label="Choose a bar">${Array.from({length:bars},(_,b)=>this._choice(`event-bar:${b}`,`Bar ${b+1}`,b===this.eventTuneBar)).join('')}</div>
       <div class="pf-phrase-caption"><span>Higher notes</span><span>Time moves left to right</span></div>
       <p id="pf-phrase-status" class="pf-sub" role="status">${playing?"Playing this part.":"Stopped. Press Play to hear your music."}</p>
@@ -2369,10 +2375,120 @@ export class PlayFlow {
         <p class="pf-say">Tap a part. Make it calm or big. The last part ends the song.</p>
         ${songRiverSvg}
         <div class="pf-song-cards">${tiles}</div>
+        ${embedded ? "" : this._timelineHtml()}
         ${footer}
         ${embedded ? "" : this._sheetBoxHtml()}
         ${more}
       </div>`;
+  }
+
+  /* ---- The timeline: the whole song as blocks on one time axis. Drag anywhere to play from there. ---- */
+  _timelineModel() {
+    const song = this.app.compiledSong;
+    if (!song?.events) return null;
+    const spb = stepsPerBar(this.doc), total = Number(song.total_steps) || 64;
+    const ranges = songCardRanges(this.doc.song_cards, 4 * spb, song.bpm || 100, spb);
+    const lanes = [["drums", "Beat", e => e.role === "drums"], ["bass", "Bass", e => e.role === "bass"], ["chords", "Chords", e => e.role === "harmony" || e.role === "hocket"], ["tune", "Tune", e => e.role === "lead"]];
+    const blocks = [];
+    for (const [id, , test] of lanes) for (const e of song.events) {
+      if (!test(e) || (e.velocity ?? 1) <= 0) continue;
+      blocks.push({ lane: id, step: Number(e.step) || 0, length: Math.max(.5, Number(e.duration_steps) || 1), own: e.provenance === "user_placed" || e.provenance === "hummed_confirmed", id: e.id });
+    }
+    return { total, spb, ranges, lanes: lanes.map(([id, label]) => ({ id, label })), blocks,
+      parts: ranges.map((r, i) => ({ ...r, name: this.doc.song_cards[i]?.role_name || `Part ${i + 1}` })) };
+  }
+
+  _timelineHtml() {
+    const m = this._timelineModel();
+    if (!m) return "";
+    const PX = 6, LANE = 14, HEAD = 16, LEFT = 46, W = LEFT + m.total * PX + 8, H = HEAD + m.lanes.length * LANE + 10;
+    const x = step => LEFT + step * PX;
+    const step = this.app.scheduler?.isPlaying && this.playhead ? this.playhead.step : (this.timelineStep ?? 0);
+    const partsSvg = m.parts.map(p => `<g class="pf-tl-part"><line x1="${x(p.start_step)}" x2="${x(p.start_step)}" y1="0" y2="${H}" class="pf-tl-partline"/><text x="${x(p.start_step) + 4}" y="11" class="pf-tl-partname">${esc(p.name)}</text></g>`).join("");
+    const bars = Array.from({ length: Math.ceil(m.total / m.spb) }, (_, b) => `<line x1="${x(b * m.spb)}" x2="${x(b * m.spb)}" y1="${HEAD}" y2="${H - 10}" class="pf-tl-bar"/>`).join("");
+    const lanesSvg = m.lanes.map((l, i) => `<text x="4" y="${HEAD + i * LANE + 10}" class="pf-tl-lane pf-part-${l.id}">${l.label}</text>`).join("");
+    const blocks = m.blocks.map(b => `<rect x="${x(b.step)}" y="${HEAD + m.lanes.findIndex(l => l.id === b.lane) * LANE + 2}" width="${Math.max(3, b.length * PX - 1)}" height="${LANE - 4}" rx="2" class="pf-tl-block pf-part-${b.lane}${b.own ? " own" : ""}" data-id="${esc(b.id)}"/>`).join("");
+    const px = x(Math.max(0, Math.min(m.total, step)));
+    return `<div class="pf-timeline-wrap"><p class="pf-sub pf-tl-help">Drag along the timeline to play from anywhere. <span data-tl-label>${this._timelineLabel(step, m)}</span></p>
+      <svg class="pf-timeline" data-timeline viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="slider" tabindex="0" aria-label="Where the song is playing" aria-valuemin="1" aria-valuemax="${Math.ceil(m.total / m.spb)}" aria-valuenow="${Math.floor(step / m.spb) + 1}" aria-valuetext="${esc(this._timelineLabel(step, m))}">
+        ${lanesSvg}${partsSvg}${bars}${blocks}
+        <g class="pf-tl-playhead" transform="translate(${px} 0)"><line x1="0" x2="0" y1="0" y2="${H}"/><path d="M-6 0 L6 0 L0 8 Z"/></g>
+      </svg></div>`;
+  }
+
+  _timelineLabel(step, m = this._timelineModel()) {
+    if (!m) return "";
+    const part = m.parts.find(p => step >= p.start_step && step < p.end_step) || m.parts.at(-1);
+    const bar = Math.floor((step - (part?.start_step || 0)) / m.spb) + 1;
+    return `${part?.name || "Song"}, bar ${Math.max(1, bar)}.`;
+  }
+
+  _paintTimeline() {
+    const svg = this.root?.querySelector?.("[data-timeline]");
+    if (!svg) return;
+    const m = this._timelineModel();
+    if (!m) return;
+    const step = this.app.scheduler?.isPlaying && this.playhead ? this.playhead.step : (this.timelineStep ?? 0);
+    if (step === this.timelinePainted) return;
+    this.timelinePainted = step;
+    svg.querySelector(".pf-tl-playhead")?.setAttribute("transform", `translate(${46 + Math.max(0, Math.min(m.total, step)) * 6} 0)`);
+    svg.setAttribute("aria-valuenow", String(Math.floor(step / m.spb) + 1));
+    const label = this._timelineLabel(step, m);
+    svg.setAttribute("aria-valuetext", label);
+    const text = this.root.querySelector("[data-tl-label]");
+    if (text && text.textContent !== label) text.textContent = label;
+  }
+
+  _timelineStepAt(e, svg) {
+    const m = this._timelineModel();
+    if (!m) return 0;
+    const rect = svg.getBoundingClientRect(), W = 46 + m.total * 6 + 8;
+    const vx = (e.clientX - rect.left) / Math.max(1, rect.width) * W;
+    return Math.max(0, Math.min(m.total - 1, Math.floor((vx - 46) / 6)));
+  }
+
+  _beginScrub(e, svg) {
+    try { svg.setPointerCapture?.(e.pointerId); } catch { /* synthetic pointers */ }
+    this.scrub = { pointerId: e.pointerId, svg, last: null };
+    this._scrubTo(e);
+  }
+
+  _scrubTo(e) {
+    const svg = this.root?.querySelector?.("[data-timeline]") || this.scrub?.svg;
+    if (!svg) return;
+    const step = this._timelineStepAt(e, svg);
+    if (this.scrub && this.scrub.last === step) return;
+    if (this.scrub) this.scrub.last = step;
+    return this._seekTo(step);
+  }
+
+  _endScrub() {
+    const scrub = this.scrub;
+    this.scrub = null;
+    try { scrub?.svg?.releasePointerCapture?.(scrub.pointerId); } catch { /* already released */ }
+  }
+
+  /** Play from a step of the whole song. On Detail this may mean opening the part that step is in. */
+  async _seekTo(step) {
+    const scheduler = this.app.scheduler, m = this._timelineModel();
+    if (!m) return;
+    this.timelineStep = step;
+    const partIndex = m.parts.findIndex(p => step >= p.start_step && step < p.end_step);
+    if (this.stage === "tune" && this.editingCard != null && partIndex >= 0 && partIndex !== this.editingCard) {
+      this._editPart(partIndex);
+      this.eventTuneBar = Math.floor((step - m.parts[partIndex].start_step) / m.spb);
+      this.render();
+    } else if (this.stage === "tune" && partIndex >= 0) {
+      const bar = Math.floor((step - m.parts[partIndex].start_step) / m.spb);
+      if (bar !== this.eventTuneBar) { this.eventTuneBar = bar; this.render(); }
+    }
+    if (!scheduler.isPlaying) {
+      const range = this.stage === "tune" && this.editingCard != null ? m.parts[this.editingCard] : null;
+      await this._keepMusicGoing(this._intentToken(), range ? [range.start_step, range.end_step] : null);
+    }
+    scheduler.seekToStep?.(step);
+    this.playhead = { ...(this.playhead || {}), step };
+    this._paintTimeline();
   }
 
   /** The same music as real notation. One staff per part that sounds; your notes are outlined; a line follows the music. */
@@ -4490,6 +4606,13 @@ export class PlayFlow {
     if (active && ((active.tagName === "INPUT" && active.type !== "range") || active.tagName === "TEXTAREA" || active.tagName === "SELECT" || active.isContentEditable)) return;
     if (active?.tagName === "BUTTON" && !this.root.contains(active)
         && !["btn-calm", "btn-stop-sound"].includes(active.id)) return;
+    if (ev.target?.hasAttribute?.("data-timeline") && /^(ArrowLeft|ArrowRight|Home|End)$/.test(ev.key)) {
+      ev.preventDefault();
+      const m = this._timelineModel(); if (!m) return;
+      const at = this.app.scheduler?.isPlaying && this.playhead ? this.playhead.step : (this.timelineStep ?? 0);
+      const next = ev.key === "Home" ? 0 : ev.key === "End" ? m.total - m.spb : Math.max(0, Math.min(m.total - 1, Math.floor(at / m.spb) * m.spb + (ev.key === "ArrowRight" ? m.spb : -m.spb)));
+      return this._seekTo(next);
+    }
     if (this.stage === "tune" && this.tuneGrid.eventEditor && ev.target?.dataset?.phraseNote && /^Arrow(Up|Down|Left|Right)$/.test(ev.key)) {
       ev.preventDefault();
       this.eventTuneId = ev.target.dataset.phraseNote;

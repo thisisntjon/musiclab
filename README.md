@@ -10,7 +10,7 @@ Press **Listen** and a band is already playing. Drag around the circle, use the 
 
 Join in using the **eight scale keys (`A` through `K`)** with home chord tones visibly marked and **`Z` / `X`** to shift octaves (or the four drum pads). Played notes anchor the band's next bar on your pitch, rapid playing builds drum and bass energy toward a roll and drop, and **Band answers me** replies on reserved voices while keeping your own performance intact.
 
-When you hear a moment you like, press **Make my song**. The music keeps playing as the song view opens (`Find → Play → Shape → Detail → Share`), where a live companion sheet of music writes itself from what plays, you can shape Beginning / Main / Ending sections, drag notes directly in pitch, time and length on the Detail picture while hearing them live, undo, save in your browser, download standard **MusicXML 4.0** (`Download sheet`) or reopen a MusicXML/JSON file, or export a stereo `.WAV` audio file (`Download audio`).
+When you hear a moment you like, press **Make my song**. The music keeps playing as the song view opens (`Find → Play → Shape → Detail → Share`), where a live companion sheet of music writes itself from what plays, a whole-song timeline lets you drag anywhere to play from there, you can shape Beginning / Main / Ending sections, drag notes directly in pitch, time and length on the Detail picture while hearing them live, undo, save in your browser, download standard **MusicXML 4.0** (`Download sheet`) or reopen a MusicXML/JSON file, or export a stereo `.WAV` audio file (`Download audio`).
 
 ## What it's built around
 

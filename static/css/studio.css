@@ -2579,3 +2579,21 @@ body.pf-less-motion .pf-sheet-beat { display: none; }
 .pf-phrase-picture { touch-action: none; cursor: cell; }
 .pf-phrase-note { cursor: grab; }
 .pf-phrase-note::after { content: ""; position: absolute; right: 2px; top: 8px; bottom: 8px; width: 6px; border-radius: 3px; background: currentColor; opacity: .45; cursor: ew-resize; }
+
+/* The timeline: the whole song as blocks on one time axis. Drag to play from anywhere. */
+.pf-timeline-wrap { margin: 10px 0 4px; overflow-x: auto; }
+.pf-timeline { display: block; width: 100%; height: auto; max-width: none; touch-action: none; cursor: ew-resize; background: #0e1118; border: 1px solid #2a2e37; border-radius: 10px; }
+.pf-timeline:focus-visible { outline: 3px solid #ffbb46; outline-offset: 3px; }
+.pf-tl-lane { font: 600 9px system-ui, sans-serif; fill: #9aa1b0; }
+.pf-tl-partname { font: 600 9px system-ui, sans-serif; fill: #e8eaef; }
+.pf-tl-partline { stroke: #e8eaef; stroke-width: 1; opacity: .5; }
+.pf-tl-bar { stroke: #2a2e37; stroke-width: 1; }
+.pf-tl-block { fill: #9aa1b0; opacity: .9; }
+.pf-tl-block.pf-part-drums { fill: var(--pf-part-tick); }
+.pf-tl-block.pf-part-bass { fill: var(--pf-part-boom); }
+.pf-tl-block.pf-part-chords { fill: var(--pf-part-under); opacity: .55; }
+.pf-tl-block.pf-part-tune { fill: var(--pf-part-tune); }
+.pf-tl-block.own { stroke: #ff2bd6; stroke-width: 1.5; opacity: 1; }
+.pf-tl-playhead line { stroke: #ff2bd6; stroke-width: 2; }
+.pf-tl-playhead path { fill: #ff2bd6; }
+.pf-tl-help { margin: 0 0 4px; }
