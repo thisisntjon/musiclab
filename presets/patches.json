@@ -1,0 +1,212 @@
+{
+  "patches": [
+    {
+      "patch_id": "supersaw_stab",
+      "name": "Supersaw Chord Stab",
+      "category": "chords",
+      "role": "chords",
+      "color": "#38bdf8",
+      "description": "7-voice detuned stereo supersaw with tight punch envelope — establishes harmonic gravity on beats 1 & 2.5 before the bass hocket answers.",
+      "default_gesture": {
+        "preset_id": null,
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "grit": 0.35,
+        "lfo_rate": "1/8",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 1,
+        "ott_punch": 0.75
+      }
+    },
+    {
+      "patch_id": "monster_growl",
+      "name": "FM Monster Growl",
+      "category": "hocket",
+      "role": "hocket",
+      "color": "#f43f5e",
+      "description": "3-operator harmonic FM (1:2:4) into asymmetric wavefolder and dual-bandpass vowel filter. Sweeping vowel O -> A makes the bass 'roar'.",
+      "default_gesture": {
+        "preset_id": "WAH_BITE",
+        "vowel_start": "O",
+        "vowel_end": "A",
+        "grit": 0.85,
+        "lfo_rate": "1/8",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 1,
+        "ott_punch": 0.90
+      }
+    },
+    {
+      "patch_id": "talking_yoi",
+      "name": "Talking 'Yoi' Bass",
+      "category": "hocket",
+      "role": "hocket",
+      "color": "#a855f7",
+      "description": "Steep resonant formant sweep from dark 'O' (F2=800 Hz) to bright 'I' (F2=2300 Hz) with metallic ring — creates the classic vocal 'YOI' syllable.",
+      "default_gesture": {
+        "preset_id": "YOI_SWEEP",
+        "vowel_start": "O",
+        "vowel_end": "I",
+        "grit": 0.78,
+        "lfo_rate": "1/8",
+        "pitch_bend_st": 2.0,
+        "stutter_div": 1,
+        "ott_punch": 0.88
+      }
+    },
+    {
+      "patch_id": "wobble_bass",
+      "name": "Sync Wobble Bass",
+      "category": "hocket",
+      "role": "hocket",
+      "color": "#eab308",
+      "description": "Phase-locked clean sub-bass (<110 Hz) paired with a tempo-synced Cytomic SVF lowpass LFO (1/4, 1/8, 1/8T, 1/16) on the gritty mid-bass.",
+      "default_gesture": {
+        "preset_id": "WOBBLE_1_16",
+        "vowel_start": "U",
+        "vowel_end": "A",
+        "grit": 0.72,
+        "lfo_rate": "1/16",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 1,
+        "ott_punch": 0.85
+      }
+    },
+    {
+      "patch_id": "sub_drop_808",
+      "name": "808 Sub Anchor / Drop",
+      "category": "bass",
+      "role": "bass",
+      "color": "#10b981",
+      "description": "Chest-hitting C1-B2 fundamental sine/triangle sub with punchy pitch transient. Locks to kick drum steps to anchor the low end.",
+      "default_gesture": {
+        "preset_id": null,
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "grit": 0.25,
+        "lfo_rate": "1/4",
+        "pitch_bend_st": -12.0,
+        "stutter_div": 1,
+        "ott_punch": 0.80
+      }
+    },
+    {
+      "patch_id": "laser_screech",
+      "name": "Pitch-Whip Laser Lead",
+      "category": "hocket",
+      "role": "hocket",
+      "color": "#06b6d4",
+      "description": "High-register octave-whipping saw/FM screech (+12/+24 semitone exponential pitch dive) that slices through the top of the hocket phrase.",
+      "default_gesture": {
+        "preset_id": "LASER_DROP",
+        "vowel_start": "I",
+        "vowel_end": "E",
+        "grit": 0.82,
+        "lfo_rate": "1/16",
+        "pitch_bend_st": 12.0,
+        "stutter_div": 1,
+        "ott_punch": 0.90
+      }
+    },
+    {
+      "patch_id": "vocal_chop",
+      "name": "Glitch Formant Vocal Chop",
+      "category": "hocket",
+      "role": "hocket",
+      "color": "#ec4899",
+      "description": "Glottal pulse-train with 1.22x upward-shifted vocal formants and tempo-synced 1/16 or 1/32 stutter gate — the rhythmic answer at bar turnarounds.",
+      "default_gesture": {
+        "preset_id": "STUTTER_32",
+        "vowel_start": "A",
+        "vowel_end": "I",
+        "grit": 0.55,
+        "lfo_rate": "1/16",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 2,
+        "ott_punch": 0.85
+      }
+    }
+  ],
+  "gesture_badges": [
+    {
+      "badge_id": "YOI_SWEEP",
+      "label": "Yoi Talk (O -> I)",
+      "short": "YOI",
+      "why_it_works": "Sweeps the 2nd vocal formant from 800 Hz ('O') to 2300 Hz ('I'), mimicking a human mouth opening into a metallic shout.",
+      "gesture": {
+        "preset_id": "YOI_SWEEP",
+        "vowel_start": "O",
+        "vowel_end": "I",
+        "grit": 0.80,
+        "lfo_rate": "1/8",
+        "pitch_bend_st": 2.0,
+        "stutter_div": 1,
+        "ott_punch": 0.88
+      }
+    },
+    {
+      "badge_id": "WAH_BITE",
+      "label": "Monster Growl (O -> A)",
+      "short": "GROWL",
+      "gesture": {
+        "preset_id": "WAH_BITE",
+        "vowel_start": "O",
+        "vowel_end": "A",
+        "grit": 0.90,
+        "lfo_rate": "1/8",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 1,
+        "ott_punch": 0.92
+      },
+      "why_it_works": "Drives 3-operator harmonic FM and asymmetric wavefolding while opening the throat formant from 'O' to 'A'."
+    },
+    {
+      "badge_id": "WOBBLE_1_16",
+      "label": "1/16 Sync Wobble",
+      "short": "WOB 16",
+      "gesture": {
+        "preset_id": "WOBBLE_1_16",
+        "vowel_start": "U",
+        "vowel_end": "A",
+        "grit": 0.74,
+        "lfo_rate": "1/16",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 1,
+        "ott_punch": 0.86
+      },
+      "why_it_works": "Locks filter cutoff oscillation to 16th-note subdivisions while keeping the <110 Hz sub-bass completely rock-solid."
+    },
+    {
+      "badge_id": "LASER_DROP",
+      "label": "+12st Laser Whip",
+      "short": "LASER",
+      "gesture": {
+        "preset_id": "LASER_DROP",
+        "vowel_start": "I",
+        "vowel_end": "E",
+        "grit": 0.85,
+        "lfo_rate": "1/16",
+        "pitch_bend_st": 12.0,
+        "stutter_div": 1,
+        "ott_punch": 0.90
+      },
+      "why_it_works": "Starts one full octave above the target note and whips down exponentially in the first 35% of the note for instant electro impact."
+    },
+    {
+      "badge_id": "STUTTER_32",
+      "label": "32nd Glitch Chop",
+      "short": "CHOP",
+      "gesture": {
+        "preset_id": "STUTTER_32",
+        "vowel_start": "A",
+        "vowel_end": "I",
+        "grit": 0.58,
+        "lfo_rate": "1/16",
+        "pitch_bend_st": 0.0,
+        "stutter_div": 4,
+        "ott_punch": 0.88
+      },
+      "why_it_works": "Slices the vocal formant into rapid-fire micro-gates at bar boundaries to propel the listener into the next downbeat."
+    }
+  ]
+}

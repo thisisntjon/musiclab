@@ -1,0 +1,1615 @@
+{
+  "id": "heavy_bass_110",
+  "title": "Heavy Bass Showcase (110 BPM G Dorian)",
+  "arrangement_mode": "loop",
+  "global_context": {
+    "bpm": 110.0,
+    "swing": 0.53,
+    "root_pc": 7,
+    "scale_type": "dorian",
+    "bars": 4
+  },
+  "active_progression_id": "prog-main",
+  "chord_progressions": {
+    "prog-main": [
+      {
+        "bar": 0,
+        "beats": 4,
+        "degree": 1,
+        "roman": "i",
+        "quality": "min"
+      },
+      {
+        "bar": 1,
+        "beats": 4,
+        "degree": 6,
+        "roman": "bVI",
+        "quality": "maj"
+      },
+      {
+        "bar": 2,
+        "beats": 4,
+        "degree": 7,
+        "roman": "bVII",
+        "quality": "maj"
+      },
+      {
+        "bar": 3,
+        "beats": 4,
+        "degree": 1,
+        "roman": "i",
+        "quality": "min"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec_intro",
+      "name": "Intro \u2014 Atmospheric Hook",
+      "type": "intro",
+      "bars": 4,
+      "energy": 0.28,
+      "active_roles": [
+        "harmony",
+        "lead"
+      ],
+      "transition": "riser_sweep",
+      "why_label": "Intro (28% Energy): Strips out heavy drums and monster bass so the Harmony Spine and Lead Hook establish the key before the groove drops.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    },
+    {
+      "id": "sec_verse",
+      "name": "Verse \u2014 110 BPM Pocket",
+      "type": "verse",
+      "bars": 4,
+      "energy": 0.56,
+      "active_roles": [
+        "drums",
+        "harmony",
+        "bass",
+        "lead"
+      ],
+      "transition": "turnaround_fill",
+      "why_label": "Verse (56% Energy): Brings in the 110 BPM Kick/Snare pocket and 808 Sub anchors while holding back the off-beat Monster Growls for the Drop.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    },
+    {
+      "id": "sec_build",
+      "name": "Build \u2014 Snare Roll & Pre-Drop Fakeout",
+      "type": "build",
+      "bars": 4,
+      "energy": 0.78,
+      "active_roles": [
+        "drums",
+        "harmony",
+        "lead"
+      ],
+      "transition": "pre_drop_silence",
+      "why_label": "Build (78% Energy): Accelerates snare hits (1/4 -> 1/8 -> 1/16) and cuts to complete silence on Beat 4 (steps 60-63) with a Vocal Chop shout so the Drop hits harder.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    },
+    {
+      "id": "sec_drop_1",
+      "name": "Drop 1 \u2014 Full Hocket",
+      "type": "drop",
+      "bars": 4,
+      "energy": 1.0,
+      "active_roles": [
+        "drums",
+        "harmony",
+        "bass",
+        "hocket",
+        "lead"
+      ],
+      "transition": "sub_drop_impact",
+      "why_label": "Drop 1 (100% Energy): Unleashes the full Monophonic Hocket Matrix (FM Growls, Talking YOI, 1/16 Wobble, Laser Whip, Vocal Chop) at full 3-Band OTT punch.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    },
+    {
+      "id": "sec_breakdown",
+      "name": "Breakdown \u2014 Melodic Contrast",
+      "type": "breakdown",
+      "bars": 4,
+      "energy": 0.38,
+      "active_roles": [
+        "harmony",
+        "lead"
+      ],
+      "transition": "pre_drop_silence",
+      "why_label": "Breakdown (38% Energy): Clears the low end to reset ear fatigue before launching into Drop 2.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    },
+    {
+      "id": "sec_drop_2",
+      "name": "Drop 2 \u2014 Max Grit Climax",
+      "type": "drop",
+      "bars": 4,
+      "energy": 1.0,
+      "active_roles": [
+        "drums",
+        "harmony",
+        "bass",
+        "hocket",
+        "lead"
+      ],
+      "transition": "sub_drop_impact",
+      "why_label": "Drop 2 (100% Energy): Second full-energy hocket climax with heightened FM grit and Bar-4 stutter turnaround.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    },
+    {
+      "id": "sec_outro",
+      "name": "Outro \u2014 Sub & Harmony Resolve",
+      "type": "outro",
+      "bars": 4,
+      "energy": 0.24,
+      "active_roles": [
+        "drums",
+        "harmony"
+      ],
+      "transition": "outro_resolve",
+      "why_label": "Outro (24% Energy): Winds down drum density and resolves on the Home chord.",
+      "overrides": {
+        "added_notes": [],
+        "muted_steps": []
+      }
+    }
+  ],
+  "auto_harmony_stabs": true,
+  "notes": [
+    {
+      "id": "drum-kick-0",
+      "step": 0,
+      "duration_steps": 1,
+      "velocity": 0.96,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-kick-8",
+      "step": 8,
+      "duration_steps": 1,
+      "velocity": 0.94,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-snare-4",
+      "step": 4,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-4",
+      "step": 4,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-snare-12",
+      "step": 12,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-12",
+      "step": 12,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-hat-2",
+      "step": 2,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-6",
+      "step": 6,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-10",
+      "step": 10,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-14",
+      "step": 14,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-kick-16",
+      "step": 16,
+      "duration_steps": 1,
+      "velocity": 0.96,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-kick-24",
+      "step": 24,
+      "duration_steps": 1,
+      "velocity": 0.94,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-kick-27",
+      "step": 27,
+      "duration_steps": 1,
+      "velocity": 0.85,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-snare-20",
+      "step": 20,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-20",
+      "step": 20,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-snare-28",
+      "step": 28,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-28",
+      "step": 28,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-hat-18",
+      "step": 18,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-22",
+      "step": 22,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-26",
+      "step": 26,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-30",
+      "step": 30,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-kick-32",
+      "step": 32,
+      "duration_steps": 1,
+      "velocity": 0.96,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-kick-40",
+      "step": 40,
+      "duration_steps": 1,
+      "velocity": 0.94,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-snare-36",
+      "step": 36,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-36",
+      "step": 36,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-snare-44",
+      "step": 44,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-44",
+      "step": 44,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-hat-34",
+      "step": 34,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-38",
+      "step": 38,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-42",
+      "step": 42,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-46",
+      "step": 46,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-kick-48",
+      "step": 48,
+      "duration_steps": 1,
+      "velocity": 0.96,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-kick-56",
+      "step": 56,
+      "duration_steps": 1,
+      "velocity": 0.94,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-kick-59",
+      "step": 59,
+      "duration_steps": 1,
+      "velocity": 0.85,
+      "role": "drums",
+      "patch_id": "kick"
+    },
+    {
+      "id": "drum-snare-52",
+      "step": 52,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-52",
+      "step": 52,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-snare-60",
+      "step": 60,
+      "duration_steps": 1,
+      "velocity": 0.95,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-clap-60",
+      "step": 60,
+      "duration_steps": 1,
+      "velocity": 0.82,
+      "role": "drums",
+      "patch_id": "clap"
+    },
+    {
+      "id": "drum-hat-50",
+      "step": 50,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-54",
+      "step": 54,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-58",
+      "step": 58,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-hat-62",
+      "step": 62,
+      "duration_steps": 1,
+      "velocity": 0.72,
+      "role": "drums",
+      "patch_id": "hat_closed"
+    },
+    {
+      "id": "drum-fill-61",
+      "step": 61,
+      "duration_steps": 1,
+      "velocity": 0.8,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-fill-62",
+      "step": 62,
+      "duration_steps": 1,
+      "velocity": 0.88,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "drum-fill-63",
+      "step": 63,
+      "duration_steps": 1,
+      "velocity": 0.96,
+      "role": "drums",
+      "patch_id": "snare"
+    },
+    {
+      "id": "hocket-0-sub_drop_808",
+      "step": 0,
+      "duration_steps": 2,
+      "velocity": 0.96,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-2-monster_growl",
+      "step": 2,
+      "duration_steps": 2,
+      "velocity": 0.92,
+      "role": "hocket",
+      "patch_id": "monster_growl",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "wah_bite",
+        "shape": "ramp_up_down",
+        "vowel_start": "U",
+        "vowel_end": "A",
+        "lfo_rate": "1/4",
+        "grit": 0.88,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.88,
+        "xy_pad": {
+          "x": 0.42,
+          "y": 0.88
+        }
+      }
+    },
+    {
+      "id": "hocket-6-talking_yoi",
+      "step": 6,
+      "duration_steps": 2,
+      "velocity": 0.9,
+      "role": "hocket",
+      "patch_id": "talking_yoi",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "vowel_yoi",
+        "shape": "ramp_up_down",
+        "vowel_start": "O",
+        "vowel_end": "I",
+        "lfo_rate": "1/8",
+        "grit": 0.82,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.85,
+        "xy_pad": {
+          "x": 0.78,
+          "y": 0.82
+        }
+      }
+    },
+    {
+      "id": "hocket-8-sub_drop_808",
+      "step": 8,
+      "duration_steps": 2,
+      "velocity": 0.94,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-10-laser_screech",
+      "step": 10,
+      "duration_steps": 2,
+      "velocity": 0.89,
+      "role": "hocket",
+      "patch_id": "laser_screech",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 1,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "laser_drop",
+        "shape": "laser_attack",
+        "vowel_start": "E",
+        "vowel_end": "I",
+        "lfo_rate": "off",
+        "grit": 0.85,
+        "pitch_bend_st": 12,
+        "stutter_div": "off",
+        "ott_punch": 0.9,
+        "xy_pad": {
+          "x": 0.92,
+          "y": 0.85
+        }
+      }
+    },
+    {
+      "id": "hocket-14-vocal_chop",
+      "step": 14,
+      "duration_steps": 2,
+      "velocity": 0.87,
+      "role": "hocket",
+      "patch_id": "vocal_chop",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 1,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "stutter_32",
+        "shape": "stutter_gate",
+        "vowel_start": "A",
+        "vowel_end": "I",
+        "lfo_rate": "1/16",
+        "grit": 0.65,
+        "pitch_bend_st": 3,
+        "stutter_div": "1/32",
+        "ott_punch": 0.84,
+        "xy_pad": {
+          "x": 0.84,
+          "y": 0.65
+        }
+      }
+    },
+    {
+      "id": "hocket-16-sub_drop_808",
+      "step": 16,
+      "duration_steps": 2,
+      "velocity": 0.96,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-18-wobble_bass",
+      "step": 18,
+      "duration_steps": 4,
+      "velocity": 0.91,
+      "role": "hocket",
+      "patch_id": "wobble_bass",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "wobble_1_16",
+        "shape": "lfo_sync",
+        "vowel_start": "A",
+        "vowel_end": "U",
+        "lfo_rate": "1/16",
+        "grit": 0.74,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.82,
+        "xy_pad": {
+          "x": 0.88,
+          "y": 0.74
+        }
+      }
+    },
+    {
+      "id": "hocket-24-sub_drop_808",
+      "step": 24,
+      "duration_steps": 2,
+      "velocity": 0.94,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-26-monster_growl",
+      "step": 26,
+      "duration_steps": 2,
+      "velocity": 0.92,
+      "role": "hocket",
+      "patch_id": "monster_growl",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "wah_bite",
+        "shape": "ramp_up_down",
+        "vowel_start": "U",
+        "vowel_end": "A",
+        "lfo_rate": "1/4",
+        "grit": 0.88,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.88,
+        "xy_pad": {
+          "x": 0.42,
+          "y": 0.88
+        }
+      }
+    },
+    {
+      "id": "hocket-30-vocal_chop",
+      "step": 30,
+      "duration_steps": 2,
+      "velocity": 0.88,
+      "role": "hocket",
+      "patch_id": "vocal_chop",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 1,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "stutter_32",
+        "shape": "stutter_gate",
+        "vowel_start": "A",
+        "vowel_end": "I",
+        "lfo_rate": "1/16",
+        "grit": 0.65,
+        "pitch_bend_st": 3,
+        "stutter_div": "1/32",
+        "ott_punch": 0.84,
+        "xy_pad": {
+          "x": 0.84,
+          "y": 0.65
+        }
+      }
+    },
+    {
+      "id": "hocket-32-sub_drop_808",
+      "step": 32,
+      "duration_steps": 2,
+      "velocity": 0.96,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-34-monster_growl",
+      "step": 34,
+      "duration_steps": 2,
+      "velocity": 0.93,
+      "role": "hocket",
+      "patch_id": "monster_growl",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "wah_bite",
+        "shape": "ramp_up_down",
+        "vowel_start": "U",
+        "vowel_end": "A",
+        "lfo_rate": "1/4",
+        "grit": 0.88,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.88,
+        "xy_pad": {
+          "x": 0.42,
+          "y": 0.88
+        }
+      }
+    },
+    {
+      "id": "hocket-38-talking_yoi",
+      "step": 38,
+      "duration_steps": 2,
+      "velocity": 0.91,
+      "role": "hocket",
+      "patch_id": "talking_yoi",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "vowel_yoi",
+        "shape": "ramp_up_down",
+        "vowel_start": "O",
+        "vowel_end": "I",
+        "lfo_rate": "1/8",
+        "grit": 0.82,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.85,
+        "xy_pad": {
+          "x": 0.78,
+          "y": 0.82
+        }
+      }
+    },
+    {
+      "id": "hocket-40-sub_drop_808",
+      "step": 40,
+      "duration_steps": 2,
+      "velocity": 0.94,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-42-laser_screech",
+      "step": 42,
+      "duration_steps": 2,
+      "velocity": 0.9,
+      "role": "hocket",
+      "patch_id": "laser_screech",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 1,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "laser_drop",
+        "shape": "laser_attack",
+        "vowel_start": "E",
+        "vowel_end": "I",
+        "lfo_rate": "off",
+        "grit": 0.85,
+        "pitch_bend_st": 12,
+        "stutter_div": "off",
+        "ott_punch": 0.9,
+        "xy_pad": {
+          "x": 0.92,
+          "y": 0.85
+        }
+      }
+    },
+    {
+      "id": "hocket-46-wobble_bass",
+      "step": 46,
+      "duration_steps": 2,
+      "velocity": 0.88,
+      "role": "hocket",
+      "patch_id": "wobble_bass",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "wobble_1_8t",
+        "shape": "lfo_sync",
+        "vowel_start": "O",
+        "vowel_end": "A",
+        "lfo_rate": "1/8t",
+        "grit": 0.7,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.8,
+        "xy_pad": {
+          "x": 0.68,
+          "y": 0.7
+        }
+      }
+    },
+    {
+      "id": "hocket-48-sub_drop_808",
+      "step": 48,
+      "duration_steps": 2,
+      "velocity": 0.97,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-50-talking_yoi",
+      "step": 50,
+      "duration_steps": 2,
+      "velocity": 0.92,
+      "role": "hocket",
+      "patch_id": "talking_yoi",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "vowel_yoi",
+        "shape": "ramp_up_down",
+        "vowel_start": "O",
+        "vowel_end": "I",
+        "lfo_rate": "1/8",
+        "grit": 0.82,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.85,
+        "xy_pad": {
+          "x": 0.78,
+          "y": 0.82
+        }
+      }
+    },
+    {
+      "id": "hocket-54-wobble_bass",
+      "step": 54,
+      "duration_steps": 2,
+      "velocity": 0.91,
+      "role": "hocket",
+      "patch_id": "wobble_bass",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "wobble_1_16",
+        "shape": "lfo_sync",
+        "vowel_start": "A",
+        "vowel_end": "U",
+        "lfo_rate": "1/16",
+        "grit": 0.74,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.82,
+        "xy_pad": {
+          "x": 0.88,
+          "y": 0.74
+        }
+      }
+    },
+    {
+      "id": "hocket-56-sub_drop_808",
+      "step": 56,
+      "duration_steps": 2,
+      "velocity": 0.95,
+      "role": "bass",
+      "patch_id": "sub_drop_808",
+      "pitch_lock_mode": "relational",
+      "kick_locked": true,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "kick_locked_anchor"
+      },
+      "gesture": {
+        "preset_id": "sub_dive",
+        "shape": "laser_dive",
+        "vowel_start": "U",
+        "vowel_end": "O",
+        "lfo_rate": "off",
+        "grit": 0.28,
+        "pitch_bend_st": -12,
+        "stutter_div": "off",
+        "ott_punch": 0.7,
+        "xy_pad": {
+          "x": 0.15,
+          "y": 0.28
+        }
+      }
+    },
+    {
+      "id": "hocket-58-laser_screech",
+      "step": 58,
+      "duration_steps": 2,
+      "velocity": 0.92,
+      "role": "hocket",
+      "patch_id": "laser_screech",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 1,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "laser_drop",
+        "shape": "laser_attack",
+        "vowel_start": "E",
+        "vowel_end": "I",
+        "lfo_rate": "off",
+        "grit": 0.85,
+        "pitch_bend_st": 12,
+        "stutter_div": "off",
+        "ott_punch": 0.9,
+        "xy_pad": {
+          "x": 0.92,
+          "y": 0.85
+        }
+      }
+    },
+    {
+      "id": "hocket-60-vocal_chop",
+      "step": 60,
+      "duration_steps": 4,
+      "velocity": 0.94,
+      "role": "hocket",
+      "patch_id": "vocal_chop",
+      "pitch_lock_mode": "relational",
+      "kick_locked": false,
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 1,
+        "function_tag": "offbeat_hocket_response"
+      },
+      "gesture": {
+        "preset_id": "stutter_32",
+        "shape": "stutter_gate",
+        "vowel_start": "A",
+        "vowel_end": "I",
+        "lfo_rate": "1/16",
+        "grit": 0.65,
+        "pitch_bend_st": 3,
+        "stutter_div": "1/32",
+        "ott_punch": 0.84,
+        "xy_pad": {
+          "x": 0.84,
+          "y": 0.65
+        }
+      }
+    },
+    {
+      "id": "lead-0",
+      "step": 0,
+      "duration_steps": 2,
+      "velocity": 0.84,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-4",
+      "step": 4,
+      "duration_steps": 2,
+      "velocity": 0.82,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-8",
+      "step": 8,
+      "duration_steps": 2,
+      "velocity": 0.86,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-16",
+      "step": 16,
+      "duration_steps": 2,
+      "velocity": 0.84,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A_prime"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-20",
+      "step": 20,
+      "duration_steps": 2,
+      "velocity": 0.83,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A_prime"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-24",
+      "step": 24,
+      "duration_steps": 2,
+      "velocity": 0.87,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 1,
+        "octave_offset": 0,
+        "function_tag": "phrase_A_prime"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-32",
+      "step": 32,
+      "duration_steps": 2,
+      "velocity": 0.85,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-36",
+      "step": 36,
+      "duration_steps": 2,
+      "velocity": 0.82,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 1,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-40",
+      "step": 40,
+      "duration_steps": 2,
+      "velocity": 0.86,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_A"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-48",
+      "step": 48,
+      "duration_steps": 2,
+      "velocity": 0.88,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 2,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_B"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    },
+    {
+      "id": "lead-52",
+      "step": 52,
+      "duration_steps": 4,
+      "velocity": 0.9,
+      "role": "lead",
+      "patch_id": "supersaw_stab",
+      "pitch_lock_mode": "relational",
+      "relational": {
+        "anchor": "chord_tone",
+        "chord_tone_index": 0,
+        "scale_degree_offset": 0,
+        "octave_offset": 0,
+        "function_tag": "phrase_B"
+      },
+      "gesture": {
+        "preset_id": "pluck_stab",
+        "shape": "pluck_stab",
+        "vowel_start": "A",
+        "vowel_end": "E",
+        "lfo_rate": "off",
+        "grit": 0.45,
+        "pitch_bend_st": 0,
+        "stutter_div": "off",
+        "ott_punch": 0.75,
+        "xy_pad": {
+          "x": 0.55,
+          "y": 0.45
+        }
+      }
+    }
+  ]
+}

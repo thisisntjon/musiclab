@@ -1,0 +1,2581 @@
+:root {
+  --bg-deep: #090b10;
+  --bg-panel: #111520;
+  --bg-card: #181e2e;
+  --bg-cell: #161b29;
+  --bg-cell-hover: #242d44;
+  --border-subtle: #26304a;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent-primary: #f43f5e;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #a855f7;
+  --accent-amber: #eab308;
+  --accent-emerald: #10b981;
+  --accent-pink: #ec4899;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Consolas", "SFMono-Regular", Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Top Transport Bar */
+.transport-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #0d111a;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-badge {
+  background: linear-gradient(135deg, #f43f5e, #a855f7);
+  color: #fff;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+
+.song-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.transport-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.control-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.control-pill label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.control-pill input[type="number"],
+.control-pill select {
+  background: var(--bg-deep);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.control-pill input[type="number"] {
+  width: 56px;
+}
+
+.spectrum-block canvas {
+  background: #07090e;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  display: block;
+}
+
+.project-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  background: var(--bg-card);
+  transition: all 0.12s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.15);
+}
+
+.btn-sm {
+  padding: 4px 9px;
+  font-size: 11px;
+}
+
+.btn-primary {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.btn-primary.playing {
+  background: var(--accent-emerald);
+}
+
+.btn-secondary {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+  color: var(--text-main);
+  background: var(--bg-card);
+}
+
+/* Why This Works Banner */
+.why-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 16px;
+  background: linear-gradient(90deg, rgba(244, 63, 94, 0.14), rgba(6, 182, 212, 0.12));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.why-tag {
+  background: var(--accent-cyan);
+  color: #041016;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.why-text {
+  flex: 1;
+  font-size: 12.5px;
+  color: #e2e8f0;
+}
+
+.why-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-amber);
+  white-space: nowrap;
+}
+
+/* Workflow Stepper */
+.workflow-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #0d121d;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+
+.step-tab {
+  cursor: pointer;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-tab.active {
+  background: #1e293b;
+  color: #fff;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.35);
+}
+
+.step-num {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.bar-filter-group {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar-filter-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.bar-btn {
+  cursor: pointer;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.bar-btn.active {
+  background: var(--accent-purple);
+  color: #fff;
+  border-color: var(--accent-purple);
+}
+
+/* Main Workspace */
+.studio-workspace {
+  display: grid;
+  grid-template-columns: 1fr 345px;
+  gap: 12px;
+  padding: 12px 16px;
+  flex: 1;
+  align-items: start;
+}
+
+.sequencer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.panel-header h2 {
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-subtitle {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.badge-register {
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(56, 189, 248, 0.14);
+  color: #38bdf8;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.badge-choke {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(244, 63, 94, 0.18);
+  color: #fb7185;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Chord Spine Grid */
+.chord-spine-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.chord-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: border-color 0.15s ease;
+}
+
+.chord-card.active-bar {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+}
+
+.chord-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chord-bar-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.chord-voicing-badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--accent-cyan);
+}
+
+.chord-select {
+  background: var(--bg-deep);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Sequencer Matrices */
+.matrix-scroll-wrapper {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.matrix-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 780px;
+}
+
+.matrix-row {
+  display: grid;
+  grid-template-columns: 145px 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.row-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: var(--bg-card);
+  border-left: 3px solid var(--accent-cyan);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.row-steps {
+  display: grid;
+  gap: 2px;
+}
+
+.step-cell {
+  height: 25px;
+  background: var(--bg-cell);
+  border: 1px solid #1f273b;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.85);
+  user-select: none;
+  transition: transform 0.06s ease, background 0.08s ease;
+}
+
+.step-cell.beat-start {
+  border-left: 1px solid #3b496e;
+}
+
+.step-cell.bar-start {
+  border-left: 2px solid #64748b;
+}
+
+.step-cell:hover {
+  background: var(--bg-cell-hover);
+}
+
+.step-cell.playhead {
+  outline: 2px solid #fff;
+  z-index: 2;
+}
+
+.step-cell.active {
+  font-weight: 700;
+  color: #fff;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.35);
+}
+
+.step-cell.selected-note {
+  outline: 2px solid var(--accent-amber);
+  z-index: 3;
+}
+
+/* Chord-Gravity Melody Cell Tiers */
+.step-cell.gravity-anchor {
+  background: rgba(16, 185, 129, 0.13);
+  border-color: rgba(16, 185, 129, 0.32);
+}
+
+.step-cell.gravity-tension {
+  background: rgba(234, 179, 8, 0.06);
+  border-color: rgba(234, 179, 8, 0.2);
+}
+
+.step-cell.gravity-anchor.active {
+  background: var(--accent-emerald);
+  border-color: #34d399;
+}
+
+.step-cell.gravity-tension.active {
+  background: var(--accent-amber);
+  color: #090b10;
+  border-color: #fde047;
+}
+
+.legend-pill {
+  display: inline-block;
+  margin-right: 12px;
+  font-size: 11px;
+}
+
+.legend-pill.tier-anchor {
+  color: #34d399;
+}
+
+.legend-pill.tier-tension {
+  color: #facc15;
+}
+
+/* Right Dock: Noise Sculptor */
+.sculptor-dock {
+  position: sticky;
+  top: 12px;
+}
+
+.patch-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.patch-pill {
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.patch-pill.active {
+  background: #232d45;
+  border-color: #fff;
+}
+
+.xy-pad-section {
+  margin-bottom: 10px;
+}
+
+.xy-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+#xy-monster-pad {
+  width: 100%;
+  height: 185px;
+  background: radial-gradient(circle at center, #171f32 0%, #090c14 100%);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  cursor: crosshair;
+  display: block;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+
+.gesture-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.gesture-badge-btn {
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.gesture-badge-btn.active,
+.gesture-badge-btn:hover {
+  background: var(--accent-cyan);
+  color: #061217;
+}
+
+.macros-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.macro-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.macro-label-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
+.macro-row input[type="range"] {
+  width: 100%;
+}
+
+.macro-row select {
+  width: 100%;
+  background: var(--bg-deep);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11.5px;
+}
+
+.vowel-pair-selects {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.mono-readout {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-amber);
+}
+
+.inspector-box {
+  background: #0d121d;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.inspector-details {
+  font-size: 11.5px;
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.toggle-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+/* Phase 2: Subtractive Song Arranger & Build-to-Drop Blueprint */
+.arranger-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.arranger-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge-mode {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.badge-mode.mode-loop {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+}
+
+.badge-mode.mode-song {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+}
+
+.arranger-timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(150px, 1fr));
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-top: 3px solid var(--accent-cyan);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.section-card.type-intro,
+.section-card.type-outro {
+  border-top-color: #38bdf8;
+}
+
+.section-card.type-verse {
+  border-top-color: #10b981;
+}
+
+.section-card.type-build,
+.section-card.type-breakdown {
+  border-top-color: #eab308;
+}
+
+.section-card.type-drop {
+  border-top-color: #f43f5e;
+  background: rgba(244, 63, 94, 0.06);
+}
+
+.section-card.focused-section {
+  outline: 2px solid var(--accent-amber);
+}
+
+.section-card.playing-section {
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+  border-color: var(--accent-cyan);
+}
+
+.section-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.section-bar-range {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.section-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.energy-bar-track {
+  height: 5px;
+  background: #090c14;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.energy-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #f43f5e);
+}
+
+.section-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.section-control-row select {
+  background: var(--bg-deep);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 10.5px;
+}
+
+.section-roles-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.role-chip {
+  cursor: pointer;
+  background: #0d121d;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+.role-chip.active {
+  background: rgba(6, 182, 212, 0.22);
+  color: #38bdf8;
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+/* Phase 3: Macro X-Ray Overlay & Custom Patches */
+.xray-wrapper {
+  background: #080b12;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+}
+
+.xray-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+#xray-canvas {
+  width: 100%;
+  height: 124px;
+  display: block;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.custom-patches-section {
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  background: #0d121d;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+}
+
+/* Phase 4: "Photoshop for Music" 5 Consolidated Surfaces */
+.ab-bypass-pill {
+  border-color: rgba(244, 63, 94, 0.45);
+}
+
+#btn-ab-bypass.raw-active {
+  background: var(--accent-amber);
+  color: #090b10;
+  border-color: #fde047;
+  font-weight: 800;
+}
+
+#btn-tonic-drone.drone-active {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  border-color: #10b981;
+}
+
+/* Surface B: Kick-to-Bass Pocket Guide & Ghost Diff Previews */
+.step-cell.kick-pulse-col {
+  box-shadow: inset 0 -2px 0 rgba(244, 63, 94, 0.55);
+}
+
+.step-cell.ghost-added {
+  outline: 2px dashed #38bdf8;
+  background: rgba(56, 189, 248, 0.25) !important;
+  color: #e0f2fe;
+}
+
+.step-cell.mission-target-col {
+  outline: 2px dashed #facc15;
+  background: rgba(250, 204, 21, 0.16);
+}
+
+/* Surface E: Progressive Gravity Fade Modes (Anti-Crutch) */
+.gravity-fade-ear_first .step-cell.gravity-anchor:not(.active):not(:hover),
+.gravity-fade-ear_first .step-cell.gravity-tension:not(.active):not(:hover) {
+  background: var(--bg-cell);
+  border-color: #1f273b;
+}
+
+.gravity-fade-blind_ear .step-cell.gravity-anchor:not(.active),
+.gravity-fade-blind_ear .step-cell.gravity-tension:not(.active) {
+  background: var(--bg-cell);
+  border-color: #1f273b;
+}
+
+/* Surface C, D, E: Coaching & Deconstruction Drawer */
+.coaching-drawer {
+  border-top: 1px solid #1e293b;
+  padding-top: 6px;
+}
+
+.coaching-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.coach-tab {
+  cursor: pointer;
+  background: #111726;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.coach-tab.active {
+  background: #1e293b;
+  color: #38bdf8;
+  border-color: #38bdf8;
+}
+
+.diagnostic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.diagnostic-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  border-radius: 5px;
+  background: #111726;
+  border-left: 3px solid var(--accent-amber);
+  font-size: 11.5px;
+}
+
+.diagnostic-card.sev-high {
+  border-left-color: var(--accent-rose);
+}
+
+.diagnostic-card.healthy-card {
+  border-left-color: var(--accent-emerald);
+  color: #a7f3d0;
+}
+
+.deconstruct-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: #111726;
+  border-radius: 5px;
+}
+
+.deconstruct-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.deconstruct-stage-btn.active {
+  background: var(--accent-cyan);
+  color: #061018;
+  border-color: #67e8f9;
+}
+
+.ear-mission-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  background: #111726;
+  border-left: 3px solid #a855f7;
+  border-radius: 5px;
+  font-size: 11.5px;
+}
+
+
+/* Phase 5: Target Size (>=24px), Keyboard Focus, Greyscale & Post-Placement Marks */
+body.wcag-greyscale-mode {
+  filter: grayscale(100%) contrast(1.08);
+}
+
+.step-cell {
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* Keyboard/switch focus must be visible on the dark theme (the browser default ring is black). */
+:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.step-cell:focus-visible {
+  outline: 2px solid #ffffff !important;
+  outline-offset: 1px;
+  z-index: 5;
+}
+
+.step-cell.post-placement-cell {
+  background: #141b2b;
+  border: 1px solid #28354f;
+}
+
+.step-cell.post-placement-cell.active.placed-mark-anchor {
+  background: #10b981;
+  color: #04130e;
+  border: 2px solid #ffffff;
+  font-weight: 800;
+}
+
+.step-cell.post-placement-cell.active.placed-mark-tension {
+  background: #eab308;
+  color: #1c1302;
+  border: 2px dashed #ffffff;
+  font-weight: 800;
+}
+
+.step-cell.post-placement-cell.active.placed-mark-blind {
+  background: #94a3b8;
+  color: #0b0f19;
+  border: 2px solid #e2e8f0;
+  font-weight: 800;
+}
+
+.step-cell.height-trap-col {
+  box-shadow: inset 0 0 0 1px rgba(244, 63, 94, 0.55);
+}
+
+/* ==============================================================================
+   Developer studio (?studio): tools drawer
+   ============================================================================== */
+.studio-tools-drawer {
+  background: #0d1322;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 8px 18px;
+}
+
+
+/* ── Play flow: start, beat, tune, underneath, keep ──
+   Every colour and size below comes from these tokens (9c-8). Meaning is carried by shape as well as colour:
+   the starter pulse is dashed, the person's own notes are solid, ideas are dotted, possible clashes are dashed red.
+   Comfort settings (9c-5) change the tokens, not the rules. */
+.play-flow,
+body.pf-mode {
+  --pf-page: #05070d;
+  --pf-surface: #05070d;
+  --pf-surface-2: #0b111e;
+  --pf-surface-3: #131c31;
+  --pf-line: #64748b;
+  --pf-line-soft: rgba(148, 163, 184, 0.26);
+  --pf-text: #e8e8ec;
+  --pf-text-soft: #c9ccd6;
+  --pf-text-muted: #a9aebd;
+  /* The five parts (static/js/visual/look.js): apart under all colour blindness, each with its own shape too. */
+  --pf-part-boom: #ff8a00;
+  --pf-part-clap: #ff2bd6;
+  --pf-part-tick: #ffe600;
+  --pf-part-tune: #00e5ff;
+  --pf-part-under: #f2f2f2;
+  --pf-ink: #05070d; /* text on light fills */
+  --pf-mine: #d97706;
+  --pf-mine-line: #fbbf24;
+  --pf-mine-lit: #fcd34d;
+  --pf-starter: #0f2942;
+  --pf-starter-line: #7dd3fc;
+  --pf-lit: #fde68a;
+  --pf-lit-line: #fffbeb;
+  --pf-ring: #f8fafc;
+  --pf-idea-line: #6ee7b7;
+  --pf-clash-line: #f87171;
+  --pf-warn: #7f1d1d;
+  --pf-go: #032a30;
+  --pf-go-line: #00e5ff;
+  --pf-next: #2a0a26;
+  --pf-next-line: #ff2bd6;
+  --pf-big: #0b1a2a;
+  --pf-big-line: #00e5ff;
+  --pf-focus: #ffe600;
+
+  --pf-text-sm: 16px;
+  --pf-text-md: 18px;
+  --pf-text-lg: 22px;
+  --pf-text-xl: 28px;
+  --pf-space-1: 4px;
+  --pf-space-2: 8px;
+  --pf-space-3: 12px;
+  --pf-space-4: 16px;
+  --pf-space-6: 24px;
+  --pf-radius: 12px;
+  --pf-radius-sm: 8px;
+  --pf-radius-dot: 9999px;
+  --pf-target: 48px; /* buttons and pads; "bigger controls" raises it */
+  --pf-pad: 48px;
+  --pf-label: 84px;
+}
+
+body.pf-mode {
+  background: var(--pf-page);
+  font-size: var(--pf-text-sm);
+}
+/* In play mode the page is only the play flow and the volume: the old studio stays out of sight. */
+body.pf-mode .why-banner,
+body.pf-mode #studio-tools-drawer,
+body.pf-mode #advanced-studio-container,
+body.pf-mode .workflow-stepper,
+body.pf-mode .studio-workspace,
+body.pf-mode .project-actions,
+body.pf-mode .brand-block,
+body.pf-mode #btn-play {
+  display: none !important;
+}
+body.pf-mode .transport-bar {
+  background: var(--pf-page);
+  border-bottom: 1px solid var(--pf-line-soft);
+  padding: var(--pf-space-2) var(--pf-space-4);
+  justify-content: flex-end;
+}
+body.pf-mode .volume-control label {
+  font-size: var(--pf-text-md);
+}
+body.pf-mode #btn-volume-lock {
+  min-width: var(--pf-target);
+  min-height: var(--pf-target);
+}
+body.pf-mode #btn-stop-sound {
+  min-height: var(--pf-target);
+  padding: 0 var(--pf-space-4);
+  font: inherit;
+  border-radius: 999px;
+}
+body.pf-mode .play-flow {
+  width: min(960px, calc(100% - 2 * var(--pf-space-4)));
+  margin: var(--pf-space-6) auto;
+}
+
+.play-flow {
+  margin: var(--pf-space-3) 0;
+  padding: var(--pf-space-6);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-line-soft);
+  color: var(--pf-text);
+  font-size: var(--pf-text-sm);
+  line-height: 1.45;
+}
+.pf-heading {
+  margin: 0 0 var(--pf-space-3);
+  font-size: var(--pf-text-xl);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--pf-text);
+}
+.pf-say {
+  margin: var(--pf-space-2) 0;
+  font-size: var(--pf-text-md);
+  color: var(--pf-text-soft);
+}
+.pf-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pf-space-2);
+  align-items: center;
+  margin: var(--pf-space-3) 0;
+}
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pf-space-2);
+  min-height: var(--pf-target);
+  min-width: var(--pf-target);
+  padding: var(--pf-space-2) var(--pf-space-4);
+  border-radius: var(--pf-radius);
+  border: 2px solid var(--pf-line);
+  background: var(--pf-surface-2);
+  color: var(--pf-text);
+  font: inherit;
+  font-size: var(--pf-text-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.pf-btn:hover {
+  background: var(--pf-surface-3);
+}
+.pf-btn.on,
+.pf-btn[aria-pressed="true"] {
+  border-color: var(--pf-mine-line);
+  box-shadow: inset 0 0 0 2px var(--pf-mine-line);
+}
+.pf-icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pf-big {
+  font-size: var(--pf-text-lg);
+  padding: var(--pf-space-3) var(--pf-space-6);
+  background: var(--pf-big);
+  border-color: var(--pf-big-line);
+}
+.pf-big:hover {
+  background: var(--pf-big);
+  filter: brightness(1.08);
+}
+.pf-next {
+  background: var(--pf-next);
+  border-color: var(--pf-next-line);
+}
+.pf-next:hover {
+  background: var(--pf-next);
+  filter: brightness(1.1);
+}
+.pf-play {
+  background: var(--pf-go);
+  border-color: var(--pf-go-line);
+}
+.pf-play:hover {
+  background: var(--pf-go);
+  filter: brightness(1.1);
+}
+.pf-small {
+  font-weight: 600;
+  background: transparent;
+}
+/* One route from finding music to sharing it; the current level is marked. */
+.pf-journey ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pf-space-2, 8px);
+  list-style: none;
+  margin: 0 0 var(--pf-space-4, 16px);
+  padding: 0;
+}
+.pf-journey-step[aria-current="step"] {
+  background: var(--pf-next);
+  border-color: var(--pf-next-line);
+}
+.pf-journey-step:disabled {
+  opacity: .45;
+}
+.pf-speed {
+  min-width: 3ch;
+  text-align: center;
+  font-size: var(--pf-text-md);
+  font-weight: 700;
+  color: var(--pf-text);
+}
+.pf-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pf-space-2);
+  min-height: var(--pf-target);
+  color: var(--pf-text-soft);
+}
+.pf-check input {
+  width: 24px;
+  height: 24px;
+}
+#pf-title {
+  min-height: var(--pf-target);
+  padding: var(--pf-space-2) var(--pf-space-3);
+  border-radius: var(--pf-radius);
+  border: 2px solid var(--pf-line);
+  background: var(--pf-ink);
+  color: var(--pf-text);
+  font: inherit;
+  font-size: var(--pf-text-md);
+  min-width: 240px;
+}
+.pf-grid {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-space-2);
+  margin: var(--pf-space-3) 0;
+  padding: var(--pf-space-2);
+  border-radius: var(--pf-radius);
+  background: radial-gradient(ellipse at 54% 50%, rgba(15, 23, 42, 0.52) 0%, rgba(5, 7, 13, 0.96) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  touch-action: none; /* swipe-to-paint instead of scrolling while on the pads */
+}
+.pf-flow-svg,
+.pf-wake-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+.pf-lane {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--pf-space-2);
+}
+.pf-lane-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pf-space-1);
+  width: var(--pf-label);
+  flex: 0 0 var(--pf-label);
+  font-size: var(--pf-text-sm);
+  font-weight: 600;
+  color: var(--pf-text-soft);
+}
+.pf-pads {
+  display: grid;
+  grid-template-columns: repeat(8, var(--pf-pad));
+  gap: var(--pf-space-1);
+}
+.pf-pad {
+  position: relative;
+  width: var(--pf-pad);
+  height: var(--pf-pad);
+  border-radius: var(--pf-radius-dot);
+  border: 1.5px solid rgba(148, 163, 184, 0.34);
+  background: radial-gradient(circle, rgba(148, 163, 184, 0.16) 0%, rgba(11, 17, 30, 0.72) 68%);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+.pf-pad.beat {
+  border-color: rgba(148, 163, 184, 0.48);
+  background: radial-gradient(circle, rgba(148, 163, 184, 0.24) 0%, rgba(19, 28, 49, 0.82) 70%);
+}
+/* Starter pulse: dashed glowing ring with drum icon; the person's own pads: glowing circular orbs (shape and colour both carry meaning). */
+.pf-pad.on {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px dashed var(--pf-starter-line);
+  background: radial-gradient(circle at 38% 35%, rgba(56, 189, 248, 0.38) 0%, var(--pf-starter) 78%);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.28);
+  color: var(--pf-text-soft);
+}
+.pf-pad.on.mine {
+  border: 2px solid var(--pf-mine-line);
+  background: radial-gradient(circle at 38% 35%, #fcd34d 0%, var(--pf-mine) 76%);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.46);
+  color: var(--pf-text);
+}
+.pf-pad.on.mine[data-lane="kick"] {
+  border-color: #fde68a;
+  background: radial-gradient(circle at 38% 35%, #fbbf24 0%, #d97706 76%);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.48);
+}
+.pf-pad.on.mine[data-lane="clap"] {
+  border-color: #fecdd3;
+  background: radial-gradient(circle at 38% 35%, #fb7185 0%, #be123c 76%);
+  box-shadow: 0 0 15px rgba(251, 113, 133, 0.48);
+}
+.pf-pad.on.mine[data-lane="hat"] {
+  border-color: #bae6fd;
+  background: radial-gradient(circle at 38% 35%, #38bdf8 0%, #0369a1 76%);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.48);
+}
+.pf-pad.pf-note.on.mine[data-mark="anchor"] {
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.52);
+}
+.pf-pad.start-here {
+  border: 2px dashed var(--pf-part-clap);
+  box-shadow: 0 0 14px rgba(255, 43, 214, 0.45);
+}
+/* Phase 9b: kit and feel cards, tabs, ideas, the note dial's clash marks, slots and the details drawer. */
+.pf-card {
+  min-height: 56px;
+  font-size: var(--pf-text-md);
+  padding: var(--pf-space-3) var(--pf-space-6);
+}
+.pf-sub {
+  display: block;
+  font-size: var(--pf-text-sm);
+  font-weight: 400;
+  color: var(--pf-text-muted);
+}
+.pf-tabs .pf-btn[aria-pressed="true"] {
+  background: var(--pf-surface-3);
+}
+/* An idea: a glowing bioluminescent dashed ring with a directional icon. Moving to it plays it; choosing it places it. */
+.pf-pad.pf-note.idea {
+  border: 2px dashed var(--pf-idea-line);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(5, 7, 13, 0.78) 76%);
+  box-shadow: 0 0 12px rgba(110, 231, 183, 0.36);
+}
+/* Guide mode: a note that may clash with the chord under it gets a dashed red edge (shape, not colour alone). */
+.pf-pad.pf-note.clash:not(.on) {
+  border: 2px dashed var(--pf-clash-line);
+}
+.pf-pad.pf-note.beat:not(.on):not(.idea) {
+  background: radial-gradient(circle, rgba(148, 163, 184, 0.24) 0%, rgba(19, 28, 49, 0.82) 70%);
+}
+.pf-slots {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-space-2);
+  margin: var(--pf-space-3) 0;
+}
+.pf-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pf-space-2);
+  align-items: center;
+}
+.pf-armed {
+  border-color: var(--pf-clash-line);
+  background: var(--pf-warn);
+}
+.pf-drawer {
+  border-top: 1px solid var(--pf-line-soft);
+  margin-top: var(--pf-space-2);
+  padding-top: var(--pf-space-1);
+}
+
+/* Playhead and lit pads. The moving playhead is a thin ring (shape, not a fill change); a pad lights only while its
+   note is heard. At most 3 pads change brightness at once, far under the WCAG 2.3.1 flash area. */
+.pf-pad.pf-ring {
+  box-shadow: 0 0 0 3px var(--pf-ring);
+}
+.pf-pad.on.pf-lit {
+  outline: 2px solid var(--pf-part, var(--pf-lit-line));
+  outline-offset: 3px;
+}
+@keyframes pf-stream-flow {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+body.pf-playing .pf-stream-current,
+body.pf-playing .pf-stream-tendril {
+  animation: pf-stream-flow 2.2s linear infinite;
+}
+.pf-water-river {
+  position: relative;
+  width: 100%;
+  height: 92px;
+  margin: var(--pf-space-2) 0;
+  border-radius: var(--pf-radius);
+  background: radial-gradient(ellipse at 50% 50%, rgba(15, 23, 42, 0.62) 0%, rgba(5, 7, 13, 0.96) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  overflow: hidden;
+}
+.pf-water-river.pf-song-river {
+  height: 76px;
+}
+.pf-under-river-svg,
+.pf-song-river-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+@keyframes pf-unfold-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pf-unfold {
+  animation: pf-unfold-in 200ms ease-out;
+}
+.pf-bars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pf-space-3);
+  margin: var(--pf-space-2) 0;
+}
+.pf-bar-row {
+  display: flex;
+  gap: var(--pf-space-1);
+}
+.pf-bar {
+  position: relative;
+  overflow: hidden;
+  min-width: 52px;
+  padding: var(--pf-space-1) 0 var(--pf-space-2);
+  text-align: center;
+  font-size: var(--pf-text-sm);
+  font-weight: 700;
+  color: var(--pf-text-muted);
+  border: 2px solid var(--pf-line);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface);
+}
+/* The tune stage: the bars the open tab changes. */
+.pf-bar.editing {
+  border-style: dashed;
+  border-color: var(--pf-mine-line);
+}
+.pf-bar.now {
+  color: var(--pf-ink);
+  background: var(--pf-text-soft);
+  border-style: solid;
+  border-color: var(--pf-ring);
+}
+/* How far through the bar: a thin line along the bottom, only in the bar that is playing. */
+.pf-bar-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--pf-next);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.pf-bar:not(.now) .pf-bar-fill {
+  display: none;
+}
+.pf-bar-text {
+  font-size: var(--pf-text-sm);
+  color: var(--pf-text-soft);
+}
+
+/* Less movement: the system setting or the comfort setting. */
+@media (prefers-reduced-motion: reduce) {
+  .pf-pad.start-here,
+  .pf-stream-current,
+  .pf-stream-tendril,
+  .pf-unfold {
+    animation: none;
+  }
+  .pf-pad.on.pf-lit::after,
+  .pf-bar-fill {
+    display: none;
+  }
+}
+.pf-less-motion .pf-pad.start-here,
+.pf-less-motion .pf-stream-current,
+.pf-less-motion .pf-stream-tendril,
+.pf-less-motion .pf-unfold {
+  animation: none;
+}
+.pf-less-motion .pf-pad.on.pf-lit::after,
+.pf-less-motion .pf-bar-fill {
+  display: none;
+}
+
+/* Phones: 8 pads become 2 rows of 4 so every pad stays at least 44 px. */
+@media (max-width: 600px) {
+  .play-flow {
+    padding: var(--pf-space-3);
+  }
+  body.pf-mode .play-flow {
+    width: calc(100% - 2 * var(--pf-space-2));
+    margin: var(--pf-space-3) auto;
+  }
+  .pf-lane {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pf-lane-label {
+    width: auto;
+    flex: none;
+  }
+  .pf-pads {
+    grid-template-columns: repeat(4, var(--pf-pad));
+  }
+  .pf-tune .pf-lane {
+    flex-direction: row;
+    align-items: center;
+  }
+  .pf-tune .pf-lane-label {
+    width: 64px;
+    flex: 0 0 64px;
+  }
+}
+.pf-msg {
+  padding: var(--pf-space-2) var(--pf-space-3);
+  border-left: 4px solid var(--pf-go-line);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface-2);
+  color: var(--pf-text);
+}
+body.pf-mode .volume-control {
+  color: var(--pf-text);
+}
+body.pf-mode .volume-control .pf-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Comfort: bigger controls (9c-5). Only tokens change. */
+body.pf-bigger,
+body.pf-bigger .play-flow {
+  --pf-pad: 64px;
+  --pf-target: 56px;
+  --pf-text-sm: 18px;
+  --pf-text-md: 20px;
+  --pf-text-lg: 24px;
+  --pf-text-xl: 32px;
+  --pf-label: 104px;
+}
+@media (max-width: 600px) {
+  body.pf-bigger,
+  body.pf-bigger .play-flow {
+    --pf-pad: 56px;
+  }
+}
+
+/* More contrast when the system asks for it (9c-4): lines and soft text go brighter. */
+@media (prefers-contrast: more) {
+  .play-flow,
+  body.pf-mode {
+    --pf-line: #cbd5e1;
+    --pf-line-soft: #94a3b8;
+    --pf-text-soft: #f8fafc;
+    --pf-text-muted: #f1f5f9;
+  }
+}
+
+/* Forced colours (Windows contrast themes, 9c-4): shadows and fills are dropped by the system, so every state
+   that used them gets a border style or an outline the system keeps. */
+@media (forced-colors: active) {
+  .pf-pad {
+    border: 2px solid CanvasText;
+  }
+  .pf-pad.on {
+    border: 3px dashed Highlight;
+  }
+  .pf-pad.on.mine {
+    forced-color-adjust: none;
+    border: 3px solid Highlight;
+    background: Highlight;
+  }
+  .pf-pad.pf-note.idea {
+    border: 3px dotted CanvasText;
+  }
+  .pf-pad.pf-ring {
+    outline: 3px solid CanvasText;
+    outline-offset: 2px;
+  }
+  .pf-pad.on.pf-lit {
+    forced-color-adjust: none;
+    background: Canvas;
+    border: 4px double Highlight;
+  }
+  .pf-btn.on,
+  .pf-btn[aria-pressed="true"] {
+    border: 4px double Highlight;
+  }
+  .pf-bar.now {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+  .pf-bar-fill {
+    display: none;
+  }
+}
+.pf-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pf-space-2);
+}
+.pf-head-row .pf-heading {
+  margin: 0;
+}
+
+/* MVP & Back-on-Track layout refinements */
+body.pf-mode #input-volume {
+  min-height: var(--pf-target);
+  min-width: 96px;
+  cursor: pointer;
+}
+body.pf-mode .play-flow {
+  margin: var(--pf-space-2) auto;
+  padding: var(--pf-space-3) var(--pf-space-4);
+}
+body.pf-mode .pf-row {
+  margin: var(--pf-space-2) 0;
+}
+body.pf-mode .pf-grid {
+  margin: var(--pf-space-2) 0;
+  gap: 6px;
+}
+/* Bar indicators are progress markers, not buttons (no raised box border). */
+body.pf-mode .pf-bar {
+  min-width: 38px;
+  padding: 2px 6px 6px;
+  border: none;
+  border-bottom: 3px solid var(--pf-line);
+  border-radius: 0;
+  background: transparent;
+}
+body.pf-mode .pf-bar.editing {
+  border-bottom-style: dashed;
+  border-bottom-color: var(--pf-mine-line);
+}
+body.pf-mode .pf-bar.now {
+  color: var(--pf-ink);
+  background: var(--pf-text-soft);
+  border-radius: 4px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--pf-ring);
+}
+/* Idea pads: show subtle directional icon inside the dotted outline. */
+.pf-pad.pf-note.idea {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pf-text-soft);
+}
+/* Song stage cards & All-at-Once layout. */
+.pf-song-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pf-space-3);
+  margin: var(--pf-space-2) 0;
+}
+
+.pf-instrument-group {
+  margin: 1.25rem auto;
+  max-width: 64rem;
+}
+
+.pf-instrument-group h2 {
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.pf-instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-instrument-card {
+  display: grid;
+  place-items: center;
+  gap: 0.65rem;
+  min-height: 12rem;
+  padding: 1rem;
+  border: 2px solid var(--pf-line, currentColor);
+  border-radius: 1rem;
+  background: var(--pf-panel, transparent);
+  text-align: center;
+}
+
+.pf-instrument-picture .pf-icon {
+  width: 5rem;
+  height: 5rem;
+}
+.pf-song-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-space-2);
+  padding: var(--pf-space-3);
+  border-radius: var(--pf-radius);
+  border: 2px solid var(--pf-line);
+  background: var(--pf-surface-2);
+  min-width: 180px;
+}
+.pf-song-card.now {
+  border-color: var(--pf-ring);
+  box-shadow: 0 0 0 3px var(--pf-ring);
+}
+.pf-song-card-title {
+  font-weight: 700;
+  font-size: var(--pf-text-md);
+  color: var(--pf-text);
+  margin: 0;
+}
+.pf-all-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pf-space-4);
+}
+.pf-panel {
+  padding: var(--pf-space-3);
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-line-soft);
+  background: var(--pf-page);
+}
+.pf-tune-16 .pf-pads {
+  grid-template-columns: repeat(16, var(--pf-pad));
+}
+.pf-pad.pf-note.held-tail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pf-mine);
+  border-style: solid;
+  border-color: var(--pf-mine-line);
+  color: var(--pf-text);
+  opacity: 0.78;
+}
+.pf-pad.pf-note.on {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pf-song-card.pf-card-big {
+  border-color: var(--pf-next-line);
+}
+.pf-cover {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-page);
+  border: 1px solid var(--pf-line);
+}
+.pf-working-card {
+  margin-bottom: var(--pf-space-3);
+}
+
+/* ── Neon look (visual-wave, 2026-10-27) ──
+   Black stage, neon parts. Pitch is height and higher notes are lighter; each part has a colour AND a shape
+   (Boom round, Clap star, Tick diamond, Tune drop); text stays off-white. Everything that moves is caused by a sound:
+   particles and the beat ball live on one canvas behind the page (static/js/visual/particle_canvas.js). */
+body.pf-mode {
+  background-color: var(--pf-page);
+  background-image: radial-gradient(ellipse 120% 80% at 50% 0%, #0b1020 0%, var(--pf-page) 60%);
+  background-attachment: fixed;
+  color: var(--pf-text);
+}
+.pf-particles {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+body.pf-mode .play-flow,
+body.pf-mode .transport-bar {
+  position: relative;
+  z-index: 1;
+}
+body.pf-mode .play-flow {
+  width: min(1120px, calc(100% - 2 * var(--pf-space-4)));
+  background: transparent;
+  border: none;
+}
+.play-flow {
+  --pf-pad: clamp(48px, 5.4vw, 68px);
+  --pf-label: 92px;
+}
+.pf-heading {
+  font-size: clamp(26px, 3vw, 36px);
+  letter-spacing: -0.02em;
+}
+
+/* Buttons: dark glass with a neon edge; the text keeps at least 4.5:1. */
+.pf-btn {
+  background: rgba(14, 18, 32, 0.82);
+  border-color: rgba(201, 204, 214, 0.38);
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+.pf-btn:hover {
+  background: rgba(24, 30, 52, 0.9);
+  border-color: var(--pf-text-soft);
+}
+.pf-play {
+  color: var(--pf-part-tune);
+  border-color: var(--pf-part-tune);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.35), inset 0 0 12px rgba(0, 229, 255, 0.12);
+}
+.pf-next {
+  color: #ff7be6;
+  border-color: var(--pf-part-clap);
+  box-shadow: 0 0 16px rgba(255, 43, 214, 0.32), inset 0 0 12px rgba(255, 43, 214, 0.12);
+}
+.pf-big {
+  color: var(--pf-ink);
+  border-color: transparent;
+  background: linear-gradient(100deg, var(--pf-part-tune), #8fa8ff 50%, var(--pf-part-clap));
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.35), 0 0 30px rgba(255, 43, 214, 0.25);
+}
+.pf-big:hover {
+  background: linear-gradient(100deg, var(--pf-part-tune), #8fa8ff 50%, var(--pf-part-clap));
+}
+.pf-btn.on,
+.pf-btn[aria-pressed="true"] {
+  border-color: var(--pf-part-tune);
+  box-shadow: inset 0 0 0 2px var(--pf-part-tune), 0 0 12px rgba(0, 229, 255, 0.3);
+}
+.pf-btn:focus-visible,
+.pf-pad:focus-visible {
+  outline: 3px solid var(--pf-focus);
+  outline-offset: 3px;
+}
+
+/* The pad field: a dark pool, no box. Its top 50 px is the beat ball's lane, inside the pool and clear of any text. */
+.pf-grid[data-water-grid] {
+  padding-top: 50px;
+}
+.pf-grid {
+  background: radial-gradient(ellipse at 50% 50%, rgba(18, 26, 48, 0.55) 0%, rgba(5, 7, 13, 0) 75%);
+  border: none;
+  padding: var(--pf-space-3) var(--pf-space-2);
+}
+.pf-pad {
+  border: 1.5px solid rgba(201, 204, 214, 0.22);
+  background: radial-gradient(circle, rgba(201, 204, 214, 0.1) 0%, rgba(5, 7, 13, 0.6) 70%);
+}
+.pf-pad.beat {
+  border-color: rgba(201, 204, 214, 0.36);
+}
+.pf-pad[data-lane="kick"] { --pf-part: var(--pf-part-boom); }
+.pf-pad[data-lane="clap"] { --pf-part: var(--pf-part-clap); }
+.pf-pad[data-lane="hat"] { --pf-part: var(--pf-part-tick); }
+.pf-pad.pf-note { --pf-part: var(--pf-part-tune); }
+
+/* A sounding part is drawn as its shape, inside the round target. Starters are hollow and dashed; yours are solid. */
+.pf-pad.on {
+  background: radial-gradient(circle, rgba(5, 7, 13, 0.2) 0%, rgba(5, 7, 13, 0.7) 70%);
+  border: 2px dashed var(--pf-part);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--pf-part) 30%, transparent);
+  color: var(--pf-ink);
+}
+.pf-pad.on .pf-icon {
+  display: none;
+}
+.pf-pad.on::before {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  background: var(--pf-part);
+  opacity: 0.35;
+}
+.pf-pad.on.mine,
+.pf-pad.on.mine[data-lane] {
+  border: 2px solid var(--pf-part);
+  background: radial-gradient(circle, color-mix(in srgb, var(--pf-part) 22%, transparent) 0%, rgba(5, 7, 13, 0.6) 72%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--pf-part) 55%, transparent), inset 0 0 10px color-mix(in srgb, var(--pf-part) 30%, transparent);
+}
+.pf-pad.on.mine::before {
+  opacity: 1;
+}
+.pf-pad[data-lane="kick"].on::before {
+  border-radius: 50%;
+  inset: 18%;
+}
+.pf-pad[data-lane="clap"].on::before {
+  inset: 14%;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+.pf-pad[data-lane="hat"].on::before {
+  inset: 26%;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+/* Tune notes: a round drop, lighter the higher it sits (--pf-h is 0 at the bottom row, 1 at the top). */
+.pf-pad.pf-note.on::before {
+  border-radius: 50%;
+  inset: 20%;
+  background: color-mix(in srgb, var(--pf-part-tune) calc(100% - var(--pf-h, 0.5) * 55%), #ffffff);
+}
+.pf-pad.pf-note.on.mine[data-mark="anchor"] {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+}
+.pf-pad.pf-note.on .pf-icon {
+  display: inline;
+  position: relative;
+  z-index: 1;
+  color: var(--pf-ink);
+}
+/* Ideas are dimmer than your own notes (visual dominance: the glow must not outshine your ear). */
+.pf-pad.pf-note.idea {
+  border: 2px dotted rgba(0, 229, 255, 0.6);
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.1) 0%, rgba(5, 7, 13, 0.6) 76%);
+  box-shadow: none;
+  color: var(--pf-text-soft);
+}
+.pf-pad.pf-note.held-tail {
+  border-color: rgba(0, 229, 255, 0.45);
+  background: rgba(0, 229, 255, 0.1);
+}
+/* Rows: a faint line at each pitch so height reads as height. */
+.pf-tune .pf-lane::after {
+  content: "";
+  position: absolute;
+  left: var(--pf-label);
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 229, 255, 0.07);
+  z-index: -1;
+}
+
+/* The playhead column: a thin ring (shape, not a brightness jump). */
+.pf-pad.pf-ring {
+  box-shadow: 0 0 0 2px rgba(232, 232, 236, 0.55);
+}
+
+/* "Where you are": Beat, Tune, Under, Song. */
+.pf-trail {
+  display: flex;
+  gap: var(--pf-space-2);
+  list-style: none;
+  margin: 0 0 var(--pf-space-3);
+  padding: 0;
+}
+.pf-trail-step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pf-space-1);
+  padding: var(--pf-space-1) var(--pf-space-3);
+  border-radius: 999px;
+  border: 1px solid rgba(201, 204, 214, 0.22);
+  color: var(--pf-text-muted);
+  font-size: var(--pf-text-sm);
+  font-weight: 600;
+}
+.pf-trail-step.done {
+  color: var(--pf-text-soft);
+  border-color: rgba(201, 204, 214, 0.4);
+}
+.pf-trail-step[aria-current="step"] {
+  color: var(--pf-text);
+  border-color: var(--pf-part-tune);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+.pf-trail-step[data-part="beat"] .pf-icon { color: var(--pf-part-boom); }
+.pf-trail-step[data-part="tune"] .pf-icon { color: var(--pf-part-tune); }
+.pf-trail-step[data-part="under"] .pf-icon { color: var(--pf-part-under); }
+.pf-trail-step[data-part="song"] .pf-icon { color: var(--pf-part-clap); }
+
+/* Calm (header): everything still. */
+body.pf-mode .pf-calm-btn {
+  margin-right: var(--pf-space-2);
+}
+body:not(.pf-mode) .pf-calm-btn {
+  display: none;
+}
+.pf-less-motion .pf-particles {
+  display: none;
+}
+.pf-less-motion .pf-pad.on.mine {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--pf-part) 35%, transparent);
+}
+/* High Contrast: the system draws its own colours; the canvas and the drawn shapes step aside. */
+@media (forced-colors: active) {
+  .pf-particles {
+    display: none;
+  }
+  .pf-pad.on::before {
+    background: CanvasText;
+  }
+}
+
+/* ── Apple meets Aperture (owner, 2026-10-27) ──
+   Apple: system type, hairlines, frosted glass, pill buttons, generous space. Aperture-style test-chamber signage:
+   numbered step tiles, pictograms, a faint tiled wall, and the blue/orange pair (our Tune cyan and Boom orange).
+   Everything here is still; only sound moves things (visual-wave SYNTHESIS). */
+body.pf-mode,
+body.pf-mode .play-flow,
+body.pf-mode .transport-bar {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.play-flow,
+body.pf-mode {
+  --pf-focus: #ffffff;
+  --pf-glass: rgba(22, 24, 34, 0.58);
+  --pf-hair: rgba(255, 255, 255, 0.1);
+  --pf-hair-strong: rgba(255, 255, 255, 0.22);
+}
+body.pf-mode {
+  background-image:
+    radial-gradient(ellipse 120% 70% at 50% -10%, rgba(0, 229, 255, 0.08) 0%, rgba(5, 7, 13, 0) 55%),
+    radial-gradient(ellipse 90% 60% at 100% 110%, rgba(255, 138, 0, 0.06) 0%, rgba(5, 7, 13, 0) 55%),
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: auto, auto, 72px 72px, 72px 72px;
+}
+body.pf-mode .transport-bar {
+  background: rgba(5, 7, 13, 0.62);
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+  border-bottom: 1px solid var(--pf-hair);
+  position: sticky;
+  top: 0;
+}
+.pf-heading {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+.pf-say {
+  color: var(--pf-text-soft);
+  letter-spacing: -0.01em;
+}
+
+/* Pill buttons on glass, hairline edges. */
+.pf-btn {
+  border-radius: 999px;
+  border: 1px solid var(--pf-hair-strong);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.pf-btn:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.34);
+}
+.pf-play {
+  color: var(--pf-part-tune);
+  border: 1.5px solid var(--pf-part-tune);
+}
+.pf-next {
+  color: var(--pf-part-boom);
+  border: 1.5px solid var(--pf-part-boom);
+  box-shadow: 0 0 16px rgba(255, 138, 0, 0.3), inset 0 0 12px rgba(255, 138, 0, 0.1);
+}
+/* The big start buttons: the blue-to-orange pair, dark text (a solid base colour so the page audit can measure it). */
+.pf-big,
+.pf-big:hover {
+  color: var(--pf-ink);
+  border: none;
+  background-color: var(--pf-part-tune);
+  background-image: linear-gradient(100deg, var(--pf-part-tune) 0%, #7fe9ff 45%, #ffb35c 70%, var(--pf-part-boom) 100%);
+  box-shadow: 0 0 26px rgba(0, 229, 255, 0.3), 0 0 30px rgba(255, 138, 0, 0.22);
+}
+.pf-btn:focus-visible,
+.pf-pad:focus-visible {
+  outline: 3px solid var(--pf-focus);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 7px rgba(0, 229, 255, 0.35);
+}
+
+/* Glass panels for the drawers and rivers. */
+.pf-details,
+.pf-water-river {
+  background: var(--pf-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--pf-hair);
+  border-radius: 20px;
+}
+.pf-details {
+  padding: var(--pf-space-3) var(--pf-space-4);
+}
+
+/* Test-chamber signage: numbered tiles with a pictogram; the one you are in is a lit white panel. */
+.pf-trail {
+  gap: 6px;
+  margin-bottom: var(--pf-space-4);
+}
+.pf-trail-step {
+  border-radius: 10px;
+  border: 1px solid var(--pf-hair);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 12px 6px 8px;
+  gap: 8px;
+}
+.pf-trail-num {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  padding-right: 8px;
+  border-right: 1px solid var(--pf-hair-strong);
+}
+.pf-trail-step[aria-current="step"] {
+  background: #f2f2f2;
+  border-color: #f2f2f2;
+  color: var(--pf-ink);
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.18);
+}
+.pf-trail-step[aria-current="step"] .pf-icon {
+  color: var(--pf-ink);
+}
+.pf-trail-step[aria-current="step"] .pf-trail-num {
+  border-right-color: rgba(5, 7, 13, 0.3);
+}
+
+/* Bar cells: thin chamber-light segments. */
+.pf-bar {
+  border-radius: 6px;
+}
+@media (prefers-reduced-transparency: reduce) {
+  body.pf-mode .transport-bar,
+  .pf-btn,
+  .pf-details,
+  .pf-water-river {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: #12141c;
+  }
+}
+
+/* Start: a centred welcome, and the key to the picture (colour + shape per part). */
+.pf-start {
+  text-align: center;
+  padding-top: clamp(24px, 9vh, 96px);
+}
+.pf-start .pf-heading {
+  font-size: clamp(40px, 6.4vw, 76px);
+  background: linear-gradient(180deg, #ffffff 0%, #c9ccd6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #e8e8ec;
+}
+@supports (-webkit-background-clip: text) {
+  .pf-start .pf-heading {
+    -webkit-text-fill-color: transparent;
+  }
+}
+.pf-start .pf-say {
+  font-size: var(--pf-text-lg);
+}
+.pf-start .pf-row {
+  justify-content: center;
+}
+.pf-start .pf-big {
+  min-height: 60px;
+  padding: 0 30px;
+  font-size: var(--pf-text-lg);
+}
+.pf-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  list-style: none;
+  margin: var(--pf-space-6) auto;
+  padding: 0;
+  color: var(--pf-text-soft);
+  font-weight: 600;
+}
+.pf-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.pf-legend-shape {
+  width: 18px;
+  height: 18px;
+  background: var(--pf-part);
+  filter: drop-shadow(0 0 6px var(--pf-part));
+}
+.pf-legend-item[data-part="boom"] { --pf-part: var(--pf-part-boom); }
+.pf-legend-item[data-part="clap"] { --pf-part: var(--pf-part-clap); }
+.pf-legend-item[data-part="tick"] { --pf-part: var(--pf-part-tick); }
+.pf-legend-item[data-part="tune"] { --pf-part: var(--pf-part-tune); }
+.pf-legend-item[data-part="under"] { --pf-part: var(--pf-part-under); }
+.pf-legend-item[data-part="boom"] .pf-legend-shape,
+.pf-legend-item[data-part="tune"] .pf-legend-shape {
+  border-radius: 50%;
+}
+.pf-legend-item[data-part="clap"] .pf-legend-shape {
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: none;
+}
+.pf-legend-item[data-part="tick"] .pf-legend-shape {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  filter: none;
+}
+.pf-legend-item[data-part="under"] .pf-legend-shape {
+  width: 26px;
+  height: 10px;
+  border-radius: 6px;
+}
+.pf-legend-up {
+  color: var(--pf-text-muted);
+  font-weight: 500;
+}
+.pf-legend-up .pf-icon {
+  color: var(--pf-part-tune);
+}
+body.pf-mode #btn-volume-lock {
+  border-radius: 999px;
+  border: 1px solid var(--pf-hair-strong);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--pf-text-soft);
+}
+@media (forced-colors: active) {
+  .pf-legend-shape {
+    background: CanvasText;
+  }
+  .pf-start .pf-heading {
+    -webkit-text-fill-color: CanvasText;
+  }
+}
+@media (max-width: 600px) {
+  .pf-trail {
+    flex-wrap: wrap;
+  }
+  /* Narrow screens: other steps show number and picture; the word stays for screen readers. */
+  .pf-trail-step:not([aria-current="step"]) span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+/* A note the app changed (Déjà Vu, an ending shape): a hollow drop with a dotted edge, never shown as yours. */
+.pf-pad.pf-note.on.moved {
+  border: 2px dotted var(--pf-part-tune);
+  box-shadow: none;
+}
+.pf-pad.pf-note.on.moved::before {
+  opacity: 0.55;
+}
+
+/* ── Last word on motion and phone layout (quality pass) ──
+   These come last so no earlier "look" layer can win: a person's Calm or reduced-motion choice always stops the
+   flowing lines, and the phone width is not undone by the wider desktop rules above. */
+body.pf-playing.pf-less-motion .pf-stream-current,
+body.pf-playing.pf-less-motion .pf-stream-tendril {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.pf-playing .pf-stream-current,
+  body.pf-playing .pf-stream-tendril,
+  .pf-unfold {
+    animation: none;
+  }
+}
+@media (max-width: 600px) {
+  body.pf-mode .play-flow {
+    width: calc(100% - 2 * var(--pf-space-2));
+    margin: var(--pf-space-3) auto;
+  }
+}
+/* Tune is a drop, not a circle, so it never looks like a Boom (each part keeps its own shape). */
+.pf-pad.pf-note.on::before,
+.pf-legend-item[data-part="tune"] .pf-legend-shape {
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+}
+/* Instrument cards: frosted glass; the choose button is a quiet blue outline until hovered or focused,
+   so six cards don't shout at once. */
+.pf-instrument-card {
+  background: var(--pf-glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--pf-hair);
+  border-radius: 20px;
+}
+.pf-start .pf-instrument-card .pf-big {
+  background-image: none;
+  background-color: rgba(0, 229, 255, 0.08);
+  color: var(--pf-part-tune);
+  border: 1.5px solid var(--pf-part-tune);
+  box-shadow: none;
+  font-size: var(--pf-text-md);
+}
+.pf-start .pf-instrument-card .pf-big:hover,
+.pf-start .pf-instrument-card .pf-big:focus-visible {
+  background-color: var(--pf-part-tune);
+  background-image: linear-gradient(100deg, var(--pf-part-tune) 0%, #7fe9ff 45%, #ffb35c 70%, var(--pf-part-boom) 100%);
+  color: var(--pf-ink);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.35);
+}
+.pf-instrument-image { display: block; width: 160px; height: 110px; max-width: 100%; object-fit: contain; }
+.pf-instrument-card .pf-sub { min-height: 2.5em; }
+.pf-jam-instrument { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+.pf-jam-pads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0 12px; }
+.pf-jam-pad { min-height: 110px; flex-direction: column; border: 2px solid var(--pf-part-tune); }
+.pf-jam-pad kbd { font: inherit; font-size: 28px; font-weight: 700; }
+.pf-jam-directions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
+.pf-jam-directions label { display: block; }
+body.pf-listening { background: #050507; }
+body.pf-listening .transport-bar { background: #050507; z-index: 10; }
+.pf-listening .pf-stage { background: transparent; border-color: transparent; box-shadow: none; }
+.pf-listening-visual { display: block; width: 100%; height: clamp(160px, 28vh, 260px); color: #9ba9e9; }
+.pf-listening-stage, .pf-listening .pf-start { max-width: 840px; margin: 0 auto; }
+.pf-listening .pf-heading { letter-spacing: -.035em; }
+.pf-listening .pf-say, .pf-listening .pf-sub { max-width: 64ch; }
+.pf-other-ways { margin: 24px 0; }
+.pf-other-ways > summary { cursor: pointer; padding: 14px 4px; }
+.pf-other-ways > summary:focus-visible { outline: 3px solid #9ba9e9; outline-offset: 3px; }
+@media (forced-colors: active) { .pf-listening-visual { color: CanvasText; } }
+#pf-style-blend { display: block; width: 100%; min-height: 32px; margin: 8px 0; accent-color: var(--pf-part-tune); }
+.pf-jam-directions h2 { font-size: 20px; margin-bottom: 8px; }
+.pf-jam-directions p { margin-bottom: 12px; }
+@media (max-width: 600px) {
+  .pf-listening-visual { height: 140px; }
+  .pf-jam-pads { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pf-jam-directions { grid-template-columns: 1fr; }
+}
+
+/* Connected-music prototype: fixed positions, native buttons, no drag requirement. */
+.pf-honeycomb { position: relative; width: min(100%, 610px); height: 316px; margin: 8px auto; }
+.pf-honeycomb .pf-hex, .pf-hex-center { position: absolute; width: 32%; height: 116px; box-sizing: border-box; }
+.pf-honeycomb .pf-hex { min-width: 0; padding: 18px 13px; white-space: normal; overflow-wrap: anywhere; font-size: 15px; line-height: 1.2; border-radius: 20px; clip-path: polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); background: #153139; border: 0; box-shadow: none; }
+.pf-honeycomb .pf-hex:hover { background: #245362; }
+.pf-honeycomb .pf-hex:focus-visible { background: #285d70; box-shadow: inset 0 0 0 5px #fff; outline: none; text-decoration: underline; }
+.pf-hex-0 { left: 17%; top: 0; } .pf-hex-1 { left: 51%; top: 0; }
+.pf-hex-2 { left: 0; top: 100px; } .pf-hex-3 { left: 68%; top: 100px; }
+.pf-hex-4 { left: 17%; top: 200px; } .pf-hex-5 { left: 51%; top: 200px; }
+.pf-hex-center { left: 34%; top: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4px; }
+.pf-hex-center strong { font-size: 15px; line-height: 1.2; overflow-wrap: anywhere; }
+.pf-hex-center .pf-sub { font-size: 11px; margin: 0 0 4px; }
+.pf-hex-center .pf-listening-visual { height: 36px; flex-shrink: 0; }
+.pf-all-directions { margin: 8px 0 12px; }
+.pf-all-directions summary { padding: 10px 0; cursor: pointer; }
+.pf-all-directions select { max-width: 100%; }
+@media (max-width: 600px) { .pf-honeycomb .pf-hex { font-size: 12px; padding: 16px 10px; } .pf-hex-center strong { font-size: 12px; } }
+@media (forced-colors: active) { .pf-honeycomb .pf-hex { clip-path: none; border: 2px solid ButtonText; } .pf-honeycomb .pf-hex:focus-visible { outline: 3px solid Highlight; } }
+
+.pf-music-field { position: relative; height: 220px; margin: 12px; border: 1px solid #7ea0b0; border-radius: 16px; touch-action: none; cursor: crosshair; background: radial-gradient(ellipse at 20% 20%,#326362,transparent 70%),linear-gradient(110deg,#152737,#45304e); }
+.pf-music-field:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.pf-field-corner { position: absolute; top: 10px; left: 12px; font-size: 12px; pointer-events: none; }
+.pf-field-right { left: auto; right: 12px; } .pf-field-bottom { top: auto; bottom: 10px; }
+.pf-field-requested,.pf-field-realized { position: absolute; transform: translate(-50%,-50%); border-radius: 50%; pointer-events: none; box-sizing: border-box; }
+.pf-field-requested { width: 26px; height: 26px; border: 3px solid #fff; }
+.pf-field-realized { width: 12px; height: 12px; background: #fff; }
+.pf-field-adjust label { display: block; padding: 8px; } .pf-field-adjust input { width: 100%; min-height: 32px; }
+@media (forced-colors: active) { .pf-music-field { background: Canvas; border-color: CanvasText; } .pf-field-requested { border-color: Highlight; } .pf-field-realized { background: CanvasText; } }
+
+.pf-field-regions { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin: 0 12px; }
+.pf-field-regions span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; text-align: center; }
+
+/* The demo centers listening and steering; existing studio tools stay optional. */
+.pf-demo-stage .pf-music-field { height: clamp(220px, 36vh, 380px); }
+.pf-music-field .pf-listening-visual { position: absolute; inset: 0; height: 100%; pointer-events: none; opacity: .6; }
+.pf-demo-tools { margin-top: 16px; border-top: 1px solid #333; padding-top: 12px; }
+.pf-demo-tools > summary { cursor: pointer; min-height: 44px; display: list-item; padding: 8px 4px; }
+.pf-demo-tools > summary:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.pf-demo-stage .pf-heading { margin-bottom: 8px; }
+.pf-demo-stage .pf-jam-pads { margin-top: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pf-demo-stage .pf-jam-pad { min-height: 88px; padding: 10px 4px; border-radius: 18px; }
+@media (max-width: 480px) {
+  .pf-demo-stage .pf-music-field { height: 220px; margin: 8px 0; }
+  .pf-demo-stage .pf-sub { margin-block: 8px; }
+}
+
+.pf-music-circle { position: relative; width: min(100%, 520px); aspect-ratio: 1; margin: 12px auto; border-radius: 50%; border: 1px solid #8796b4; touch-action: none; cursor: crosshair; background: radial-gradient(circle, #0c0c15 0 30%, transparent 69%), conic-gradient(#254955,#394a62,#55455e,#61485c,#674c43,#555b36,#305d52,#274f65,#39446e,#543e66,#254955); }
+.pf-music-circle:focus-visible { outline: 3px solid white; outline-offset: 5px; }
+.pf-music-circle .pf-listening-visual { position: absolute; inset: 20%; width: 60%; height: 60%; pointer-events: none; opacity: .45; }
+.pf-circle-title { position: absolute; left: 30%; top: 40%; width: 40%; text-align: center; font-size: clamp(14px, 2vw, 20px); pointer-events: none; }
+.pf-circle-family { position: absolute; transform: translate(-50%,-50%); width: 65px; text-align: center; font-size: 11px; font-weight: 600; pointer-events: none; }
+.pf-circle-tick { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #c4cbd7; transform: translate(-50%,-50%); pointer-events: none; }
+.pf-music-circle .pf-field-requested, .pf-music-circle .pf-field-realized { pointer-events: none; }
+#pf-circle-picker { max-width: 100%; width: 100%; min-height: 44px; }
+@media (forced-colors: active) { .pf-music-circle { background: Canvas; border-color: CanvasText; } .pf-circle-tick { background: CanvasText; } }
+
+/* Immediate press feedback; no motion required, including reduced-motion use. */
+.pf-jam-pad.pf-pad-sounding { box-shadow: inset 0 0 0 3px currentColor; text-decoration: underline; text-underline-offset: 5px; }
+
+/* Captured tune: direct musical picture, stable explicit transport. */
+.pf-phrase-overview { padding: 12px 0; border-bottom: 1px solid #343944; }
+.pf-event-tune .pf-head-row { align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.pf-phrase-caption { display:flex; justify-content:space-between; gap:12px; color:#b8c4d3; margin:16px 0 8px; }
+.pf-phrase-picture { position:relative; height:210px; border:1px solid #526074; border-radius:14px; background:repeating-linear-gradient(to right, transparent 0, transparent calc(var(--phrase-beat-width,25%) - 1px), #344150 var(--phrase-beat-width,25%)),repeating-linear-gradient(to bottom,#111923 0,#111923 41px,#293443 42px); }
+.pf-phrase-note { position:absolute; min-width:44px; min-height:44px; height:44px; padding:0; border:2px solid #75dbef; border-radius:10px; background:#173b49; color:#fff; z-index:1; }
+.pf-phrase-note[aria-pressed="true"] { background:#b8eaf3; color:#10212c; outline:2px solid #fff; outline-offset:2px; z-index:3; }
+.pf-phrase-note:focus-visible { outline:3px solid #ffbb46; outline-offset:4px; z-index:4; }
+.pf-phrase-cursor { position:absolute; top:0; bottom:0; width:2px; background:#ffbb46; pointer-events:none; z-index:2; }
+.pf-phrase-cursor[hidden] { display:none; }
+.pf-phrase-beats { display:flex; justify-content:space-around; color:#b8c4d3; margin:8px 0 18px; }
+.pf-phrase-empty { padding:24px; }
+.pf-event-tune details summary { cursor:pointer; padding:12px 0; }
+@media (prefers-reduced-motion: reduce) { .pf-phrase-cursor { display:none; } }
+
+/* Phase 13.2: on a phone the journey stays one row, and the circle leaves room so
+   "Make my song" and the pads sit above the fold. */
+@media (max-width: 480px) {
+  .pf-journey ol { flex-wrap: nowrap; gap: 4px; }
+  .pf-journey-step { padding: 8px 10px; font-size: 14px; min-height: 44px; }
+  .pf-demo-stage .pf-music-circle { width: min(100%, 272px); margin: 6px auto; }
+  .pf-demo-stage .pf-heading { font-size: 26px; margin: 4px 0; }
+  .pf-demo-stage .pf-jam-pad { min-height: 64px; }
+  .pf-demo-stage .pf-jam-pads { margin-top: 8px; }
+}
+
+/* A press that has to wait shows it was heard at once: a ring that breathes.
+   Calm and reduced motion keep the ring still. */
+.pf-jam-pad.pf-pad-waiting { box-shadow: 0 0 0 3px var(--pf-next-line), 0 0 18px var(--pf-next-line); animation: pf-pad-wait 900ms ease-in-out infinite alternate; }
+@keyframes pf-pad-wait { from { box-shadow: 0 0 0 3px var(--pf-next-line), 0 0 6px var(--pf-next-line); } to { box-shadow: 0 0 0 3px var(--pf-next-line), 0 0 22px var(--pf-next-line); } }
+@media (prefers-reduced-motion: reduce) { .pf-jam-pad.pf-pad-waiting { animation: none; } }
+body.pf-less-motion .pf-jam-pad.pf-pad-waiting { animation: none; }
+
+/* The sheet: real notation in the app's part colours. Lines and rests stay quiet; notes carry the part. */
+.pf-sheet-box { margin-top: 12px; }
+.pf-sheet-wrap { overflow-x: auto; background: #fbfbf7; border-radius: 12px; padding: 8px; }
+.pf-sheet { display: block; max-width: 100%; height: auto; font-family: system-ui, sans-serif; }
+.pf-sheet-title { font-size: 13px; font-weight: 700; fill: #1b1d22; }
+.pf-sheet-tempo { font-size: 11px; fill: #1b1d22; }
+.pf-sheet-part { font-size: 22px; fill: #1b1d22; }
+.pf-sheet-line, .pf-sheet-bar { stroke: #1b1d22; stroke-width: 1; opacity: .8; }
+.pf-sheet-rest, .pf-sheet-dot, .pf-sheet-acc { fill: #1b1d22; }
+.pf-sheet-acc { font-size: 11px; }
+.pf-sheet-note { fill: #1b1d22; stroke: #1b1d22; stroke-width: 1.4; }
+.pf-sheet-note[data-open="1"] { fill: #fbfbf7; }
+.pf-sheet-stem, .pf-sheet-flag { stroke: #1b1d22; stroke-width: 1.3; }
+.pf-sheet-note.pf-part-tune, .pf-sheet-stem.pf-part-tune, .pf-sheet-flag.pf-part-tune { fill: #0097a8; stroke: #0097a8; }
+.pf-sheet-note.pf-part-chords, .pf-sheet-stem.pf-part-chords, .pf-sheet-flag.pf-part-chords { fill: #5a5e66; stroke: #5a5e66; }
+.pf-sheet-note.pf-part-bass, .pf-sheet-stem.pf-part-bass, .pf-sheet-flag.pf-part-bass { fill: #c25d00; stroke: #c25d00; }
+.pf-sheet-note.pf-part-drums, .pf-sheet-stem.pf-part-drums, .pf-sheet-flag.pf-part-drums { fill: #1b1d22; stroke: #1b1d22; }
+.pf-sheet-note[data-open="1"].pf-part-tune, .pf-sheet-note[data-open="1"].pf-part-bass, .pf-sheet-note[data-open="1"].pf-part-chords { fill: #fbfbf7; }
+.pf-sheet-note.own { stroke: #ff2bd6; stroke-width: 2.4; }
+.pf-sheet-note.now { filter: drop-shadow(0 0 3px #ff2bd6); }
+.pf-sheet-playhead { stroke: #ff2bd6; stroke-width: 2; opacity: .85; }
+@media (prefers-reduced-motion: reduce) { .pf-sheet-note.now { filter: none; } }
+
+.pf-sheet-beat { fill: #ff2bd6; }
+.pf-sheet-beat-mark { fill: #9aa1b0; }
+.pf-sheet-beat-mark.on { fill: #ff2bd6; }
+@media (prefers-reduced-motion: reduce) { .pf-sheet-beat { display: none; } .pf-sheet-beat-mark.on { r: 3; } }
+body.pf-less-motion .pf-sheet-beat { display: none; }
+
+/* Eight melody keys: A to K up the scale. Home notes (the chord's own) are bright; the rest are quieter. */
+.pf-demo-stage .pf-jam-pads, .pf-listening-stage .pf-jam-pads { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.pf-jam-pad { opacity: .78; }
+.pf-jam-pad.pf-pad-home { opacity: 1; border-width: 3px; box-shadow: 0 0 10px var(--pf-part-tune); }
+.pf-jam-pads .pf-octave { grid-column: 1 / -1; justify-content: center; margin-top: 4px; }
+@media (max-width: 600px) {
+  .pf-demo-stage .pf-jam-pads, .pf-listening-stage .pf-jam-pads { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pf-demo-stage .pf-jam-pad { min-height: 52px; padding: 6px 2px; }
+  .pf-demo-stage .pf-jam-pad kbd { font-size: 20px; }
+  .pf-demo-stage .pf-music-circle { width: min(100%, 248px); }
+}
+
+/* Notes you can grab: a hand cursor, a visible grip on the right edge for length. */
+.pf-phrase-picture { touch-action: none; cursor: cell; }
+.pf-phrase-note { cursor: grab; }
+.pf-phrase-note::after { content: ""; position: absolute; right: 2px; top: 8px; bottom: 8px; width: 6px; border-radius: 3px; background: currentColor; opacity: .45; cursor: ew-resize; }

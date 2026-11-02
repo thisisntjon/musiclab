@@ -1,0 +1,80 @@
+"""Public exports for theory-core."""
+from src.theory_core.models import (
+    NOTE_NAMES,
+    SCALES,
+    VOWELS,
+    LFO_RATES,
+    MONSTER_CHOKE_PATCHES,
+    ALL_SYNTH_PATCHES,
+    GESTURE_PRESETS,
+    midi_to_freq,
+    midi_to_name,
+    normalize_gesture,
+    gesture_from_xy,
+)
+from src.theory_core.harmony import (
+    FUNCTIONAL_STATES,
+    chord_pitch_classes,
+    voice_chord_progression,
+    classify_step_gravity,
+    harmonize_melody_phrase,
+    suggest_harmony_alternatives,
+)
+from src.theory_core.hocket import (
+    apply_monophonic_hocket_choke,
+    resolve_note_pitch,
+    lock_bass_to_kick,
+    transform_call_response,
+)
+from src.theory_core.arranger import (
+    DEFAULT_SONG_BLUEPRINT,
+    GENERAL_SONG_BLUEPRINTS,
+    unfold_song_sections,
+)
+from src.theory_core.compiler import compile_song
+from src.theory_core.diagnostics import (
+    diagnose_song,
+    apply_diagnostic_fix,
+    preview_transform_diff,
+    generate_ear_mission,
+    grade_ear_mission,
+    compute_provenance_summary,
+    FLUID_SONG_RUNG_SPECS,
+    ensure_fluid_song_graph,
+)
+
+__all__ = [
+    "NOTE_NAMES",
+    "SCALES",
+    "VOWELS",
+    "LFO_RATES",
+    "MONSTER_CHOKE_PATCHES",
+    "ALL_SYNTH_PATCHES",
+    "GESTURE_PRESETS",
+    "midi_to_freq",
+    "midi_to_name",
+    "normalize_gesture",
+    "gesture_from_xy",
+    "FUNCTIONAL_STATES",
+    "chord_pitch_classes",
+    "voice_chord_progression",
+    "classify_step_gravity",
+    "harmonize_melody_phrase",
+    "suggest_harmony_alternatives",
+    "apply_monophonic_hocket_choke",
+    "resolve_note_pitch",
+    "lock_bass_to_kick",
+    "transform_call_response",
+    "DEFAULT_SONG_BLUEPRINT",
+    "GENERAL_SONG_BLUEPRINTS",
+    "unfold_song_sections",
+    "compile_song",
+    "diagnose_song",
+    "apply_diagnostic_fix",
+    "preview_transform_diff",
+    "generate_ear_mission",
+    "grade_ear_mission",
+    "compute_provenance_summary",
+    "FLUID_SONG_RUNG_SPECS",
+    "ensure_fluid_song_graph",
+]

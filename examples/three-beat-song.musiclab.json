@@ -1,0 +1,3300 @@
+{
+  "format": "musiclab.project.v1",
+  "exported_at": "2026-10-31T00:52:28.816Z",
+  "title": "Three-beat study",
+  "cartridge": {
+    "kit": "soft",
+    "feel": "none",
+    "parts": 3,
+    "notes": 4
+  },
+  "song": {
+    "id": "musiclab-three-beat-example-v1",
+    "title": "Three-beat study",
+    "source": "person",
+    "global_context": {
+      "bpm": 100,
+      "swing": 0.5,
+      "root_pc": 0,
+      "scale_type": "major",
+      "bars": 4,
+      "steps_per_bar": 12
+    },
+    "notes": [
+      {
+        "id": "triple-blend-drums-kick-0-36",
+        "step": 0,
+        "duration_steps": 1,
+        "velocity": 0.38,
+        "role": "drums",
+        "patch_id": "kick",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 36
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-8-38",
+        "step": 8,
+        "duration_steps": 1,
+        "velocity": 0.22,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-2-42",
+        "step": 2,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-6-42",
+        "step": 6,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-10-42",
+        "step": 10,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-0-one",
+        "step": 0,
+        "duration_steps": 4,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 36
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-8-one",
+        "step": 8,
+        "duration_steps": 4,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 43
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-4-60",
+        "step": 4,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 60
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          261.6255653005986
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-4-64",
+        "step": 4,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 64
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          329.6275569128699
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-4-67",
+        "step": 4,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          391.99543598174927
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-8-60",
+        "step": 8,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 60
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          261.6255653005986
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-8-64",
+        "step": 8,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 64
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          329.6275569128699
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-8-67",
+        "step": 8,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          391.99543598174927
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-kick-12-36",
+        "step": 12,
+        "duration_steps": 1,
+        "velocity": 0.38,
+        "role": "drums",
+        "patch_id": "kick",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 36
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-20-38",
+        "step": 20,
+        "duration_steps": 1,
+        "velocity": 0.22,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-14-42",
+        "step": 14,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-18-42",
+        "step": 18,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-22-42",
+        "step": 22,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-12-one",
+        "step": 12,
+        "duration_steps": 4,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 41
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-22-one",
+        "step": 22,
+        "duration_steps": 2,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 48
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-16-65",
+        "step": 16,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 65
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          349.2282314330039
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-16-69",
+        "step": 16,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 69
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          440
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-16-72",
+        "step": 16,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 72
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          523.2511306011972
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-20-65",
+        "step": 20,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 65
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          349.2282314330039
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-20-69",
+        "step": 20,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 69
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          440
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-20-72",
+        "step": 20,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 72
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          523.2511306011972
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-perc-23-45",
+        "step": 23,
+        "duration_steps": 0.6,
+        "velocity": 0.18,
+        "role": "drums",
+        "patch_id": "perc",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 45
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-kick-24-36",
+        "step": 24,
+        "duration_steps": 1,
+        "velocity": 0.38,
+        "role": "drums",
+        "patch_id": "kick",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 36
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-32-38",
+        "step": 32,
+        "duration_steps": 1,
+        "velocity": 0.22,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-26-42",
+        "step": 26,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-30-42",
+        "step": 30,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-34-42",
+        "step": 34,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-24-one",
+        "step": 24,
+        "duration_steps": 4,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 43
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-32-one",
+        "step": 32,
+        "duration_steps": 4,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 50
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-28-67",
+        "step": 28,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          391.99543598174927
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-28-71",
+        "step": 28,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 71
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          493.8833012561241
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-28-74",
+        "step": 28,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 74
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          587.3295358348151
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-32-67",
+        "step": 32,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          391.99543598174927
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-32-71",
+        "step": 32,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 71
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          493.8833012561241
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-32-74",
+        "step": 32,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 74
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          587.3295358348151
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-kick-36-36",
+        "step": 36,
+        "duration_steps": 1,
+        "velocity": 0.38,
+        "role": "drums",
+        "patch_id": "kick",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 36
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-44-38",
+        "step": 44,
+        "duration_steps": 1,
+        "velocity": 0.22,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-38-42",
+        "step": 38,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-42-42",
+        "step": 42,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-hat_closed-46-42",
+        "step": 46,
+        "duration_steps": 0.6,
+        "velocity": 0.09,
+        "role": "drums",
+        "patch_id": "hat_closed",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 42
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-36-one",
+        "step": 36,
+        "duration_steps": 4,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 36
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-bass-clean_bass-46-one",
+        "step": 46,
+        "duration_steps": 2,
+        "velocity": 0.32,
+        "role": "bass",
+        "patch_id": "clean_bass",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 43
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-40-60",
+        "step": 40,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 60
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          261.6255653005986
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-40-64",
+        "step": 40,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 64
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          329.6275569128699
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-40-67",
+        "step": 40,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          391.99543598174927
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-44-60",
+        "step": 44,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 60
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          261.6255653005986
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-44-64",
+        "step": 44,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 64
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          329.6275569128699
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-harmony-warm_keys-44-67",
+        "step": 44,
+        "duration_steps": 1.5,
+        "velocity": 0.2,
+        "role": "harmony",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "voiced_freqs": [
+          391.99543598174927
+        ],
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-perc-47-45",
+        "step": 47,
+        "duration_steps": 0.6,
+        "velocity": 0.18,
+        "role": "drums",
+        "patch_id": "perc",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 45
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-4-38",
+        "step": 4,
+        "duration_steps": 1,
+        "velocity": 0.11,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-16-38",
+        "step": 16,
+        "duration_steps": 1,
+        "velocity": 0.11,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-28-38",
+        "step": 28,
+        "duration_steps": 1,
+        "velocity": 0.11,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "triple-blend-drums-snare-40-38",
+        "step": 40,
+        "duration_steps": 1,
+        "velocity": 0.11,
+        "role": "drums",
+        "patch_id": "snare",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 38
+        },
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        },
+        "provenance": "jam_generated",
+        "generated_by": "musiclab_jam",
+        "scene_version": 1
+      },
+      {
+        "id": "example-melody-0",
+        "step": 0,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 60
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-1",
+        "step": 4,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 64
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-2",
+        "step": 9,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-3",
+        "step": 12,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 65
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-4",
+        "step": 17,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 69
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-5",
+        "step": 23,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 72
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-6",
+        "step": 24,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-7",
+        "step": 30,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 71
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-8",
+        "step": 35,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 74
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-9",
+        "step": 36,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 67
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-10",
+        "step": 40,
+        "duration_steps": 2,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 64
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      },
+      {
+        "id": "example-melody-11",
+        "step": 44,
+        "duration_steps": 4,
+        "velocity": 0.65,
+        "role": "lead",
+        "patch_id": "warm_keys",
+        "pitch_lock_mode": "concrete",
+        "concrete": {
+          "midi_pitch": 60
+        },
+        "provenance": "generator_default",
+        "generated_by": "musiclab_example",
+        "performance": {
+          "version": 1,
+          "offset_steps": 0
+        }
+      }
+    ],
+    "chord_progressions": {
+      "prog-main": [
+        {
+          "bar": 0,
+          "beats": 4,
+          "degree": 1,
+          "roman": "I",
+          "quality": "maj"
+        },
+        {
+          "bar": 1,
+          "beats": 4,
+          "degree": 5,
+          "roman": "V",
+          "quality": "maj"
+        },
+        {
+          "bar": 2,
+          "beats": 4,
+          "degree": 6,
+          "roman": "vi",
+          "quality": "min"
+        },
+        {
+          "bar": 3,
+          "beats": 4,
+          "degree": 4,
+          "roman": "IV",
+          "quality": "maj"
+        }
+      ]
+    },
+    "active_progression_id": "prog-main",
+    "auto_harmony_stabs": false,
+    "arrangement_mode": "loop",
+    "lead_patch_id": "warm_keys",
+    "play_session": {
+      "acts_count": 0,
+      "acts": [],
+      "reveals_count": 0,
+      "reveals": [],
+      "start_bpm": 100
+    },
+    "jam_session": {
+      "kind": "pitched",
+      "patchId": "warm_keys",
+      "kit": "soft",
+      "density": 1,
+      "color": 1,
+      "responsive": false,
+      "style_blend": 0,
+      "response": {
+        "enabled": false,
+        "note_count": 0,
+        "source_ids": [],
+        "mode": "off"
+      },
+      "style_spectrum": 0.5,
+      "scene_variant": "answer"
+    },
+    "drum_kit": "soft",
+    "song_cards": [
+      {
+        "bars": 2,
+        "role_name": "Opening"
+      },
+      {
+        "bars": 2,
+        "role_name": "Answer",
+        "material": {
+          "notes": [
+            {
+              "id": "triple-blend-drums-kick-0-36",
+              "step": 0,
+              "duration_steps": 1,
+              "velocity": 0.38,
+              "role": "drums",
+              "patch_id": "kick",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-8-38",
+              "step": 8,
+              "duration_steps": 1,
+              "velocity": 0.22,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-2-42",
+              "step": 2,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-6-42",
+              "step": 6,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-10-42",
+              "step": 10,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-0-one",
+              "step": 0,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-8-one",
+              "step": 8,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 43
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-4-60",
+              "step": 4,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                261.6255653005986
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-4-64",
+              "step": 4,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 64
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                329.6275569128699
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-4-67",
+              "step": 4,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-8-60",
+              "step": 8,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                261.6255653005986
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-8-64",
+              "step": 8,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 64
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                329.6275569128699
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-8-67",
+              "step": 8,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-kick-12-36",
+              "step": 12,
+              "duration_steps": 1,
+              "velocity": 0.38,
+              "role": "drums",
+              "patch_id": "kick",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-20-38",
+              "step": 20,
+              "duration_steps": 1,
+              "velocity": 0.22,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-14-42",
+              "step": 14,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-18-42",
+              "step": 18,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-22-42",
+              "step": 22,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-12-one",
+              "step": 12,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 41
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-22-one",
+              "step": 22,
+              "duration_steps": 2,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 48
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-16-65",
+              "step": 16,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 65
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                349.2282314330039
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-16-69",
+              "step": 16,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 69
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                440
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-16-72",
+              "step": 16,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 72
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                523.2511306011972
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-20-65",
+              "step": 20,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 65
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                349.2282314330039
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-20-69",
+              "step": 20,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 69
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                440
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-20-72",
+              "step": 20,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 72
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                523.2511306011972
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-perc-23-45",
+              "step": 23,
+              "duration_steps": 0.6,
+              "velocity": 0.18,
+              "role": "drums",
+              "patch_id": "perc",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 45
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-kick-24-36",
+              "step": 24,
+              "duration_steps": 1,
+              "velocity": 0.38,
+              "role": "drums",
+              "patch_id": "kick",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-32-38",
+              "step": 32,
+              "duration_steps": 1,
+              "velocity": 0.22,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-26-42",
+              "step": 26,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-30-42",
+              "step": 30,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-34-42",
+              "step": 34,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-24-one",
+              "step": 24,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 43
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-32-one",
+              "step": 32,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 50
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-28-67",
+              "step": 28,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-28-71",
+              "step": 28,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 71
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                493.8833012561241
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-28-74",
+              "step": 28,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 74
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                587.3295358348151
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-32-67",
+              "step": 32,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-32-71",
+              "step": 32,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 71
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                493.8833012561241
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-32-74",
+              "step": 32,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 74
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                587.3295358348151
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-kick-36-36",
+              "step": 36,
+              "duration_steps": 1,
+              "velocity": 0.38,
+              "role": "drums",
+              "patch_id": "kick",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-44-38",
+              "step": 44,
+              "duration_steps": 1,
+              "velocity": 0.22,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-38-42",
+              "step": 38,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-42-42",
+              "step": 42,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-46-42",
+              "step": 46,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-36-one",
+              "step": 36,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-46-one",
+              "step": 46,
+              "duration_steps": 2,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 43
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-40-60",
+              "step": 40,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                261.6255653005986
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-40-64",
+              "step": 40,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 64
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                329.6275569128699
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-40-67",
+              "step": 40,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-44-60",
+              "step": 44,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                261.6255653005986
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-44-64",
+              "step": 44,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 64
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                329.6275569128699
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-44-67",
+              "step": 44,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-perc-47-45",
+              "step": 47,
+              "duration_steps": 0.6,
+              "velocity": 0.18,
+              "role": "drums",
+              "patch_id": "perc",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 45
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-4-38",
+              "step": 4,
+              "duration_steps": 1,
+              "velocity": 0.11,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-16-38",
+              "step": 16,
+              "duration_steps": 1,
+              "velocity": 0.11,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-28-38",
+              "step": 28,
+              "duration_steps": 1,
+              "velocity": 0.11,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-40-38",
+              "step": 40,
+              "duration_steps": 1,
+              "velocity": 0.11,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "example-melody-0",
+              "step": 0,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 72
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-1",
+              "step": 4,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 76
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-2",
+              "step": 9,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 79
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-3",
+              "step": 12,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 77
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-4",
+              "step": 17,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 81
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-5",
+              "step": 23,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 84
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-6",
+              "step": 24,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 79
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-7",
+              "step": 30,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 83
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-8",
+              "step": 35,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 86
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-9",
+              "step": 36,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 79
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-10",
+              "step": 40,
+              "duration_steps": 2,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 76
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-11",
+              "step": 44,
+              "duration_steps": 4,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 72
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            }
+          ],
+          "drum_kit": "soft",
+          "lead_patch_id": "warm_keys",
+          "chord_progressions": {
+            "prog-main": [
+              {
+                "bar": 0,
+                "beats": 4,
+                "degree": 1,
+                "roman": "I",
+                "quality": "maj"
+              },
+              {
+                "bar": 1,
+                "beats": 4,
+                "degree": 5,
+                "roman": "V",
+                "quality": "maj"
+              },
+              {
+                "bar": 2,
+                "beats": 4,
+                "degree": 6,
+                "roman": "vi",
+                "quality": "min"
+              },
+              {
+                "bar": 3,
+                "beats": 4,
+                "degree": 4,
+                "roman": "IV",
+                "quality": "maj"
+              }
+            ]
+          },
+          "active_progression_id": "prog-main",
+          "auto_harmony_stabs": false
+        }
+      },
+      {
+        "bars": 1,
+        "role_name": "Ending",
+        "material": {
+          "notes": [
+            {
+              "id": "triple-blend-drums-kick-0-36",
+              "step": 0,
+              "duration_steps": 1,
+              "velocity": 0.38,
+              "role": "drums",
+              "patch_id": "kick",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-8-38",
+              "step": 8,
+              "duration_steps": 1,
+              "velocity": 0.22,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-2-42",
+              "step": 2,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-6-42",
+              "step": 6,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-hat_closed-10-42",
+              "step": 10,
+              "duration_steps": 0.6,
+              "velocity": 0.09,
+              "role": "drums",
+              "patch_id": "hat_closed",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 42
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-0-one",
+              "step": 0,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 36
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-bass-clean_bass-8-one",
+              "step": 8,
+              "duration_steps": 4,
+              "velocity": 0.32,
+              "role": "bass",
+              "patch_id": "clean_bass",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 43
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-4-60",
+              "step": 4,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                261.6255653005986
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-4-64",
+              "step": 4,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 64
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                329.6275569128699
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-4-67",
+              "step": 4,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-8-60",
+              "step": 8,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                261.6255653005986
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-8-64",
+              "step": 8,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 64
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                329.6275569128699
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-harmony-warm_keys-8-67",
+              "step": 8,
+              "duration_steps": 1.5,
+              "velocity": 0.2,
+              "role": "harmony",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 67
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "voiced_freqs": [
+                391.99543598174927
+              ],
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "triple-blend-drums-snare-4-38",
+              "step": 4,
+              "duration_steps": 1,
+              "velocity": 0.11,
+              "role": "drums",
+              "patch_id": "snare",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 38
+              },
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              },
+              "provenance": "jam_generated",
+              "generated_by": "musiclab_jam",
+              "scene_version": 1
+            },
+            {
+              "id": "example-melody-0",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-1",
+              "step": 4,
+              "duration_steps": 3,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            },
+            {
+              "id": "example-melody-2",
+              "step": 9,
+              "duration_steps": 3,
+              "velocity": 0.65,
+              "role": "lead",
+              "patch_id": "warm_keys",
+              "pitch_lock_mode": "concrete",
+              "concrete": {
+                "midi_pitch": 60
+              },
+              "provenance": "generator_default",
+              "generated_by": "musiclab_example",
+              "performance": {
+                "version": 1,
+                "offset_steps": 0
+              }
+            }
+          ],
+          "drum_kit": "soft",
+          "lead_patch_id": "warm_keys",
+          "chord_progressions": {
+            "prog-main": [
+              {
+                "bar": 0,
+                "beats": 4,
+                "degree": 1,
+                "roman": "I",
+                "quality": "maj"
+              },
+              {
+                "bar": 1,
+                "beats": 4,
+                "degree": 5,
+                "roman": "V",
+                "quality": "maj"
+              },
+              {
+                "bar": 2,
+                "beats": 4,
+                "degree": 6,
+                "roman": "vi",
+                "quality": "min"
+              },
+              {
+                "bar": 3,
+                "beats": 4,
+                "degree": 4,
+                "roman": "IV",
+                "quality": "maj"
+              }
+            ]
+          },
+          "active_progression_id": "prog-main",
+          "auto_harmony_stabs": false
+        }
+      }
+    ],
+    "example_notes": "Original generated study. No notes are claimed as a personal performance. Edit, reorder and save your own version."
+  }
+}

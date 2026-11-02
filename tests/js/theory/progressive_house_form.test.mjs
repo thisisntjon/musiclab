@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {newPlayDoc} from '../../../static/js/theory/session_rules.js';
+import {startJam,setJamDirection} from '../../../static/js/theory/jam_session.js';
+import {createJamFormBuilder} from '../../../static/js/theory/jam_form_program.js';
+import {LookaheadScheduler} from '../../../static/js/audio/scheduler.js';
+import {compileSongStandalone} from '../../../static/ui/standalone_compiler.js';
+import {materializePerformance} from '../../../static/js/theory/performance_capture.js';
+import {parseProjectJson,exportProjectJson} from '../../../static/js/theory/save_store.js';
+import {sourceModeGuidance} from '../../../static/js/theory/source_mode.js';
+const make=()=>setJamDirection(startJam(newPlayDoc()),{scene_catalogue:'first-neighborhood-v1',scene_id:'progressive-house-v1',responsive:false});
+test('progressive layers build and remove kick/bass before their next downbeat return',()=>{
+ const p=createJamFormBuilder()(make());
+ for(const block of p.blocks)for(const v of block.variants)assert.ok(v.events.every(e=>!e.patch_id.startsWith('sampled_')));
+ const a=p.blocks[0].variants[0].events,b=p.blocks[1].variants[0].events;
+ assert.deepEqual([0,1,2].map(bar=>a.filter(e=>e.role==='lead'&&Math.floor(e.step/16)===bar).length),[2,3,4]);
+ assert.ok(!a.some(e=>e.step>=48&&(e.role==='bass'||e.patch_id==='kick')));
+ assert.equal(b.filter(e=>e.patch_id==='kick').length,16);assert.ok(b.some(e=>e.patch_id==='kick'&&e.step===0));
+});
+test('Keep in the break retains reached space and personal input, not the requested return',()=>{
+ const d=make(),p=createJamFormBuilder()(d),s=new LookaheadScheduler();s.audioCtx={currentTime:8.1};s.isPlaying=true;
+ s.performanceTake={song_id:d.id,start:0,bpm:100,capture_bars:8,sequence:0,events:[]};
+ for(const e of p.blocks[0].variants[0].events)s._rememberPerformance(e,e.start_sec);
+ const own={id:'jam-live-break',source_note_id:'jam-live-break',provenance:'user_placed',role:'lead',patch_id:'pluck_lead',concrete:{midi_pitch:61},duration_sec:1,velocity:.6};
+ s._rememberPerformance(own,8);s._rememberPerformance(p.blocks[1].variants[0].events.find(e=>e.patch_id==='kick'),9.6);
+ const changed=structuredClone(d);changed.jam_session.form_cursor={id:'progressive-house-v1',blockIndex:1,cycle:0};
+ const requested=setJamDirection(changed);assert.equal(createJamFormBuilder()(requested).cursor.blockIndex,1);
+ const capture=s.capturePerformance(),kept=materializePerformance(requested,capture),saved=parseProjectJson(exportProjectJson(kept));assert.equal(saved.ok,true);
+ assert.ok(capture.events.every(r=>r.scheduled_time<8.1));assert.ok(capture.events.some(r=>r.event.source_note_id==='jam-live-break'));
+ const events=compileSongStandalone(saved.song).events;
+ assert.ok(!events.some(e=>e.step>=48&&(e.role==='bass'||e.patch_id==='kick')));
+ const personal=events.find(e=>e.source_note_id==='jam-live-break');assert.equal(personal.concrete.midi_pitch,61);
+ assert.ok(Math.abs(personal.duration_sec-.1)<1e-8);assert.equal(personal.why_label,'From your performance. Pitch kept as written.');
+});
+test('recorded-note guidance stays honest after edits without overriding known modes or ordinary notes',()=>{
+ const own={provenance:'user_placed',source_note_id:'jam-live-original',concrete:{midi_pitch:58}};
+ assert.equal(sourceModeGuidance(own),'From your performance. Pitch kept as written.');
+ assert.equal(sourceModeGuidance({...own,source_note_id:'manual-grid-note'}),null);
+ assert.equal(sourceModeGuidance({...own,provenance:'jam_generated'}),null);
+ assert.equal(sourceModeGuidance({...own,performed_mode:{version:1,name:'dorian',tonic:0,intervals:[0,2,3,5,7,9,10]}}),'Source band: Dorian. Pitch kept as written.');
+});

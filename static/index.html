@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MusicLab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%232563eb'/%3E%3Cpath d='M10 8l6 4-6 4z' fill='%23fff'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./css/studio.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Transport Bar (Radically Simplified Guided Header: 3 Core Actions + Collapsible Studio Tools Drawer) -->
+    <header class="transport-bar">
+      <div class="brand-block">
+        <span class="brand-badge">MUSICLAB</span>
+        <h1 id="song-title-display" class="song-title">Your Guided Song Studio</h1>
+      </div>
+
+      <div class="transport-controls">
+        <button id="btn-stop-sound" class="btn btn-secondary" title="Stop all sound (Escape)" aria-keyshortcuts="Escape">Stop sound</button>
+        <button id="btn-play" class="btn btn-primary" title="Play or Stop your song (Space)">
+          <span id="play-icon">&#9654;</span> <span id="play-label">Play Song</span>
+        </button>
+        <div class="volume-control" style="display:inline-flex; align-items:center; gap:6px;">
+          <label for="input-volume" title="Volume">&#128264;<span class="sr-only">Volume</span></label>
+          <input id="input-volume" type="range" min="0" max="100" step="5" value="80" aria-label="Volume" style="width:96px;" />
+          <button id="btn-volume-lock" class="btn btn-sm btn-ghost" aria-pressed="false" title="Lock the volume">&#128275;<span class="sr-only"> Lock volume</span></button>
+        </div>
+      </div>
+
+      <div class="project-actions">
+        <button id="btn-undo" class="btn btn-ghost" title="Undo last change">&#8630; Undo</button>
+        <button id="btn-save" class="btn btn-secondary" title="Save your song">&#128190; Save</button>
+        <button id="btn-export-wav" class="btn btn-accent" title="Export finished stereo .WAV audio">&#11015; Export .WAV</button>
+        <button id="btn-toggle-studio-tools" class="btn btn-ghost" title="Open optional tempo, key, showcase presets, and advanced studio tools">
+          &#9881; Studio Tools &#9662;
+        </button>
+      </div>
+    </header>
+
+    <!-- Collapsible Studio Tools & Advanced Controls Drawer (Hidden by default so first-time creators aren't overwhelmed by dials) -->
+    <div id="studio-tools-drawer" class="studio-tools-drawer" style="display:none;">
+      <div class="transport-controls" style="flex-wrap:wrap; gap:8px;">
+        <div class="control-pill" title="Switch between the Genre-Neutral Default Starter and the Heavy Bass &amp; Glitch Showcase">
+          <label for="select-preset-mode">Showcase / Demo</label>
+          <select id="select-preset-mode">
+            <option value="starter_neutral_100_cm" selected>Starter: Warm Keys &amp; Clean Groove</option>
+            <option value="heavy_bass_110">Showcase: Heavy Bass &amp; Glitch</option>
+            <option value="flawed_beginner_loop">Coach Demo: 4 Beginner Traps</option>
+          </select>
+        </div>
+
+        <div class="control-pill">
+          <label for="input-bpm">Pace</label>
+          <input id="input-bpm" type="number" min="70" max="175" step="1" value="100" />
+        </div>
+
+        <div class="control-pill">
+          <label for="input-swing">Groove Feel</label>
+          <input id="input-swing" type="range" min="0.50" max="0.65" step="0.01" value="0.52" />
+          <span id="swing-val">Relaxed</span>
+        </div>
+
+        <div class="control-pill">
+          <label for="select-root">Home Note &amp; Mood</label>
+          <select id="select-root">
+            <option value="7">G</option>
+            <option value="0" selected>C</option>
+            <option value="2">D</option>
+            <option value="3">Eb</option>
+            <option value="5">F</option>
+            <option value="9">A</option>
+          </select>
+          <select id="select-scale">
+            <option value="dorian">Warm Minor Groove</option>
+            <option value="natural_minor">Natural Minor</option>
+            <option value="phrygian_dominant">Dark Dramatic</option>
+            <option value="major" selected>Bright Major</option>
+          </select>
+        </div>
+
+        <div class="control-pill ab-bypass-pill" title="Compare Raw Unassisted (A) vs. Guided Studio (B) — Shortcut: \ key">
+          <button id="btn-ab-bypass" class="btn btn-sm btn-secondary">
+            &#9878; Compare Before/After (B)
+          </button>
+          <select id="select-ab-focus" title="Choose which studio helper to compare">
+            <option value="all" selected>All Studio Helpers</option>
+            <option value="voice_leading">Smooth Chords vs. Jumpy Chords</option>
+            <option value="hocket_choke">Clean Bass Cut vs. Muddy Overlap</option>
+            <option value="humanize">Natural Groove vs. Robot Timing</option>
+            <option value="pre_drop_silence">Pre-Drop Breathing Space vs. No Gap</option>
+          </select>
+        </div>
+
+        <button id="btn-tonic-drone" class="btn btn-sm btn-ghost" title="Play a gentle home-note drone in the background">
+          &#127925; Home Note Drone: Off
+        </button>
+
+        <button id="btn-provenance-ledger" class="btn btn-sm btn-secondary" title="Export your song notes receipt (.JSON)">
+          &#9989; <span id="provenance-badge-label">Your Song &bull; Listening to starting point</span>
+        </button>
+
+        <button id="btn-greyscale-mode" class="btn btn-sm btn-ghost" title="High-contrast shape mode without color reliance">
+          &#9680; High-Contrast Shapes
+        </button>
+
+        <button id="btn-redo" class="btn btn-sm btn-ghost" title="Redo edit">Redo</button>
+        <button id="btn-reset-seed" class="btn btn-sm btn-ghost" title="Start fresh from clean starter song">Start Fresh</button>
+        <canvas id="spectrum-canvas" width="160" height="32" title="Live Audio Output Meter"></canvas>
+      </div>
+    </div>
+
+    <!-- Screen-reader announcements for choices and step changes (visually hidden) -->
+    <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Real-Time "Your Co-Producer Guide" Banner -->
+    <section class="why-banner" id="why-banner">
+      <div class="why-tag">CO-PRODUCER GUIDE</div>
+      <div class="why-text" id="why-text">
+        Welcome! You don't need music theory or complicated dials to build a song here. Press <strong>Play Song</strong>, pick a feel you like in <strong>Step 1</strong>, and shape it with one click.
+      </div>
+      <div class="why-status" id="why-status">Beat: <span id="playhead-step-label">1 / 64</span></div>
+    </section>
+
+    <!-- The play flow: start, beat, tune, underneath, keep. -->
+    <section id="play-flow" class="play-flow" aria-label="Make music" hidden></section>
+
+    <!-- Advanced Fine Note Canvas & Sequencer Stack (Hidden by default during Steps 1-5; revealed on Step 6 or via toggle) -->
+    <div id="advanced-studio-container" style="display:none;">
+    <!-- 4-Step "Shape Then Refine" Guided Layering Bar -->
+    <nav class="workflow-stepper" aria-label="4-Step Shape Then Refine Workflow">
+      <button class="step-tab active" data-view="all">
+        <span class="step-num">&#9733;</span> All Studio Layers (Split View)
+      </button>
+      <button class="step-tab" data-view="groove">
+        <span class="step-num">1</span> Beat &amp; Groove
+      </button>
+      <button class="step-tab" data-view="harmony">
+        <span class="step-num">2</span> Chords &amp; Accompaniment
+      </button>
+      <button class="step-tab" data-view="hocket">
+        <span class="step-num">3</span> Bass &amp; Synth Trade-Offs
+      </button>
+      <button class="step-tab" data-view="melody">
+        <span class="step-num">4</span> Melody Phrase Canvas
+      </button>
+      <button class="step-tab" data-view="arranger">
+        <span class="step-num">5</span> Full Song Journey
+      </button>
+
+      <div class="bar-filter-group">
+        <span class="bar-filter-label">Focus Bar:</span>
+        <button class="bar-btn active" data-bar="all">All 4 Bars (64)</button>
+        <button class="bar-btn" data-bar="0">Bar 1 (Call A)</button>
+        <button class="bar-btn" data-bar="1">Bar 2 (Var A')</button>
+        <button class="bar-btn" data-bar="2">Bar 3 (Call A)</button>
+        <button class="bar-btn" data-bar="3">Bar 4 (Turnaround B)</button>
+        <button class="bar-btn" data-bar="mobile_0" title="8-Step Mobile View (larger targets on phones)">&#128241; 8-Step Mobile</button>
+      </div>
+    </nav>
+
+    <!-- Main Workspace: Left Sequencer Stack + Right Sound Sculptor Dock -->
+    <main class="studio-workspace">
+      <div class="sequencer-column" id="sequencer-column">
+        <!-- Layer 5: Song Arranger & Section Journey -->
+        <section class="panel panel-arranger" id="panel-arranger">
+          <div class="panel-header">
+            <div>
+              <h2>Song Journey &amp; Section Pacing <span class="badge-register">Multi-Section Song</span></h2>
+              <p class="panel-subtitle">Unfold your 4-bar phrase into a complete multi-section song with gentle intros, breathing room, and chorus lifts.</p>
+            </div>
+            <div class="panel-actions">
+              <button id="btn-dl-master-wav" class="btn btn-sm btn-accent" title="Browser OfflineAudioContext Master Mix WAV Download">
+                &#11015; Master .WAV
+              </button>
+              <button id="btn-dl-hocket-stem" class="btn btn-sm btn-secondary" title="Browser OfflineAudioContext Bass &amp; Synth Stem WAV">
+                &#11015; Bass Stem .WAV
+              </button>
+              <button id="btn-dl-drums-stem" class="btn btn-sm btn-secondary" title="Browser OfflineAudioContext Drums Stem WAV">
+                &#11015; Drums Stem .WAV
+              </button>
+            </div>
+          </div>
+          <div class="xray-wrapper">
+            <div class="xray-caption">
+              <span><strong>Song Overview:</strong> Section Pacing &bull; Smooth Chords &bull; Connected Phrases</span>
+              <span id="health-score-badge" class="badge-register">Sound Check: Clear</span>
+            </div>
+            <canvas id="xray-canvas" width="880" height="128"></canvas>
+
+            <!-- Surface C, D, E Consolidated Coaching & Deconstruction Bar -->
+            <div class="coaching-drawer">
+              <div class="coaching-tabs">
+                <button class="coach-tab active" data-coach-tab="diagnose">
+                  &#129658; Diagnostic Ear Coach (<span id="diag-count-label">0</span> Notes to Check)
+                </button>
+                <button class="coach-tab" data-coach-tab="deconstruct">
+                  &#128269; Listen Layer-by-Layer (4 Parts)
+                </button>
+                <button class="coach-tab" data-coach-tab="ear-mission">
+                  &#127919; Short Ear Exercise
+                </button>
+                <button id="tab-falsification-btn" class="coach-tab" data-coach-tab="falsification" style="display:none;">
+                  &#129514; Research Study Harness (Dev)
+                </button>
+                <div style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+                  <button id="btn-load-flawed-demo" class="btn btn-sm btn-ghost" title="Load a deliberately flawed beginner loop to test the Diagnostic Ear Coach">
+                    &#9888; Load 4-Mistake Demo
+                  </button>
+                  <button id="btn-fix-all-issues" class="btn btn-sm btn-accent" title="Apply all White-Box Fixes in one click">
+                    &#10024; Fix My Loop
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tab C: Diagnostic Ear Coach -->
+              <div id="coach-panel-diagnose" class="coach-panel">
+                <div id="diagnostic-issues-container" class="diagnostic-list"></div>
+              </div>
+
+              <!-- Tab D: Guided 4-Stage Song Deconstruction -->
+              <div id="coach-panel-deconstruct" class="coach-panel" style="display:none;">
+                <div class="deconstruct-bar">
+                  <span style="font-size:11.5px; color:#94a3b8;">Listen to each part of your song one layer at a time:</span>
+                  <div class="deconstruct-steps">
+                    <button class="btn btn-sm btn-secondary deconstruct-stage-btn" data-stage="1">1. Beat Only</button>
+                    <button class="btn btn-sm btn-secondary deconstruct-stage-btn" data-stage="2">2. + Smooth Chords</button>
+                    <button class="btn btn-sm btn-secondary deconstruct-stage-btn" data-stage="3">3. + Bass &amp; Low End</button>
+                    <button class="btn btn-sm btn-accent deconstruct-stage-btn active" data-stage="4">4. Full Band (+ Melody)</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab E: 20-Second Ear-to-Grid Micro-Mission -->
+              <div id="coach-panel-ear-mission" class="coach-panel" style="display:none;">
+                <div id="ear-mission-container" class="ear-mission-box"></div>
+              </div>
+
+              <!-- Tab F (Dev Only): Transfer Study Harness -->
+              <div id="coach-panel-falsification" class="coach-panel" style="display:none;">
+                <div id="falsification-study-container" class="ear-mission-box"></div>
+              </div>
+            </div>
+          </div>
+          <div id="song-arranger-container"></div>
+        </section>
+
+        <!-- Layer 2: Harmony Spine -->
+        <section class="panel panel-harmony" id="panel-harmony">
+          <div class="panel-header">
+            <div>
+              <h2>Chords &amp; Accompaniment <span class="badge-register">Smooth Connected Voicing</span></h2>
+              <p class="panel-subtitle">Click a bar's chord or preview <strong>3 Accompaniment Options</strong> fitted underneath your melody.</p>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button id="btn-harmony-options" class="btn btn-sm btn-secondary" title="Preview 3 accompaniment chord options">
+                &#10024; 3 Harmony Options
+              </button>
+              <label class="toggle-inline">
+                <input type="checkbox" id="toggle-auto-stabs" checked />
+                <span>Chord Stabs on Beats</span>
+              </label>
+            </div>
+          </div>
+          <div id="harmony-options-drawer" class="coaching-drawer" style="display:none; margin-bottom:8px;"></div>
+          <div class="chord-spine-grid" id="chord-spine-grid"></div>
+        </section>
+
+        <!-- Layer 3: Monophonic Bass & Synth Trade-Off Matrix -->
+        <section class="panel panel-hocket" id="panel-hocket">
+          <div class="panel-header">
+            <div>
+              <h2>Bass &amp; synth <span class="badge-choke">One note at a time</span></h2>
+              <p class="panel-subtitle">Each step triggers one bass or synth voice and cleanly cuts off the previous one so low notes never overlap into mud.</p>
+            </div>
+            <div class="panel-actions">
+              <button id="btn-kick-lock" class="btn btn-sm btn-secondary" title="Lock bass notes to main drum hits">
+                &#9889; Lock Bass to Beat
+              </button>
+              <button id="btn-hocket-call-response" class="btn btn-sm btn-accent" title="Repeat Bar 1 pattern across all 4 bars with a turnaround">
+                &#10024; Build 4-Bar Bass Pattern
+              </button>
+            </div>
+          </div>
+          <div class="matrix-scroll-wrapper">
+            <div id="hocket-matrix-container" class="matrix-container"></div>
+          </div>
+        </section>
+
+        <!-- Layer 1: Beat & Drum Grid -->
+        <section class="panel panel-groove" id="panel-groove">
+          <div class="panel-header">
+            <div>
+              <h2>Beat &amp; Drum Grid <span class="badge-register">Clear Rhythm Pocket</span></h2>
+              <p class="panel-subtitle">Kick and snare hits gently make room in the mix so the beat stays clear.</p>
+            </div>
+          </div>
+          <div class="matrix-scroll-wrapper">
+            <div id="drum-matrix-container" class="matrix-container"></div>
+          </div>
+        </section>
+
+        <!-- Layer 4: Melody Note Canvas -->
+        <section class="panel panel-melody" id="panel-melody">
+          <div class="panel-header">
+            <div>
+              <h2>Melody Note Canvas <span class="badge-register">Post-Placement Shape Marks (&bull; / &#9671; / &#9650;) &bull; Keyboard Nav</span></h2>
+              <p class="panel-subtitle">
+                <span class="legend-pill tier-anchor">&#9679; Placed Chord Note (Home/Stable)</span>
+                <span class="legend-pill tier-tension">&#9671; Placed Stepping Note (Moves Smoothly &searr;)</span>
+              </p>
+            </div>
+            <div class="panel-actions">
+              <button id="btn-hum-to-notes" class="btn btn-sm btn-secondary" title="Hum or sing a short idea into your mic (or run vocal demo) to generate editable draft notes">
+                &#127908; Hum Idea &rarr; Draft Notes
+              </button>
+              <label class="control-pill" style="padding:2px 8px; font-size:11px;" title="Shape marks appear after you place a note so you listen first">
+                <span>Marks:</span>
+                <select id="select-gravity-fade">
+                  <option value="post_placement" selected>Post-Placement Marks (&#9679; / &#9671; Default)</option>
+                  <option value="blind_ear">Faded Off (By Ear Only)</option>
+                  <option value="full">Starter Pre-Glow Guides</option>
+                  <option value="ear_first">Hover-Reveal Only</option>
+                </select>
+              </label>
+              <button id="btn-lead-call-response" class="btn btn-sm btn-accent" title="Shape a 4-bar Call &amp; Response phrase from Bar 1">
+                &#10024; Shape 4-Bar Phrase
+              </button>
+            </div>
+          </div>
+          <div id="hum-draft-drawer" class="coaching-drawer" style="display:none; margin-bottom:8px;"></div>
+          <div class="matrix-scroll-wrapper">
+            <div id="melody-matrix-container" class="matrix-container"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Dock: Sound Sculptor & Per-Note Inspector -->
+      <aside class="sculptor-dock" id="sculptor-dock">
+        <div class="panel panel-sculptor">
+          <div class="panel-header">
+            <div>
+              <h2>Sound Sculptor</h2>
+              <p class="panel-subtitle" id="sculptor-target-label">Editing: Active Bass / Synth Voice</p>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button id="btn-audition-patch" class="btn btn-sm btn-primary" title="Audition current sculpted sound">
+                &#128266; Audition
+              </button>
+              <button id="btn-dl-patch-wav" class="btn btn-sm btn-accent" title="Download this sculpted sound as a one-shot .WAV sample">
+                &#11015; .WAV
+              </button>
+            </div>
+          </div>
+
+          <!-- 7 Patch Selector Pills -->
+          <div class="patch-selector-grid" id="patch-selector-grid"></div>
+
+          <!-- Custom Saved Patches Library -->
+          <div class="custom-patches-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <span class="section-label" style="margin-bottom:0;">Custom Sculpted Sounds</span>
+              <button id="btn-save-custom-patch" class="btn btn-sm btn-secondary">+ Save Current Sound</button>
+            </div>
+            <div class="gesture-badges-row" id="custom-patches-row"></div>
+          </div>
+
+          <!-- 2D X/Y Sound Morph Pad -->
+          <div class="xy-pad-section">
+            <div class="xy-header">
+              <span>2D Sound Pad (X: Tone / Speed &bull; Y: Grit &amp; Punch)</span>
+              <span id="xy-readout" class="mono-readout">X: 0.78 | Y: 0.82</span>
+            </div>
+            <canvas id="xy-monster-pad" width="310" height="190"></canvas>
+          </div>
+
+          <!-- 1-Click Gesture Badges -->
+          <div class="gesture-badges-section">
+            <div class="section-label">1-Click Sound Articulations</div>
+            <div class="gesture-badges-row" id="gesture-badges-row"></div>
+          </div>
+
+          <!-- 6 Perceptual Macro Controls -->
+          <div class="macros-grid">
+            <div class="macro-row">
+              <label for="macro-vowel-start">Tone Color (Start &rarr; End)</label>
+              <div class="vowel-pair-selects">
+                <select id="macro-vowel-start">
+                  <option value="U">U (Warm Low)</option>
+                  <option value="O" selected>O (Rounded)</option>
+                  <option value="A">A (Open)</option>
+                  <option value="E">E (Mid Focus)</option>
+                  <option value="I">I (Bright Edge)</option>
+                </select>
+                <span>&rarr;</span>
+                <select id="macro-vowel-end">
+                  <option value="U">U (Warm Low)</option>
+                  <option value="O">O (Rounded)</option>
+                  <option value="A">A (Open)</option>
+                  <option value="E">E (Mid Focus)</option>
+                  <option value="I" selected>I (Bright Edge)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-label-line">
+                <label for="macro-grit">Harmonic Grit &amp; Drive</label>
+                <span id="macro-grit-val" class="mono-readout">Strong</span>
+              </div>
+              <input id="macro-grit" type="range" min="0.0" max="1.0" step="0.01" value="0.82" />
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-label-line">
+                <label for="macro-lfo-rate">Rhythmic Pulse Speed</label>
+              </div>
+              <select id="macro-lfo-rate">
+                <option value="off">Off (Smooth Sweep)</option>
+                <option value="1/2">1/2 Bar Slow</option>
+                <option value="1/4">1/4 Beat</option>
+                <option value="1/8" selected>1/8 Groove</option>
+                <option value="1/8t">1/8 Triplet</option>
+                <option value="1/16">1/16 Rapid Pulse</option>
+                <option value="1/32">1/32 Fast</option>
+              </select>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-label-line">
+                <label for="macro-pitch-bend">Pitch Glide / Dive</label>
+                <span id="macro-pitch-val" class="mono-readout">0 st</span>
+              </div>
+              <input id="macro-pitch-bend" type="range" min="-24" max="24" step="1" value="0" />
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-label-line">
+                <label for="macro-stutter">Rhythmic Chop Gate</label>
+              </div>
+              <select id="macro-stutter">
+                <option value="off" selected>Off (Solid Note)</option>
+                <option value="1/16">1/16 Chop</option>
+                <option value="1/32">1/32 Rapid Chop</option>
+              </select>
+            </div>
+
+            <div class="macro-row">
+              <div class="macro-label-line">
+                <label for="macro-ott">Multiband Punch</label>
+                <span id="macro-ott-val" class="mono-readout">Full</span>
+              </div>
+              <input id="macro-ott" type="range" min="0.0" max="1.0" step="0.01" value="0.85" />
+            </div>
+          </div>
+
+          <!-- Selected Note White-Box Inspector -->
+          <div class="inspector-box" id="inspector-box">
+            <div class="section-label">Selected Note Details</div>
+            <div id="inspector-details" class="inspector-details">
+              Click any step on the Bass or Melody grid to inspect or pin its note.
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+    </div>
+  </div>
+
+  <script type="module" src="./ui/app.js"></script>
+</body>
+</html>
