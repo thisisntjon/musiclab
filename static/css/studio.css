@@ -2660,3 +2660,9 @@ body.pf-less-motion [data-enter] > *, body.pf-less-motion [data-enter] .pf-song-
 @media (max-width: 480px) { .pf-demo-stage .pf-music-circle { width: min(100%, 248px); } }
 .pf-legend-btn, .pf-adjust-btn { white-space: nowrap; }
 @media (max-width: 480px) { .pf-journey { flex-wrap: wrap; } .pf-journey ol { flex: 1 1 100%; } .pf-adjust-btn { margin-left: 0; } }
+
+/* Share: one name box with its ideas folded beside it; the drawer lives behind More. */
+.pf-name-row { align-items: center; flex-wrap: wrap; gap: 10px; }
+.pf-name-row input { min-width: 12ch; flex: 1 1 14ch; }
+.pf-name-ideas summary { cursor: pointer; padding: 8px 0; }
+.pf-name-ideas[open] { flex-basis: 100%; }

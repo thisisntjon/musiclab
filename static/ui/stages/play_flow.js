@@ -219,7 +219,8 @@ export class PlayFlow {
     this.liveHolds = new Map(); // "key:a" / "pointer:1" -> scheduler live note id, until released
     this.jamPointer = null; // the pointer press that already sounded a jam pad
     this.tunePage = 0;
-    this.detailsOpen = false;
+    this.detailsOpen = true;
+    this.songMoreOpen = true;
     this.aboutOpen = false;
     this.comfortOpen = false;
     this.allAtOnce = false;
@@ -703,6 +704,7 @@ export class PlayFlow {
   _journeyHtml() {
     const current = this._journeyLevel(), inJam = this.stage === "jam", hasJam = Boolean(this.doc?.jam_session);
     const levels = [["find", "Find", hasJam], ["play", "Play", hasJam], ["shape", "Shape", true],
+      ["beat", "1. Beat", !inJam], ["tune", "2. Tune", !inJam], ["under", "3. Backing", !inJam],
       ["detail", "Detail", !inJam], ["share", "Share", !inJam]];
     const steps = levels.map(([id, label, reachable]) => {
       const here = id === current, attrs = here ? 'aria-current="step"' : reachable ? "" : "disabled";
@@ -728,6 +730,7 @@ export class PlayFlow {
     }
     if (level === "shape") return this.stage === "jam" ? this._captureDirection() : this._go("song");
     if (this.stage === "jam") return;
+    if (level === "beat" || level === "tune" || level === "under") return this._go(level);
     if (level === "detail") return this._go(this._capturedDevelopmentStage());
     if (level === "share") return this._go("keep");
   }
@@ -782,7 +785,8 @@ export class PlayFlow {
     // Mutes and Focus live only in the "All at once" deck: nothing stays silent or quiet unseen.
     this.app.scheduler?.clearMuteLayers();
     this.app.scheduler?.setSpotlightRole(null);
-    this.detailsOpen = false;
+    this.detailsOpen = true;
+    this.songMoreOpen = true;
     this.aboutOpen = false;
     this.comfortOpen = false;
     this.slotsFull = false;
@@ -914,6 +918,8 @@ export class PlayFlow {
     this.demoToolsOpen=this.root.querySelector('.pf-demo-tools:not(.pf-song-more)')?.open??this.demoToolsOpen;
     this.songMoreOpen=this.root.querySelector('.pf-song-more')?.open??this.songMoreOpen;
     this.sheetOpen=this.root.querySelector('.pf-sheet-box')?.open??this.sheetOpen;
+    this.shareMoreOpen=this.root.querySelector('.pf-share-more')?.open??this.shareMoreOpen;
+    this.nameIdeasOpen=this.root.querySelector('.pf-name-ideas')?.open??this.nameIdeasOpen;
     this.participationOpen=this.root.querySelector('.pf-participation')?.open??this.participationOpen;
     this.startOptionsOpen=this.root.querySelector('.pf-other-ways')?.open??this.startOptionsOpen;
     this.startCycleOpen=this.root.querySelector('.pf-cycle-choice')?.open??this.startCycleOpen;
@@ -2375,7 +2381,8 @@ export class PlayFlow {
     // Everything else stays available, behind More.
     const layerSwitches = CARD_LAYERS.map(l => this._choice(`card-layer:${activeIdx}:${l.id}`, `${icon(l.icon)} ${l.label}`, Boolean(activeCard[l.id]))).join("");
     const fxBtns = CARD_FX.map(f => this._choice(`card-fx:${activeIdx}:${f.id}`, `${icon(f.icon)} ${f.label}`, activeCard?.fx === f.id, "pf-btn pf-small")).join("");
-    const more = embedded ? "" : `<details class="pf-demo-tools pf-song-more" ${this.songMoreOpen ? "open" : ""}><summary data-key="song-more">More</summary>
+    const more = embedded ? "" : `<details class="pf-demo-tools pf-song-more" ${this.songMoreOpen !== false ? "open" : ""}><summary data-key="song-more">More</summary>
+        <div class="pf-row" role="group" aria-label="Studio steps">${this._btn("edit-scope:beat", "Edit beat", "pf-btn pf-small")}${this._btn("edit-scope:tune", "Edit tune", "pf-btn pf-small")}${this._btn("edit-scope:under", "Edit backing", "pf-btn pf-small")}</div>
         <p class="pf-sub">These change the part you touched last: part ${activeIdx + 1}.</p>
         <div class="pf-row" role="group" aria-label="Part ${activeIdx + 1} length">
           ${this._btn(`card-bars:${activeIdx}:${activeCard.bars - 1}`, "Shorter", "pf-btn pf-small", activeCard.bars <= 1 ? "disabled" : "")}
@@ -2840,10 +2847,10 @@ export class PlayFlow {
             ? "It is saved here as you go. Pick a name, then save it to your list or download it."
             : "You can keep this starting point now and add your own notes later."
         }</p>
-        <div class="pf-row" role="group" aria-label="Pick a name">${names}</div>
-        <div class="pf-row">
-          <label class="pf-say" for="pf-title">Or type a name:</label>
+        <div class="pf-row pf-name-row">
+          <label class="pf-say" for="pf-title">Name:</label>
           <input id="pf-title" type="text" value="${esc(title)}" placeholder="My song" />
+          <details class="pf-name-ideas" ${this.nameIdeasOpen ? "open" : ""}><summary data-key="name-ideas">Name ideas</summary><div class="pf-row" role="group" aria-label="Pick a name">${names}</div></details>
         </div>
         <div class="pf-row">
           ${this._btn("save", `${icon("save")} Save`, "pf-btn pf-big")}
@@ -2854,12 +2861,14 @@ export class PlayFlow {
         </div>
         ${swapList}
         ${this.saveMessage ? `<p class="pf-say pf-msg" aria-live="polite">${esc(this.saveMessage)}</p>` : ""}
-        <div class="pf-row pf-drawer">
-          ${this._btn("toggle-about", `${icon("sparkle")} ${this.aboutOpen ? "Close about this" : "More about this"}`, "pf-btn pf-small", `aria-expanded="${this.aboutOpen}"`)}
-          ${this._btn("toggle-all-view", `${icon("grid")} All at once`, "pf-btn pf-small")}
-        </div>
+        <details class="pf-demo-tools pf-share-more" ${this.shareMoreOpen ? "open" : ""}><summary data-key="share-more">More</summary>
+          <div class="pf-row">
+            ${this._btn("toggle-about", `${icon("sparkle")} ${this.aboutOpen ? "Close about this" : "More about this"}`, "pf-btn pf-small", `aria-expanded="${this.aboutOpen}"`)}
+            ${this._btn("toggle-all-view", `${icon("grid")} All at once`, "pf-btn pf-small")}
+          </div>
+          ${this.aboutOpen ? this._pieceAbout() : ""}
+        </details>
         <input id="pf-import-file" type="file" accept=".json,.musicxml,.xml,application/json,application/vnd.recordare.musicxml+xml,text/xml" style="display:none" aria-hidden="true" tabindex="-1" />
-        ${this.aboutOpen ? this._pieceAbout() : ""}
       </div>`;
   }
 
@@ -4291,7 +4300,7 @@ export class PlayFlow {
     }
     if (key === "save-phrase") {
       const res = savePhraseToShelf(window.localStorage, this.doc);
-      this.app._announce(res.ok ? `Saved "${res.entry.title}" to your shelf.` : "Add a note first to save a phrase.");
+      this.app._announce(res.ok ? `Saved "${res.entry.title}" to your shelf.` : "Tap a box to save a tune.");
       return this.render();
     }
     if (key.startsWith("use-phrase:")) {
@@ -4309,7 +4318,7 @@ export class PlayFlow {
     if (key.startsWith("deja:")) {
       const mode = key.slice("deja:".length);
       if (!this.tuneGrid.main.some(Boolean) && !this.tuneGrid.ending.some(Boolean)) {
-        return this.app._announce("Add a note first, then mix it.");
+        return this.app._announce("Tap a box to add a note.");
       }
       this._pushUndo();
       this.tuneGrid = applyDejaVu(this.tuneGrid, mode, this.diceSeed++, this.tuneTab);

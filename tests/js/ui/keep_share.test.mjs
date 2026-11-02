@@ -79,7 +79,10 @@ test("the Share screen keeps its primary controls to five", async () => {
   const flow = await songOf(setup());
   flow.stage = "keep";
   const html = flow._renderKeep();
-  const primary = [...html.matchAll(/data-key="(save|download|play|to-song|back)"/g)].map(m => m[1]);
-  assert.ok(primary.length <= 5, primary.join(","));
+  const visible = html.replace(/<details[\s\S]*?<\/details>/g, "");
+  const buttons = [...visible.matchAll(/<button[^>]*data-key="([^"]+)"/g)].map(m => m[1]).filter(k => !k.startsWith("journey:") && !["adjust-open", "legend-open"].includes(k));
+  assert.deepEqual(buttons.sort(), ["back", "dl-sheet", "download", "play", "save"], `exactly five actions outside the folds: ${buttons}`);
+  assert.match(html, /<details class="pf-name-ideas"[\s\S]*data-key="name:/, "name ideas are folded beside the name box");
+  assert.match(html, /<details class="pf-demo-tools pf-share-more"[\s\S]*toggle-about[\s\S]*toggle-all-view/, "the drawer is behind More");
   assert.doesNotMatch(html, /data-key="download"[^>]*>[^<]*Download<\//, "the download says what it is");
 });
