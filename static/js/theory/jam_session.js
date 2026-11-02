@@ -18,7 +18,7 @@ const DRUMS = {
   clap: { label: "Clap", midi: 39 }, hat_closed: { label: "Closed hat", midi: 42 },
   hat_open: { label: "Open hat", midi: 46 }, perc: { label: "Percussion", midi: 45 },
 };
-const PITCHED = new Set(["sampled_overdrive_guitar_v1", "sampled_organ_v1", "sampled_harmonica_v1", "sampled_strings_v1", "sampled_steel_guitar_v1", "sampled_trumpet_v1", "sampled_tenor_sax_v1", "sampled_clarinet_v1", "sampled_ooh_v1", "sampled_piano_v1", "sampled_electric_piano_v1", "sampled_guitar_v1", "sampled_clean_guitar_v1", "sampled_bass_v1", "sampled_banjo_v1", "warm_keys", "pluck_lead", "supersaw_stab", "clean_bass", "monster_growl", "talking_yoi", "wobble_bass", "sub_drop_808", "laser_screech", "vocal_chop", "reverse_swell"]);
+const PITCHED = new Set(["sampled_muted_guitar_v1", "sampled_upright_bass_v1", "sampled_overdrive_guitar_v1", "sampled_organ_v1", "sampled_harmonica_v1", "sampled_strings_v1", "sampled_steel_guitar_v1", "sampled_trumpet_v1", "sampled_tenor_sax_v1", "sampled_clarinet_v1", "sampled_ooh_v1", "sampled_piano_v1", "sampled_electric_piano_v1", "sampled_guitar_v1", "sampled_clean_guitar_v1", "sampled_bass_v1", "sampled_banjo_v1", "warm_keys", "pluck_lead", "supersaw_stab", "clean_bass", "monster_growl", "talking_yoi", "wobble_bass", "sub_drop_808", "laser_screech", "vocal_chop", "reverse_swell"]);
 const level = (value, fallback = 1) => Number.isFinite(Number(value)) ? Math.max(0, Math.min(4, Math.round(Number(value)))) : fallback;
 const isGenerated = note => note.provenance === "jam_generated" && note.generated_by === GENERATED;
 // Captured onsets can lie between grid columns; replies must respect their full gates.

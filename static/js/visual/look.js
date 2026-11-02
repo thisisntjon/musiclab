@@ -4,7 +4,7 @@
  * also has its own shape, so meaning never rests on colour alone. No saturated red. CSS mirrors these as --pf-part-*.
  */
 export const PART_COLORS = Object.freeze({
-  boom: "#FF8A00", // round: a soft, low drum
+  boom: "#F06000", // round: a soft, low drum
   clap: "#FF2BD6", // spiky star: a sharp sound
   tick: "#FFE600", // small diamond: a tiny bright sound
   tune: "#00E5FF", // round drop; higher notes are lighter

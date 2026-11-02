@@ -1100,11 +1100,12 @@ body.pf-mode {
   --pf-text-soft: #c9ccd6;
   --pf-text-muted: #a9aebd;
   /* The five parts (static/js/visual/look.js): apart under all colour blindness, each with its own shape too. */
-  --pf-part-boom: #ff8a00;
+  --pf-part-boom: #f06000;
   --pf-part-clap: #ff2bd6;
   --pf-part-tick: #ffe600;
   --pf-part-tune: #00e5ff;
   --pf-part-under: #f2f2f2;
+  --pf-own: #ff2bd6; /* your notes, the band's answer, the beat ball */
   --pf-ink: #05070d; /* text on light fills */
   --pf-mine: #d97706;
   --pf-mine-line: #fbbf24;
@@ -1120,7 +1121,7 @@ body.pf-mode {
   --pf-go: #032a30;
   --pf-go-line: #00e5ff;
   --pf-next: #2a0a26;
-  --pf-next-line: #ff2bd6;
+  --pf-next-line: var(--pf-own);
   --pf-big: #0b1a2a;
   --pf-big-line: #00e5ff;
   --pf-focus: #ffe600;
@@ -2552,14 +2553,14 @@ body.pf-less-motion .pf-jam-pad.pf-pad-waiting { animation: none; }
 .pf-sheet-note.pf-part-bass, .pf-sheet-stem.pf-part-bass, .pf-sheet-flag.pf-part-bass { fill: #c25d00; stroke: #c25d00; }
 .pf-sheet-note.pf-part-drums, .pf-sheet-stem.pf-part-drums, .pf-sheet-flag.pf-part-drums { fill: #1b1d22; stroke: #1b1d22; }
 .pf-sheet-note[data-open="1"].pf-part-tune, .pf-sheet-note[data-open="1"].pf-part-bass, .pf-sheet-note[data-open="1"].pf-part-chords { fill: #fbfbf7; }
-.pf-sheet-note.own { stroke: #ff2bd6; stroke-width: 2.4; }
-.pf-sheet-note.now { filter: drop-shadow(0 0 3px #ff2bd6); }
-.pf-sheet-playhead { stroke: #ff2bd6; stroke-width: 2; opacity: .85; }
+.pf-sheet-note.own { stroke: var(--pf-own); stroke-width: 2.4; }
+.pf-sheet-note.now { filter: drop-shadow(0 0 3px var(--pf-own)); }
+.pf-sheet-playhead { stroke: var(--pf-own); stroke-width: 2; opacity: .85; }
 @media (prefers-reduced-motion: reduce) { .pf-sheet-note.now { filter: none; } }
 
-.pf-sheet-beat { fill: #ff2bd6; }
+.pf-sheet-beat { fill: var(--pf-own); }
 .pf-sheet-beat-mark { fill: #9aa1b0; }
-.pf-sheet-beat-mark.on { fill: #ff2bd6; }
+.pf-sheet-beat-mark.on { fill: var(--pf-own); }
 @media (prefers-reduced-motion: reduce) { .pf-sheet-beat { display: none; } .pf-sheet-beat-mark.on { r: 3; } }
 body.pf-less-motion .pf-sheet-beat { display: none; }
 
@@ -2593,7 +2594,69 @@ body.pf-less-motion .pf-sheet-beat { display: none; }
 .pf-tl-block.pf-part-bass { fill: var(--pf-part-boom); }
 .pf-tl-block.pf-part-chords { fill: var(--pf-part-under); opacity: .55; }
 .pf-tl-block.pf-part-tune { fill: var(--pf-part-tune); }
-.pf-tl-block.own { stroke: #ff2bd6; stroke-width: 1.5; opacity: 1; }
-.pf-tl-playhead line { stroke: #ff2bd6; stroke-width: 2; }
-.pf-tl-playhead path { fill: #ff2bd6; }
+.pf-tl-block.own { stroke: var(--pf-own); stroke-width: 1.5; opacity: 1; }
+.pf-tl-playhead line { stroke: var(--pf-own); stroke-width: 2; }
+.pf-tl-playhead path { fill: var(--pf-own); }
 .pf-tl-help { margin: 0 0 4px; }
+
+/* Adjust: a hand of three ideas. The one playing glows; keeping it closes the hand. */
+.pf-adjust { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--pf-next-line); border-radius: 14px; background: var(--pf-next); }
+.pf-adjust-head { align-items: baseline; gap: 10px; }
+.pf-adjust-hand { gap: 10px; align-items: stretch; }
+.pf-adjust-card { flex: 1 1 160px; min-width: 0; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 14px; }
+.pf-adjust-card .pf-sub { font-weight: 400; }
+.pf-adjust-previewing { box-shadow: 0 0 0 3px var(--pf-next-line), 0 0 18px var(--pf-next-line); }
+.pf-adjust-btn { margin-left: auto; }
+.pf-journey { display: flex; align-items: center; gap: 8px; }
+.pf-journey ol { flex: 1 1 auto; }
+@media (max-width: 600px) { .pf-adjust-card { flex-basis: 100%; } }
+
+/* The visualizer: bars grouped by part, lit while that part sounds, in the part's colour. */
+.pf-vis-dim { opacity: .18; }
+.pf-vis-lit { opacity: .9; }
+.pf-vis-dim.pf-part-drums, .pf-vis-lit.pf-part-drums { stroke: var(--pf-part-tick); }
+.pf-vis-dim.pf-part-bass, .pf-vis-lit.pf-part-bass { stroke: var(--pf-part-boom); }
+.pf-vis-dim.pf-part-chords, .pf-vis-lit.pf-part-chords { stroke: var(--pf-part-under); }
+.pf-vis-dim.pf-part-tune, .pf-vis-lit.pf-part-tune { stroke: var(--pf-part-tune); }
+.pf-vis-strip .pf-listening-visual { height: 72px; margin: 6px 0 0; }
+@media (prefers-reduced-motion: reduce) { .pf-vis-lit, .pf-vis-dim { opacity: .35; } }
+
+/* The levels build themselves: what arrives unfolds from where you were. Calm and reduced motion: instant. */
+@keyframes pf-unfold { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes pf-telescope { from { opacity: 0; transform: translateX(-18px) scaleX(.9); } to { opacity: 1; transform: none; } }
+[data-enter] > * { animation: pf-unfold 360ms cubic-bezier(.2,.7,.2,1) both; }
+[data-enter] > *:nth-child(2) { animation-delay: 40ms; } [data-enter] > *:nth-child(3) { animation-delay: 80ms; }
+[data-enter] > *:nth-child(4) { animation-delay: 120ms; } [data-enter] > *:nth-child(5) { animation-delay: 160ms; }
+[data-enter] > *:nth-child(n+6) { animation-delay: 200ms; }
+[data-enter="song"] .pf-song-card { animation: pf-telescope 420ms cubic-bezier(.2,.7,.2,1) both; }
+[data-enter="song"] .pf-song-card:nth-child(2) { animation-delay: 90ms; } [data-enter="song"] .pf-song-card:nth-child(3) { animation-delay: 180ms; }
+[data-enter="jam"] .pf-jam-pad { animation: pf-unfold 380ms cubic-bezier(.2,.7,.2,1) both; transform-origin: 50% 0; }
+[data-enter="jam"] .pf-jam-pad:nth-child(n+2) { animation-delay: calc(30ms * var(--k, 1)); }
+[data-enter="tune"] .pf-phrase-picture { animation: pf-unfold 400ms cubic-bezier(.2,.7,.2,1) both; transform-origin: 50% 0; }
+@media (prefers-reduced-motion: reduce) { [data-enter] > *, [data-enter] .pf-song-card, [data-enter] .pf-jam-pad, [data-enter] .pf-phrase-picture { animation: none; } }
+body.pf-less-motion [data-enter] > *, body.pf-less-motion [data-enter] .pf-song-card, body.pf-less-motion [data-enter] .pf-jam-pad, body.pf-less-motion [data-enter] .pf-phrase-picture { animation: none; }
+
+/* "What is this?": a swatch in the element's colour and shape beside one plain sentence. */
+.pf-legend { margin: 0 0 14px; padding: 12px 14px; border: 1px solid var(--pf-rule, #2a2e37); border-radius: 14px; background: #0e1118; }
+.pf-legend-head { align-items: baseline; gap: 10px; }
+.pf-legend-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.pf-legend-row { display: flex; align-items: center; gap: 12px; }
+.pf-swatch { display: inline-block; width: 18px; height: 18px; background: var(--swatch); flex: 0 0 auto; }
+.pf-swatch-diamond { transform: rotate(45deg) scale(.8); }
+.pf-swatch-round { border-radius: 50%; }
+.pf-swatch-drop { border-radius: 50% 50% 50% 0; transform: rotate(-45deg) scale(.9); }
+.pf-swatch-band { height: 8px; width: 26px; border-radius: 4px; }
+.pf-swatch-star { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.pf-swatch-bright-edge { background: transparent; border: 3px solid var(--swatch); border-radius: 50%; }
+.pf-swatch-trail { height: 4px; width: 26px; border-radius: 2px; }
+.pf-swatch-ball { border-radius: 50%; width: 12px; height: 12px; }
+.pf-swatch-thin-line { width: 2px; height: 18px; background: var(--swatch, #9aa1b0); }
+.pf-legend-btn { margin-left: 6px; }
+
+/* The circle sizes itself from the screen height, so Make my song and the first row of keys stay above the fold
+   on short laptops and tall monitors alike. The pieces around it take about 480px; the rest is the circle. */
+.pf-demo-stage .pf-music-circle { width: min(100%, clamp(248px, calc(100vh - 500px), 520px)); }
+@media (max-height: 760px) and (min-width: 481px) { .pf-demo-stage .pf-jam-pad { min-height: 60px; padding: 6px 4px; } .pf-demo-stage .pf-heading { font-size: 26px; margin: 4px 0; } }
+@media (max-width: 480px) { .pf-demo-stage .pf-music-circle { width: min(100%, 248px); } }
+.pf-legend-btn, .pf-adjust-btn { white-space: nowrap; }
+@media (max-width: 480px) { .pf-journey { flex-wrap: wrap; } .pf-journey ol { flex: 1 1 100%; } .pf-adjust-btn { margin-left: 0; } }

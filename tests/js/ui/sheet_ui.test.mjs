@@ -84,3 +84,26 @@ test("on the Play level the sheet is live: it grows from the take and marks the 
   flow.sheetOpen = true;
   assert.match(flow._renderListeningJam(), /The page writes itself/);
 });
+
+test("the Bars / Line / Off switch changes what the moving picture draws, and the choice is remembered", async () => {
+  const flow = await songOf(setup());
+  const set = {}; const path = { setAttribute: (k, v) => { set.wave = v; } }, spectrum = { setAttribute() {} };
+  const parts = {}; const partEl = id => ({ setAttribute: (k, v) => { parts[id] = v; } });
+  const visual = { querySelector: sel => sel === "[data-wave]" ? path : sel === "[data-spectrum]" ? spectrum : partEl(sel), querySelectorAll: () => [] };
+  flow.root = { querySelector: sel => sel === ".pf-listening-visual" ? visual : null, querySelectorAll: () => [] };
+  flow.comfort = { lessMotion: false };
+  globalThis.window.matchMedia = () => ({ matches: false });
+  globalThis.document = { hidden: false, body: { classList: { toggle() {}, add() {} } }, activeElement: null, getElementById: () => null };
+  flow.app.scheduler.masterBus.analyser = { frequencyBinCount: 512, fftSize: 1024, getByteFrequencyData: a => a.fill(180), getByteTimeDomainData: a => a.fill(128) };
+  flow.visualPaintTime = -1000;
+  flow._setVisualMode("bars"); flow._paintListeningVisual(true);
+  assert.ok(Object.values(parts).some(d => d && d.length > 0), "bars are drawn in bars mode");
+  flow.visualPaintTime = -1000; flow._setVisualMode("scope"); flow._paintListeningVisual(true);
+  assert.ok(Object.values(parts).every(d => d === ""), "no bars in line mode"); assert.match(set.wave, /^M 24/);
+  flow.visualPaintTime = -1000; flow._setVisualMode("off"); flow._paintListeningVisual(true);
+  assert.equal(set.wave, "", "nothing drawn when off");
+  assert.equal(globalThis.window.localStorage.getItem("musiclab.visual-mode"), "off");
+  flow.legendOpen = true;
+  const html = flow._legendHtml();
+  assert.match(html, /Tune: the tune\./); assert.match(html, /data-key="visual-mode:off"[^>]*aria-pressed="true"/);
+});

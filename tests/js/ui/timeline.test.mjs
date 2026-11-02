@@ -93,3 +93,10 @@ test("the painted playhead follows the music without a re-render", async () => {
   assert.equal(attrs["aria-valuenow"], "3");
   assert.match(labelText, /bar/);
 });
+
+test("the compact tune editor also carries the timeline, so seeking into such a part never loses it", async () => {
+  const flow = await song();
+  await press(flow, "edit-card:1");
+  flow.tuneGrid.eventEditor = false;
+  assert.match(flow._renderTune(), /data-timeline/);
+});

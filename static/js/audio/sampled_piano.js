@@ -1,10 +1,7 @@
 /** Optional local sampled palette. Patch identity pins bank/program; no silent synth fallback. */
 export const PIANO_PATCH = 'sampled_piano_v1';
-export const SAMPLED_PROGRAMS = Object.freeze({
-  sampled_overdrive_guitar_v1: 29, sampled_organ_v1: 16, sampled_harmonica_v1: 22, sampled_trumpet_v1: 56, sampled_tenor_sax_v1: 66, sampled_clarinet_v1: 71,
-  sampled_piano_v1: 0, sampled_electric_piano_v1: 4, sampled_ooh_v1: 53,
-  sampled_strings_v1: 48, sampled_steel_guitar_v1: 25, sampled_guitar_v1: 24, sampled_clean_guitar_v1: 27, sampled_bass_v1: 33, sampled_banjo_v1: 105,
-});
+import {SAMPLED_PROGRAMS} from '../theory/sampled_sound_capabilities.js';
+export {SAMPLED_PROGRAMS};
 export const isSampledPatch = patch => Object.hasOwn(SAMPLED_PROGRAMS, patch);
 // Four MIDI ports keep repeated pitches/programs isolated through their release
 // tails. A single port exhausted during ordinary four-part arrangement changes.

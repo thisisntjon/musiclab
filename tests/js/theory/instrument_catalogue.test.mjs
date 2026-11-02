@@ -29,7 +29,7 @@ test("catalogue pages expose every supported voice and kit with a local picture"
   assert.equal(new Set(seen).size, INSTRUMENTS.length);
   assert.deepEqual([...seen].sort(), INSTRUMENTS.map(item => item.id).sort());
   const patches = new Set(INSTRUMENTS.map(item => item.patchId));
-  assert.equal(patches.size, 32); // 17 synthesized voices plus fifteen sampled instruments
+  assert.equal(patches.size, 34); // 17 synthesized voices plus seventeen sampled instruments
   for (const item of INSTRUMENTS) {
     assert.equal(getInstrument(item.id), item);
     assert.ok(item.label.split(/\s+/).length <= 3);

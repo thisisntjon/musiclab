@@ -8,6 +8,8 @@ import {phraseContext} from '../../js/theory/phrase_harmony.js';
 import {dynamicJamPads,personalPerformance,melodyPads} from '../../js/theory/dynamic_keys.js';
 import {CHORD_VOICE_SCENES} from '../../js/theory/style_traits.js';
 import { scoreFromEvents, toMusicXML, fromMusicXML, renderSheetSvg, eventsFromTake } from '../../js/theory/score_sheet.js';
+import { dealCards, applyCard, cardSeek } from '../../js/theory/adjust_cards.js';
+import { visualBars, partOfRole, describeElements } from '../../js/theory/visual_tokens.js';
 import {planMelodicPhrase,restoreMelodicPhrase,playedResponseSources,anchorPhraseToPlaying,fitToBarChord} from '../../js/theory/melodic_evolution.js';
 import {loadStyleFavorites,saveStyleFavorites} from '../../js/theory/style_favorites.js';
 import {stepsPerBar} from '../../js/theory/musical_time.js';
@@ -403,6 +405,7 @@ export class PlayFlow {
 
   _pushUndo() {
     if (!this.doc) return;
+    if (this.cardPreview && !this.cardPreviewApplying) this._cancelCardPreview();
     this.undoStack.push({
       doc: JSON.parse(JSON.stringify(this.doc)),
       beat: JSON.parse(JSON.stringify(this.beatGrid)),
@@ -706,7 +709,9 @@ export class PlayFlow {
       const title = id === "shape" && inJam ? ' title="Make what is playing into your song"' : "";
       return `<li>${this._btn(`journey:${id}`, label, "pf-btn pf-small pf-journey-step", `${attrs}${title}`)}</li>`;
     }).join("");
-    return `<nav class="pf-journey" aria-label="Your song's journey"><ol>${steps}</ol></nav>`;
+    const adjust = current && current !== "find" ? this._btn("adjust-open", "Adjust", "pf-btn pf-small pf-adjust-btn", `aria-expanded="${Boolean(this.adjustOpen)}"`) : "";
+    const what = this._btn("legend-open", "What is this?", "pf-btn pf-small pf-legend-btn", `aria-expanded="${Boolean(this.legendOpen)}"`);
+    return `<nav class="pf-journey" aria-label="Your song's journey"><ol>${steps}</ol>${adjust}${what}</nav>`;
   }
 
   _refreshJourney() {
@@ -759,6 +764,8 @@ export class PlayFlow {
     this.styleGestureOpen = false;
     if (["start", "song", "keep"].includes(stage)) this._finishPartEdit();
     if (!back) this.trail = goForward(this.trail, this.stage, stage);
+    // The arriving level unfolds; later re-renders inside the same moment must not restart or lose it.
+    if (stage !== this.stage) { this.enterMotion = stage; this.enterUntil = (typeof performance !== "undefined" ? performance.now() : 0) + 700; }
     this.stage = stage;
     // Compilation can happen before navigation (notably a fresh instrument).
     // Initialize the jam baseline on entry, and retire its plan on scope exit.
@@ -785,6 +792,7 @@ export class PlayFlow {
       this.app.scheduler.setLoopRange(0, null);
       this.app.scheduler.setRepeatPlayback(true);
     }
+    this._dealOnArrival();
     this.scan = createScan();
     this.render();
     if (typeof window !== "undefined" && typeof window.scrollTo === "function") window.scrollTo(0, 0);
@@ -930,6 +938,13 @@ export class PlayFlow {
     } else if (this.stage === "keep") {
       this.root.innerHTML = this._renderKeep();
     }
+    if (this.enterMotion && this.root.firstElementChild) {
+      const now = typeof performance !== "undefined" ? performance.now() : 0;
+      if (now <= (this.enterUntil || 0)) this.root.firstElementChild.setAttribute("data-enter", this.enterMotion);
+      else this.enterMotion = null;
+    }
+    if (this.stage !== "start" && this.doc && this.legendOpen) this.root.insertAdjacentHTML("afterbegin", this._legendHtml());
+    if (this.stage !== "start" && this.doc && this.adjustOpen) this.root.insertAdjacentHTML("afterbegin", this._adjustHtml());
     if (this.stage !== "start" && this.doc) this.root.insertAdjacentHTML("afterbegin", this._journeyHtml());
     if(this.stage!=='start'&&!(this.stage==='jam'&&(this.doc?.jam_session?.music_field||this.doc?.jam_session?.exploration_map)))this.root.insertAdjacentHTML('beforeend',`<section aria-label="Help and access"><div class="pf-row">
       ${this._btn('settings',this.comfortOpen?'Close help and settings':'Help and settings','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}
@@ -990,6 +1005,8 @@ export class PlayFlow {
    * Updates only CSS classes on the current screen, never rebuilding the DOM.
    */
   onTick(stepEvt, isPlaying) {
+    if (stepEvt?.sounding) this.soundingParts = new Set(stepEvt.sounding.map(e => partOfRole(e.role)).filter(Boolean));
+    else if (!isPlaying) this.soundingParts = new Set();
     this._showBandAnswers(stepEvt);
     this._paintSheet();
     this._paintTimeline();
@@ -1284,7 +1301,7 @@ export class PlayFlow {
   }
 
   _listeningVisualHtml() {
-    return '<svg class="pf-listening-visual" viewBox="0 0 640 220" aria-hidden="true" focusable="false"><path data-spectrum fill="none" stroke="#58c9bd" stroke-width="2" opacity=".55"/><path data-wave d="M 24 110 L 616 110" fill="none" stroke="currentColor" stroke-width="2" /></svg>';
+    return '<svg class="pf-listening-visual" viewBox="0 0 640 220" aria-hidden="true" focusable="false"><path data-spectrum fill="none"/><path data-spectrum-dim="bass" class="pf-vis-dim pf-part-bass" fill="none" stroke-width="2"/><path data-spectrum-dim="drums" class="pf-vis-dim pf-part-drums" fill="none" stroke-width="2"/><path data-spectrum-dim="chords" class="pf-vis-dim pf-part-chords" fill="none" stroke-width="2"/><path data-spectrum-dim="tune" class="pf-vis-dim pf-part-tune" fill="none" stroke-width="2"/><path data-spectrum-part="bass" class="pf-vis-lit pf-part-bass" fill="none" stroke-width="3"/><path data-spectrum-part="drums" class="pf-vis-lit pf-part-drums" fill="none" stroke-width="3"/><path data-spectrum-part="chords" class="pf-vis-lit pf-part-chords" fill="none" stroke-width="3"/><path data-spectrum-part="tune" class="pf-vis-lit pf-part-tune" fill="none" stroke-width="3"/><path data-wave d="M 24 110 L 616 110" fill="none" stroke="currentColor" stroke-width="2" /></svg>';
   }
 
   _jamProfiles() {return hasSceneCatalogue(this.doc?.jam_session)?SCENE_CATALOGUE:this.doc?.jam_session?.showcase_arrangement==='contrast-v1'?CONTRAST_PROFILES:STYLE_PROFILES;}
@@ -1309,9 +1326,10 @@ export class PlayFlow {
     if(!visual)return;
     const path=visual.querySelector('[data-wave]'),spectrum=visual.querySelector('[data-spectrum]');
     const quiet=this.comfort.lessMotion||window.matchMedia('(prefers-reduced-motion: reduce)').matches||window.matchMedia('(forced-colors: active)').matches;
-    const analyser=this.app.scheduler?.masterBus?.analyser;
-    if(!playing||quiet||!analyser||document.hidden) {
-      path.setAttribute('d','M 24 110 L 616 110');spectrum.setAttribute('d','');return;
+    const analyser=this.app.scheduler?.masterBus?.analyser,mode=this._visualMode();
+    const clearParts=()=>{for(const p of visual.querySelectorAll('[data-spectrum-part],[data-spectrum-dim]'))p.setAttribute('d','');};
+    if(!playing||quiet||!analyser||document.hidden||mode==='off') {
+      path.setAttribute('d',mode==='off'?'':'M 24 110 L 616 110');spectrum.setAttribute('d','');clearParts();return;
     }
     const now=performance.now();
     if(now-(this.visualPaintTime||0)<50)return;
@@ -1321,18 +1339,23 @@ export class PlayFlow {
     analyser.getByteFrequencyData(this.visualBins);
     analyser.getByteTimeDomainData(this.visualWave);
     this.visualLevels ||= Array(32).fill(0);
-    let bars='',wave='';
-    for(let i=0;i<32;i++) {
-      const level=this.visualBins[Math.floor(1+Math.pow(i/31,2)*(this.visualBins.length/2-2))]/255;
-      this.visualLevels[i]=this.visualLevels[i]*.8+level*.2;
-      const x=24+i*592/31,h=this.visualLevels[i]*86;
-      bars+=`M ${x} ${110-h} L ${x} ${110+h} `;
+    const groups={bass:'',drums:'',chords:'',tune:''},dim={bass:'',drums:'',chords:'',tune:''};
+    for(const bar of visualBars(this.visualBins,this.visualLevels,this.soundingParts||new Set())) {
+      const x=24+bar.i*592/31,h=bar.level*86;
+      (bar.lit?groups:dim)[bar.part]+=`M ${x} ${110-h} L ${x} ${110+h} `;
     }
+    let wave='';
     for(let i=0;i<128;i++) {
       const sample=(this.visualWave[Math.floor(i*(this.visualWave.length-1)/127)]-128)/128;
       wave+=`${i?' L':'M'} ${24+i*592/127} ${110-sample*90}`;
     }
-    spectrum.setAttribute('d',bars);path.setAttribute('d',wave);
+    spectrum.setAttribute('d','');
+    for(const part of Object.keys(groups)) {
+      const lit=visual.querySelector(`[data-spectrum-part="${part}"]`),soft=visual.querySelector(`[data-spectrum-dim="${part}"]`);
+      if(lit)lit.setAttribute('d',mode==='bars'?groups[part]:'');
+      if(soft)soft.setAttribute('d',mode==='bars'?dim[part]:'');
+    }
+    path.setAttribute('d',wave);
   }
 
   _liveJamPads() {
@@ -1982,6 +2005,7 @@ export class PlayFlow {
     const feedbackLine = this.tuneFeedback ? `<p class="pf-say pf-msg" aria-live="polite">${esc(this.tuneFeedback)}</p>` : "";
     return `
       <div class="pf-stage pf-tune">
+        ${this._timelineHtml()}
         <div class="pf-head-row"><h1 class="pf-heading">${this.doc.jam_start || this.doc.captured_performance ? "Shape your tune" : "2. Add a tune"}</h1>${this._barsHtml()}</div>
         <p class="pf-say">${
           this.tuneTab === "ending"
@@ -2123,11 +2147,13 @@ export class PlayFlow {
     }
     const step = Math.max(bar, Math.min(bar + stepCount - 1, drag.startStep + (local - drag.grabStep)));
     const pitchChanged = pitch !== Number(note.concrete?.midi_pitch), stepChanged = step !== note.step;
-    if (pitchChanged || stepChanged) this._applyNoteDrag(note, { step, pitch }, { sound: pitchChanged });
+    if (!pitchChanged && !stepChanged) return;
+    // Only an intended move in time touches timing; a pitch-only drag leaves the note's feel alone.
+    this._applyNoteDrag(note, { ...(stepChanged ? { step } : {}), ...(pitchChanged ? { pitch } : {}) }, { sound: pitchChanged });
   }
 
   _applyNoteDrag(note, { step, pitch, duration }, { sound = false } = {}) {
-    if (step !== undefined) { note.step = step; note.performance = { version: 1, offset_steps: 0, ...(note.performance?.hold_id ? { hold_id: note.performance.hold_id } : {}) }; }
+    if (step !== undefined) { note.step = step; note.performance = { ...(note.performance || {}), version: 1, offset_steps: 0 }; }
     if (pitch !== undefined) note.concrete = { ...note.concrete, midi_pitch: pitch, freq_hz: 440 * 2 ** ((pitch - 69) / 12) };
     if (duration !== undefined) note.duration_steps = duration;
     this.noteDrag.changed = true;
@@ -2158,9 +2184,9 @@ export class PlayFlow {
     if (!drag) return;
     this.noteDrag = null;
     try { this._livePicture(drag.picture)?.releasePointerCapture?.(drag.pointerId); } catch { /* already released */ }
-    if (!drag.changed || cancelled) {
-      if (cancelled && drag.changed) { const prev = this.undoStack.pop(); if (prev) this._restoreUndo?.(prev); }
-      else if (this.undoStack.length === drag.undoDepth) this.undoStack.pop();
+    if (cancelled && drag.changed) return this._undo();            // restores the note and the grids through the real path
+    if (!drag.changed) {
+      if (this.undoStack.length === drag.undoDepth) this.undoStack.pop();
       return this.render();
     }
     this.tuneGrid = { ...tuneGridFromNotes(this.doc.notes, this._partBars()), eventEditor: true };
@@ -2375,11 +2401,154 @@ export class PlayFlow {
         <p class="pf-say">Tap a part. Make it calm or big. The last part ends the song.</p>
         ${songRiverSvg}
         <div class="pf-song-cards">${tiles}</div>
+        ${embedded ? "" : `<div class="pf-vis-strip"><svg class="pf-listening-visual" viewBox="0 0 640 220" aria-hidden="true" focusable="false"><path data-spectrum fill="none"/><path data-spectrum-dim="bass" class="pf-vis-dim pf-part-bass" fill="none" stroke-width="2"/><path data-spectrum-dim="drums" class="pf-vis-dim pf-part-drums" fill="none" stroke-width="2"/><path data-spectrum-dim="chords" class="pf-vis-dim pf-part-chords" fill="none" stroke-width="2"/><path data-spectrum-dim="tune" class="pf-vis-dim pf-part-tune" fill="none" stroke-width="2"/><path data-spectrum-part="bass" class="pf-vis-lit pf-part-bass" fill="none" stroke-width="3"/><path data-spectrum-part="drums" class="pf-vis-lit pf-part-drums" fill="none" stroke-width="3"/><path data-spectrum-part="chords" class="pf-vis-lit pf-part-chords" fill="none" stroke-width="3"/><path data-spectrum-part="tune" class="pf-vis-lit pf-part-tune" fill="none" stroke-width="3"/><path data-wave d="M 24 110 L 616 110" fill="none" stroke="currentColor" stroke-width="2" /></svg></div>`}
         ${embedded ? "" : this._timelineHtml()}
         ${footer}
         ${embedded ? "" : this._sheetBoxHtml()}
         ${more}
       </div>`;
+  }
+
+  /* ---- "What is this?": every element on the screen, named in words, with its colour and shape. ---- */
+  _legendElements() {
+    const song = this.app.compiledSong, roles = new Set((song?.events || []).map(e => e.role));
+    const parts = ["drums", "bass", "chords", "tune"].filter(p => [...roles].some(r => partOfRole(r) === p));
+    const own = (this.doc?.notes || []).some(n => n.provenance === "user_placed" || n.provenance === "hummed_confirmed")
+      || (song?.events || []).some(e => e.provenance === "user_placed");
+    const marks = ["beat", "bar", ...(own ? ["own"] : []), ...(this.stage === "jam" && this.doc?.jam_session?.live_keys ? ["answer"] : [])];
+    return describeElements({ parts, marks });
+  }
+
+  _legendHtml() {
+    const rows = this._legendElements().map(e => `<li class="pf-legend-row"><span class="pf-swatch pf-swatch-${e.shape.replace(/\s+/g, "-")}" style="--swatch: var(${e.cssVar})" aria-hidden="true"></span><span>${esc(e.says)}</span></li>`).join("");
+    const mode = this._visualMode();
+    const modes = [["bars", "Bars"], ["scope", "Line"], ["off", "Off"]].map(([id, label]) => this._choice(`visual-mode:${id}`, label, mode === id, "pf-btn pf-small")).join("");
+    return `<section class="pf-legend" aria-label="What is on this screen"><div class="pf-row pf-legend-head"><strong>What is this?</strong><span class="pf-sub">The same colours and shapes mean the same things on every screen.</span></div>
+      <ul class="pf-legend-list">${rows}</ul>
+      <div class="pf-row" role="group" aria-label="The moving picture"><span class="pf-sub">Moving picture:</span>${modes}</div></section>`;
+  }
+
+  _visualMode() {
+    if (this.visualMode) return this.visualMode;
+    try { this.visualMode = ["bars", "scope", "off"].includes(window.localStorage.getItem("musiclab.visual-mode")) ? window.localStorage.getItem("musiclab.visual-mode") : "bars"; }
+    catch { this.visualMode = "bars"; }
+    return this.visualMode;
+  }
+
+  _setVisualMode(mode) {
+    if (!["bars", "scope", "off"].includes(mode)) return;
+    this.visualMode = mode;
+    try { window.localStorage.setItem("musiclab.visual-mode", mode); } catch { /* a private window forgets; that is fine */ }
+    this.app._announce(mode === "off" ? "The picture is off now." : mode === "scope" ? "The picture is a line now." : "The picture is bars now.");
+  }
+
+  /* ---- Adjust: three ideas dealt on arrival. Tap one to hear it in place, tap again to keep it. ---- */
+  _journeyLevelForCards() {
+    const level = this._journeyLevel();
+    return ["play", "shape", "detail", "share"].includes(level) ? level : null;
+  }
+
+  _dealOnArrival() {
+    const level = this._journeyLevelForCards();
+    if (!level || level === "play" || !this.doc?.song_cards) return;
+    this.adjustSeen = this.adjustSeen || {};
+    const key = `${this.doc.id}:${level}`;
+    if (this.adjustSeen[key]) return;
+    this.adjustSeen[key] = true;
+    this.adjustShuffle = 0;
+    this._openAdjust();
+  }
+
+  _openAdjust() {
+    const level = this._journeyLevelForCards() || "shape";
+    this.adjustLevel = level;
+    this.adjustHand = dealCards(this._canonicalDoc(), level, { seed: this.doc.id, shuffle: this.adjustShuffle || 0 });
+    this.adjustOpen = this.adjustHand.length > 0;
+  }
+
+  _closeAdjust() {
+    this._cancelCardPreview();
+    this.adjustOpen = false;
+    this.render();
+  }
+
+  _adjustHtml() {
+    const hand = this.adjustHand || [], previewing = this.cardPreview?.id;
+    const cards = hand.map(card => this._btn(`adjust-card:${card.id}`, `<strong>${esc(card.title)}</strong><span class="pf-sub">${esc(card.hint)}</span>${card.id === previewing ? '<span class="pf-sub pf-card-state">Playing it. Tap again to keep.</span>' : ""}`,
+      `pf-btn pf-card pf-adjust-card${card.id === previewing ? " pf-adjust-previewing" : ""}`, `aria-pressed="${card.id === previewing}"`)).join("");
+    return `<section class="pf-adjust" aria-label="Adjust"><div class="pf-row pf-adjust-head"><strong>Three ideas</strong><span class="pf-sub">Tap one to hear it. Tap again to keep it.</span></div>
+      <div class="pf-row pf-adjust-hand" role="group" aria-label="Ideas for your song">${cards}</div>
+      <div class="pf-row">${this._btn("adjust-keep-as-is", "Keep as is", "pf-btn pf-small")}${this._btn("adjust-shuffle", "Other ideas", "pf-btn pf-small")}</div></section>`;
+  }
+
+  async _tapCard(id) {
+    if (this.cardPreview?.id === id) return this._keepCard();
+    this._cancelCardPreview();
+    const NOTE_CARDS = new Set(["octave-up", "ring"]);
+    // Where to listen is decided before the change, on the song as it is (Lift used to seek the next part).
+    const canonicalBefore = this._canonicalDoc();
+    const scoped = this.editingCard != null && this.sharedMaterial;
+    let seek = cardSeek(canonicalBefore, id);
+    if (scoped) {
+      // Inside a part, listen inside that part; never jump out of it to preview.
+      const range = songCardRanges(canonicalBefore.song_cards, 4 * stepsPerBar(this.doc), canonicalBefore.global_context?.bpm || 100, stepsPerBar(this.doc))[this.editingCard];
+      if (range && (seek < range.start_step || seek >= range.end_step)) seek = range.start_step;
+    }
+    // A note card inside a part changes that part's own notes; everything else changes the whole song.
+    const next = scoped && NOTE_CARDS.has(id) ? applyCard(this.doc, id) : applyCard(canonicalBefore, id);
+    if (!next) { this.app._announce("That idea does not fit now."); return this.render(); }
+    const baseline = JSON.parse(JSON.stringify(canonicalBefore));
+    this.cardPreviewApplying = true;
+    this._pushUndo();
+    this.cardPreviewApplying = false;
+    this.cardPreview = { id, undoDepth: this.undoStack.length, baseline };
+    this._applyAdjustedDoc(next, { scoped, noteCard: NOTE_CARDS.has(id) });
+    // Trying an idea is not keeping it: the recovered draft stays the song from before the preview.
+    this._stashDraft(baseline);
+    const card = (this.adjustHand || []).find(c => c.id === id);
+    this.app._announce(`${card?.title || "Idea"}. Playing it. Tap again to keep it.`);
+    this.render();
+    await this._seekTo(seek);
+  }
+
+  _applyAdjustedDoc(next, { scoped = false, noteCard = false } = {}) {
+    if (scoped && !noteCard) {
+      // Inside a part: take the song-level changes, leave this part's notes (the projection) exactly as they are.
+      this.doc = { ...this.doc, global_context: next.global_context, song_cards: next.song_cards, title: next.title ?? this.doc.title };
+    } else if (scoped && noteCard) {
+      this.doc = { ...this.doc, notes: next.notes };
+    } else {
+      this.doc = { ...this.doc, ...next };
+    }
+    this.tuneGrid = this.tuneGrid?.eventEditor ? { ...tuneGridFromNotes(this.doc.notes, this._partBars()), eventEditor: true } : tuneGridForBars(this.tuneGrid, this.doc.notes, this._partBars());
+    this._compile();
+  }
+
+  _cancelCardPreview() {
+    const preview = this.cardPreview;
+    if (!preview) return;
+    this.cardPreview = null;
+    if (this.undoStack.length === preview.undoDepth) return this._undo();
+    // Something else was edited meanwhile. Restore only what the idea changed, and keep the later edit.
+    const base = preview.baseline, fields = ["global_context", "song_cards"];
+    const scoped = this.editingCard != null && this.sharedMaterial;
+    for (const f of fields) this.doc[f] = JSON.parse(JSON.stringify(base[f]));
+    if (!scoped) this.doc.notes = JSON.parse(JSON.stringify(base.notes));
+    this.tuneGrid = this.tuneGrid?.eventEditor ? { ...tuneGridFromNotes(this.doc.notes, this._partBars()), eventEditor: true } : tuneGridForBars(this.tuneGrid, this.doc.notes, this._partBars());
+    this._compile();
+    this.app._announce("Idea not kept.");
+  }
+
+  _keepCard() {
+    const preview = this.cardPreview;
+    if (!preview) return;
+    this.cardPreview = null;
+    const card = (this.adjustHand || []).find(c => c.id === preview.id);
+    recordAct(this.doc, "adjust_card", { card: preview.id, level: this.adjustLevel });
+    this.adjustOpen = false;
+    this._compile();   // now it is kept, the recovered draft may hold it
+    this.app._announce(`Kept: ${card?.title || "your idea"}. Undo brings the old song back.`);
+    this.render();
   }
 
   /* ---- The timeline: the whole song as blocks on one time axis. Drag anywhere to play from there. ---- */
@@ -2487,7 +2656,8 @@ export class PlayFlow {
       await this._keepMusicGoing(this._intentToken(), range ? [range.start_step, range.end_step] : null);
     }
     scheduler.seekToStep?.(step);
-    this.playhead = { ...(this.playhead || {}), step };
+    // A real playhead object: the painter reads its hits and lead, not just the step.
+    this.playhead = advancePlayhead(null, { step, events: [] }, this.app.compiledSong?.total_steps || 64, stepsPerBar(this.doc));
     this._paintTimeline();
   }
 
@@ -3942,6 +4112,12 @@ export class PlayFlow {
       return this.render();
     }
     if (key.startsWith("pad-octave:")) return this._shiftPadOctave(Number(key.slice("pad-octave:".length)));
+    if (key === "legend-open") { this.legendOpen = !this.legendOpen; if (this.legendOpen) this.app._announce(this._legendElements().map(e => e.says).join(" ")); return this.render(); }
+    if (key.startsWith("visual-mode:")) { this._setVisualMode(key.slice("visual-mode:".length)); return this.render(); }
+    if (key === "adjust-open") { if (this.adjustOpen) return this._closeAdjust(); this.adjustShuffle = (this.adjustShuffle || 0); this._openAdjust(); return this.render(); }
+    if (key === "adjust-shuffle") { this._cancelCardPreview(); this.adjustShuffle = (this.adjustShuffle || 0) + 1; this._openAdjust(); return this.render(); }
+    if (key === "adjust-keep-as-is") return this._closeAdjust();
+    if (key.startsWith("adjust-card:")) return this._tapCard(key.slice("adjust-card:".length));
     if (key.startsWith("part-mood:")) {
       const [, cIdx, mood] = key.split(":");
       const idx = Number(cIdx);
@@ -4386,6 +4562,7 @@ export class PlayFlow {
   }
 
   _save() {
+    if (this.cardPreview) this._keepCard();
     this._readTitle();
     const res = savePiece(window.localStorage, this._canonicalDoc());
     if (res.ok) {

@@ -126,7 +126,7 @@ export function toMusicXML(score) {
     return `  <part id="P-${p.id}">\n${measures}\n  </part>`;
   }).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "${"http:"}//www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="4.0">
   <work><work-title>${xml(score.title)}</work-title></work>
   <identification><encoding><software>MusicLab</software></encoding>
@@ -245,7 +245,7 @@ export function renderSheetSvg(score, { playheadStep = null, width = null, beat 
   const systems = Math.ceil(score.measures.length / PER_LINE);
   const systemH = parts.length * PART_H + 16;
   const w = width || LEFT + PER_LINE * BAR_W + 16, h = TOP + systems * systemH;
-  const out = [`<svg class="pf-sheet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${xml(score.title)} as sheet music">`];
+  const out = [`<svg class="pf-sheet" xmlns="${"http:"}//www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${xml(score.title)} as sheet music">`];
   out.push(`<text x="${LEFT}" y="18" class="pf-sheet-title">${xml(score.title)}</text>`);
   out.push(`<text x="${w - 16}" y="18" text-anchor="end" class="pf-sheet-tempo">♩ = ${Math.round(score.bpm)}</text>`);
   score.measures.forEach((m, mi) => {

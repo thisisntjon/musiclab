@@ -11,6 +11,39 @@ import { isSampledPatch, SAMPLE_TAIL, createPiano, renderPiano } from './sampled
 import { hzToMidiFloat, keyPhraseRelative, rmsToExpression } from "./hum_keying.js";
 
 export const LOOKAHEAD_INTERVAL_MS = 25;
+const microphoneSessions = new WeakMap();
+export function preferPlaybackAudioSession(nav = globalThis.navigator) {
+  try {
+    const session = nav?.audioSession;
+    if (!session) return false;
+    if (microphoneSessions.has(session) || session.type === 'play-and-record') return false;
+    if (session.type !== 'playback') session.type = 'playback';
+    return session.type === 'playback';
+  } catch (_) { return false; }
+}
+/** Keep optional humming compatible with platforms that enforce capture session types. */
+export function acquireMicrophoneAudioSession(nav = globalThis.navigator) {
+  try {
+    const session = nav?.audioSession;
+    if (!session) return () => {};
+    let lease = microphoneSessions.get(session);
+    if (!lease) {
+      const previous = session.type;
+      session.type = 'play-and-record';
+      lease = { previous, users: 0 };
+      microphoneSessions.set(session, lease);
+    }
+    lease.users++;
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      if (--lease.users) return;
+      microphoneSessions.delete(session);
+      try { if (session.type === 'play-and-record') session.type = lease.previous; } catch (_) {}
+    };
+  } catch (_) { return () => {}; }
+}
 export const SCHEDULE_AHEAD_SEC = 0.100;
 // A step whose start is already this far in the past is skipped, never started late in a burst.
 export const LATE_STEP_TOLERANCE_SEC = 0.02;
@@ -285,9 +318,8 @@ export class LookaheadScheduler {
   }
 
   ensureContext() {
-    if (typeof navigator !== "undefined" && navigator.audioSession) {
-      try { navigator.audioSession.type = "playback"; } catch (_) {}
-    }
+    // Optional platform hint only: unsupported/denied setters must not block audio.
+    preferPlaybackAudioSession();
     if (!this.audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       this.audioCtx = new AudioContextClass();
@@ -1585,18 +1617,21 @@ export async function recordHummedPhraseToDraftNotes({
     cancelWait();
   };
   let stream;
+  const releaseAudioSession = acquireMicrophoneAudioSession();
   try {
     const asked = mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false },
     });
     stream = await Promise.race([asked, cancelled$]);
     if (cancelled) {
+      releaseAudioSession();
       asked.then((late) => late?.getTracks().forEach((track) => track.stop())).catch(() => {});
       controller.stop = () => {};
       onState("stopped");
       return { status: "cancelled", source: null, notes: [] };
     }
   } catch (err) {
+    releaseAudioSession();
     const name = err && err.name;
     const status =
       name === "NotAllowedError" || name === "SecurityError"
@@ -1660,6 +1695,7 @@ export async function recordHummedPhraseToDraftNotes({
       // already disconnected
     }
     stream.getTracks().forEach((track) => track.stop());
+    releaseAudioSession();
     if (ctx) await ctx.close().catch(() => {});
     controller.stop = () => {};
     onState("stopped");

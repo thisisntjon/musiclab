@@ -114,3 +114,31 @@ test("starting a drag on an existing note does not re-render, and the drag measu
   assert.ok(after.concrete.midi_pitch > startPitch && after.concrete.midi_pitch < startPitch + 12, `moved up a little, got ${after.concrete.midi_pitch}`);
   assert.equal(after.step, startStep, "a vertical drag keeps its place in time even if the stored picture is stale");
 });
+
+// Codex red team, 2026-11-01.
+test("a pitch-only drag keeps the note's timing feel: its offset, release and hold are untouched", async () => {
+  const flow = await inDetail();
+  const note = flow.doc.notes.find(n => n.role === "lead");
+  note.performance = { version: 1, offset_steps: .37, released_at: 12.5, hold_id: "h1" };
+  const { low, high } = flow.phraseRange, yFor = midi => 12 + 22 + (high - midi) / (high - low) * 140, p0 = note.concrete.midi_pitch;
+  const buttonFor = n => ({ dataset: { phraseNote: n.id }, getBoundingClientRect: () => ({ left: 0, right: 44, top: 0, bottom: 44 }), setAttribute() {} });
+  flow._beginNoteDrag(pointer(10, yFor(p0), 7, buttonFor(note)), picture);
+  flow._moveNoteDrag(pointer(10, yFor(p0 + 5), 7));
+  flow._endNoteDrag();
+  const after = flow.doc.notes.find(n => n.id === note.id);
+  assert.notEqual(after.concrete.midi_pitch, p0);
+  assert.deepEqual(after.performance, { version: 1, offset_steps: .37, released_at: 12.5, hold_id: "h1" });
+});
+
+test("a cancelled drag restores the note and leaves the undo stack as it was", async () => {
+  const flow = await inDetail();
+  const note = flow.doc.notes.find(n => n.role === "lead");
+  const snapshot = JSON.stringify(note), depth = flow.undoStack.length;
+  const { low, high } = flow.phraseRange, yFor = midi => 12 + 22 + (high - midi) / (high - low) * 140;
+  const buttonFor = n => ({ dataset: { phraseNote: n.id }, getBoundingClientRect: () => ({ left: 0, right: 44, top: 0, bottom: 44 }), setAttribute() {} });
+  flow._beginNoteDrag(pointer(10, yFor(note.concrete.midi_pitch), 7, buttonFor(note)), picture);
+  flow._moveNoteDrag(pointer(10, yFor(note.concrete.midi_pitch + 7), 7));
+  flow._endNoteDrag({ cancelled: true });
+  assert.equal(JSON.stringify(flow.doc.notes.find(n => n.id === note.id)), snapshot);
+  assert.equal(flow.undoStack.length, depth);
+});

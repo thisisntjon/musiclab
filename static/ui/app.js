@@ -138,37 +138,7 @@ class MusicLabStudioApp {
     } catch (_e) {
       // ignore storage quota errors
     }
-    // Without the server (static files) the first post fails and posting stops for the session, so a
-    // static host's log isn't flooded; entries wait in this queue until the first post answers.
-    const loc = typeof window !== "undefined" && window.location ? window.location : null;
-    const host = loc ? loc.hostname : "";
-    const pathname = loc ? loc.pathname || "" : "";
-    if ((host !== "127.0.0.1" && host !== "localhost") || pathname.startsWith("/static/")) {
-      this._serverLog = false;
-      this._logQueue = null;
-      return;
-    }
-    if (this._serverLog === false) return;
-    if (this._serverLog === undefined) {
-      if (this._logQueue) return void this._logQueue.push(entry);
-      this._logQueue = [];
-    }
-    const post = (e) => fetch("/api/session-log", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(e) });
-    const first = this._serverLog === undefined;
-    post(entry)
-      .then((res) => {
-        if (!first) return;
-        this._serverLog = res.ok;
-        const queued = this._logQueue || [];
-        this._logQueue = null;
-        if (res.ok) queued.forEach((e) => post(e).catch(() => {}));
-      })
-      .catch(() => {
-        if (first) {
-          this._serverLog = false;
-          this._logQueue = null;
-        }
-      });
+    // Session diagnostics stay on this device; static use never probes a logging API.
   }
 
   /** Download names come from the piece's title only, never its id (ids can carry preset or artist names, 9b-7). */
