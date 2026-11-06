@@ -65,5 +65,6 @@ export function melodyPads(doc, context, { octaveShift = 0 } = {}) {
 /** A fresh personal piece keeps timing and a separately labelled full-band reference. */
 export function personalPerformance(capture,{includeRepeats=false}={}){
  if(!capture)return null;
- return {...capture,events:capture.events.filter(r=>r.event.provenance==='user_placed'&&(includeRepeats?/^(jam-live-|jam-user-|live-only-)/:/^jam-live-/).test(String(r.event.source_note_id||r.event.id||'')))};
+ const {earlier,...own}=capture,older=personalPerformance(earlier,{includeRepeats});
+ return {...own,...(older?.events.length||older?.earlier?{earlier:older}:{}),events:capture.events.filter(r=>r.event.provenance==='user_placed'&&(includeRepeats?/^(jam-live-|jam-user-|live-only-)/:/^jam-live-/).test(String(r.event.source_note_id||r.event.id||'')))};
 }

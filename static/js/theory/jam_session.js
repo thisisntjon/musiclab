@@ -20,7 +20,9 @@ const DRUMS = {
 };
 const PITCHED = new Set(["sampled_muted_guitar_v1", "sampled_upright_bass_v1", "sampled_overdrive_guitar_v1", "sampled_organ_v1", "sampled_harmonica_v1", "sampled_strings_v1", "sampled_steel_guitar_v1", "sampled_trumpet_v1", "sampled_tenor_sax_v1", "sampled_clarinet_v1", "sampled_ooh_v1", "sampled_piano_v1", "sampled_electric_piano_v1", "sampled_guitar_v1", "sampled_clean_guitar_v1", "sampled_bass_v1", "sampled_banjo_v1", "warm_keys", "pluck_lead", "supersaw_stab", "clean_bass", "monster_growl", "talking_yoi", "wobble_bass", "sub_drop_808", "laser_screech", "vocal_chop", "reverse_swell"]);
 const level = (value, fallback = 1) => Number.isFinite(Number(value)) ? Math.max(0, Math.min(4, Math.round(Number(value)))) : fallback;
-const isGenerated = note => note.provenance === "jam_generated" && note.generated_by === GENERATED;
+const isCaptured = note => note.capture_occurrence !== undefined;
+const isBandOwned = note => note.provenance === "jam_generated" && note.generated_by === GENERATED && !note.edited_from_generator;
+const isGenerated = (note, replaceCaptured = false) => isBandOwned(note) && (replaceCaptured || !isCaptured(note));
 // Captured onsets can lie between grid columns; replies must respect their full gates.
 const noteStart = note => note.step + (note.performance?.version === 1
   && Number.isFinite(note.performance.offset_steps) && note.performance.offset_steps >= 0
@@ -191,7 +193,7 @@ export function startJam(doc, { kind = "pitched", patchId, kit } = {}) {
 }
 
 /** Replace only this module's generated band; all retained notes and song context remain untouched. */
-export function setJamDirection(doc, { density, color, responsive, style_blend, style_spectrum, scene_variant, showcase_version, showcase_palette, showcase_arrangement, scene_catalogue, scene_id, scene_mix, anchor_drums, anchor_chords, style_drums, style_chords, band_chord_patch, music_field } = {}) {
+export function setJamDirection(doc, { density, color, responsive, style_blend, style_spectrum, scene_variant, showcase_version, showcase_palette, showcase_arrangement, scene_catalogue, scene_id, scene_mix, anchor_drums, anchor_chords, style_drums, style_chords, band_chord_patch, music_field, replace_captured_band = false } = {}) {
   const next = clone(doc);
   if (!next.jam_session) return next;
   const session = { ...next.jam_session, density: level(density ?? next.jam_session.density), color: level(color ?? next.jam_session.color) };
@@ -251,14 +253,15 @@ export function setJamDirection(doc, { density, color, responsive, style_blend, 
   if(!sceneTempoAllowed(session.scene_id,next.global_context?.bpm??100))throw Error('This Black-metal arrangement supports up to 160 BPM. Your tempo and notes are unchanged.');
   if(['catalogue-circle-v1','catalogue-circle-v2'].includes(session.exploration_map)&&(next.global_context?.bpm??100)>160)throw Error('Circular exploration supports up to 160 BPM. Your tempo and notes are unchanged.');
   next.jam_session = session;
-  const preserved = (next.notes || []).filter(note => !isGenerated(note));
+  const preserved = (next.notes || []).filter(note => !isGenerated(note, replace_captured_band));
+  const keptBandRoles = new Set(preserved.filter(isBandOwned).map(note => note.role));
   const backing=bandNotes(next,session,preserved);
   // Stay already contains the response that actually played. Answering again
   // would replace that chosen bass even with both relative controls neutral.
   const answer = session.anchor_backing?{notes:backing,response:{enabled:false,note_count:0,source_ids:[],mode:'anchored'}}
     :answerPlayer(session,backing,preserved,next);
   session.response = answer.response;
-  next.notes = [...preserved, ...(session.anchor_backing?answer.notes:applyStyleTraits(answer.notes,session,preserved,next))];
+  next.notes = [...preserved, ...(session.anchor_backing?answer.notes:applyStyleTraits(answer.notes,session,preserved,next)).filter(note => !keptBandRoles.has(note.role))];
   return next;
 }
 

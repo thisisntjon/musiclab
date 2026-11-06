@@ -42,14 +42,13 @@ export function optimizeNotes(notes, { tonesByBar, stepsPerBar = 16, root = 0, m
   const own = out.filter(n => n.role === "lead" && OWN.has(n.provenance)).sort((a, b) => (a.step + (a.performance?.offset_steps || 0)) - (b.step + (b.performance?.offset_steps || 0)));
   const changes = { chord: 0, grid: 0, overlap: 0, home: false };
   const tones = bar => (tonesByBar && tonesByBar[bar]) || [root, root + (minor ? 3 : 4), root + 7].map(pc);
-  const maxStep = (tonesByBar?.length ? tonesByBar.length * stepsPerBar : 64) - 1;
   for (const n of own) {
     const bar = Math.floor(n.step / stepsPerBar), midi = Number(n.concrete?.midi_pitch ?? 60);
     const fitted = nearestTone(midi, tones[bar] ? tones[bar] : tones(bar));
     if (fitted !== midi) { n.concrete = { ...n.concrete, midi_pitch: fitted, freq_hz: 440 * 2 ** ((fitted - 69) / 12) }; changes.chord++; }
     const offset = Number(n.performance?.offset_steps || 0);
     if (offset > .35 && offset < .65) { /* a deliberate push between steps: leave the feel alone */ }
-    else if (offset >= .65) { if (n.step < maxStep) n.step += 1; n.performance = { ...(n.performance || {}), version: 1, offset_steps: 0 }; changes.grid++; }
+    else if (offset >= .65) { n.step += 1; n.performance = { ...(n.performance || {}), version: 1, offset_steps: 0 }; changes.grid++; }
     else if (offset > 0 && offset <= .35) { n.performance = { ...(n.performance || {}), version: 1, offset_steps: 0 }; changes.grid++; }
   }
   // No note runs into the next one of yours.

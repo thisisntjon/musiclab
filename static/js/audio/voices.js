@@ -3,6 +3,7 @@ import { isSampledPatch } from './sampled_piano.js';
  * Web Audio synthesis voices for all 7 heavy-bass synth roles + 110 BPM Punch Drums
  */
 import { createWavefolderCurve } from "./master_bus.js";
+import { standInLevel } from "../theory/scene_voice_levels.js";
 
 export const VOWEL_FORMANTS = {
   A: [730, 1090, 2440, 900],
@@ -63,7 +64,7 @@ export function triggerScheduledEvent(audioCtx, masterBus, event, exactTime, bpm
   const role = event.role || "hocket";
   const patchId = event.patch_id || "monster_growl";
   const dur = Math.max(0.05, Number(event.duration_sec || 0.25));
-  const value = Number(event.velocity ?? .85);
+  const value = Number(event.velocity ?? .85) * (event.loading_voice ? standInLevel(event.role) : 1);
   const vel = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : .85;
   if (vel === 0) return;
   const freq = Number(event.concrete?.freq_hz || 55.0);

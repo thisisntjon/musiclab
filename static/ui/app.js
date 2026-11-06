@@ -10,6 +10,7 @@ import { LookaheadScheduler, recordHummedPhraseToDraftNotes } from "../js/audio/
 import { PHRASE_SHAPES, SHAPE_ACTIONS, transformPhraseEnding } from "../js/theory/phrase_transforms.js";
 import { EAR_PROMPT, newEarTrial, endingKind, earFeedback } from "../js/theory/ear_check.js";
 import { PlayFlow } from "./stages/play_flow.js";
+import { seededRandom } from "../js/visual/particles.js";
 import { icon } from "./icons.js";
 import { NoiseSculptorUI, PATCH_META } from "./noise_sculptor.js";
 import {
@@ -106,6 +107,9 @@ class MusicLabStudioApp {
     // A self-test run is not a person's session: it is never logged.
     if (!new URLSearchParams(window.location.search).has("selftest")) this._logSessionEvent("load", { ts_ms: this.sessionLoadMs });
     this.playFlow = new PlayFlow(this);
+    // Phase 14.2: `?seed=N` fixes the opening style so a listen can be repeated and named. Not a control; nothing in the UI shows it.
+    const seedParam = Number(new URLSearchParams(window.location.search).get("seed"));
+    if (Number.isInteger(seedParam) && seedParam > 0) this.playFlow.explorationRandom = seededRandom(seedParam);
     this._startMusicDirector();
     window.addEventListener('pagehide', () => this._stopMusicDirector());
     window.addEventListener('pageshow', () => this._startMusicDirector());
@@ -999,22 +1003,17 @@ class MusicLabStudioApp {
       const pId = this.sculptor.activePatchId;
       const g = this.sculptor.gesture;
       const label = `${pId.split("_")[0].toUpperCase()} (${g.vowel_start || "O"}->${g.vowel_end || "I"})`;
-      try {
-        const res = await fetch("/api/custom-patches", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: label,
-            patch_id: pId,
-            gesture: g,
-          }),
-        });
-        if (!res.ok) throw new Error("Static fallback");
-        const data = await res.json();
-        this.customPatches = data.custom_patches || [];
-      } catch (_e) {
-        this.customPatches = [...(this.customPatches || []), { name: label, patch_id: pId, gesture: structuredClone(g) }];
-      }
+      const res = await fetch("/api/custom-patches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: label,
+          patch_id: pId,
+          gesture: g,
+        }),
+      });
+      const data = await res.json();
+      this.customPatches = data.custom_patches || [];
       this.setWhyBanner(`Saved custom sculpted noise <strong>${label}</strong> to your library!`);
       this.renderAll();
     });

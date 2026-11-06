@@ -2,6 +2,7 @@ import {validMusicField,musicFieldTempoAllowed} from './music_field.js';
 // Import limits protect the synchronous editor/compiler, without normalizing notes.
 import {SCENE_CATALOGUE_VERSION,SCENE_MIX_VERSION,sceneIndex} from './scene_catalogue.js';
 import {restoreMelodicPhrase} from './melodic_evolution.js';
+import {validSectionDirection} from './song_view.js';
 export const MAX_PROJECT_BYTES = 5 * 1024 * 1024;
 export const MAX_PROJECT_NOTES = 16384;
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -100,10 +101,14 @@ export function validateProject(song) {
       &&(value.jam_session.scene_catalogue!==SCENE_CATALOGUE_VERSION||value.jam_session.band_chord_patch!=='sampled_banjo_v1'))fail('invalid_project');
     if (own(value, 'song_cards')) {
       if (!Array.isArray(value.song_cards) || value.song_cards.length > 8) fail('invalid_arrangement');
+      const sectionIds = new Set();
       for (const card of value.song_cards) {
         if (!object(card)) fail('invalid_arrangement');
         numeric(card, 'bars', 1, 4, true);
         if (own(card, 'material') && !object(card.material)) fail('invalid_arrangement');
+        if (own(card, 'section_id') && (typeof card.section_id !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(card.section_id))) fail('invalid_arrangement');
+        if (own(card, 'section_id')) { if (sectionIds.has(card.section_id)) fail('invalid_arrangement'); sectionIds.add(card.section_id); }
+        if (own(card, 'section_direction') && !validSectionDirection(card.section_direction)) fail('invalid_arrangement');
       }
     }
     if (own(value, 'chord_progressions')) {

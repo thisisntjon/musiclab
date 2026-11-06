@@ -1,80 +1,87 @@
 # MusicLab
 
-A free, open-source browser instrument for people who believe they "aren't musical".
+A free, open instrument for people who believe they "aren't musical".
 
-> **Status: Early, in development.** MusicLab runs locally in your browser or with a zero-dependency Python standard-library server. The genre circle includes 74 named musical interpretations across ten families plus four foundational arrangements, a scored continuous blend across the Ska–Rocksteady–Reggae sector, and a separate six-region continuous field. Automated checks verify event preservation, timing and audio ceilings, not subjective musical quality or suitability for every person. Beginner observation studies remain ahead.
+Press **Listen and explore**, steer the musical circle, and join with the eight pads or their letter keys. Press **Make my song** to keep the performed moment, then shape parts, revise notes, save an editable song and download audio.
 
-## Start with the music, not the instrument
+Generated backing and your performed notes retain separate origins. Optional Adjust and Make it nicer edits can change musical material; use Undo to restore the prior version. Download an editable song file as a backup: WAV audio alone cannot reopen the notes.
 
-Press **Listen** and a band is already playing. Drag around the circle, use the arrow keys, or open **Choose without dragging** to steer across musical styles. Changes take effect at musical boundaries without cutting off the beat.
-
-Join in using the **eight scale keys (`A` through `K`)** with home chord tones visibly marked and **`Z` / `X`** to shift octaves (or the four drum pads). Played notes anchor the band's next bar on your pitch, rapid playing builds drum and bass energy toward a roll and drop, and **Band answers me** replies on reserved voices while keeping your own performance intact.
-
-When you hear a moment you like, press **Make my song**. The music keeps playing as the song view opens (`Find → Play → Shape → Detail → Share`), where:
-- A live companion sheet of music writes itself from what plays and a whole-song timeline lets you drag anywhere to play from there.
-- **Make it nicer** is available on every level to nudge your notes to the nearest chord tone, align off-grid slips while preserving deliberate push/swing, resolve overlaps, bring the final note home, and give the arrangement a calmer opening and real ending—always with one-tap **Undo** and a plain-language summary of what changed.
-- **Detail** opens as three clear tiles (**Beat**, **Tune**, **Backing**) while the song keeps playing, so you can step into the drum pads, drag notes directly in pitch/time/length on the Tune picture, or shape chords and bass without losing your place.
-- You can save in your browser, download standard **MusicXML 4.0** (`Download sheet`) or reopen a MusicXML/JSON file, or export a stereo `.WAV` audio file (`Download audio`).
+> **Where it has been tried.** Chrome and Edge on Windows, in desktop and phone-sized windows, with mouse, keyboard only and two-switch scanning (Space moves, Enter chooses). On a first visit music starts on built-in sounds while the full sounds load, and the full sounds join at the next bar. Not yet tested: Safari, Firefox, phones and tablets as physical devices, real switch hardware. The catalogue is a set of original, connected styles, not all of music. The bundled sound bank's origin is described in `NOTICES.md`. Technical checks do not establish listening quality or suitability for a particular person.
 
 ## What it's built around
 
-- **Anything you make with MusicLab is yours.** Your performed notes, timing and held durations are recorded with their origin (`note_origins`) and never silently replaced by generated material. You own the songs and audio files you create.
-- **No AI-generated audio.** The band runs on deterministic musical rules and Web Audio synthesis/sampling on your device. There are no prompt boxes, no model calls, and no cloud services.
-- **Nothing essential is timed.** There are no countdowns or forced quizzes.
-- **Safe, deliberate sound.** Loading is silent; sound starts only when you press **Listen**, **Play** or a pad. Output is capped at −3 dBFS, **Stop sound** (or `Escape`) silences everything immediately, and **Calm** removes moving lights.
-- **Many ways in.** Touch, mouse, keyboard, or two-switch scanning (`Space` moves, `Enter` chooses).
-- **Private and local.** Static mode makes zero external network requests. The local Python server listens on `127.0.0.1` only and refuses cross-site requests.
+- **Your notes are yours.** Changes reshape what you played. They never replace it and call the result yours. Your original take is saved with the song.
+- **No countdowns.** Nothing asks you to hurry. (The optional humming feature records up to 8 seconds.)
+- **Safe sound.** Sound starts only when you press something. Music is capped at −3 dBFS. **Stop sound** or Escape silences everything.
+- **Many ways in.** Touch, mouse, keyboard, or two-switch scanning (Space moves, Enter chooses). Settings for read-aloud prompts, bigger controls, less motion, silent presses and a volume lock.
+- **Private.** It runs on your own computer and listens on 127.0.0.1 only. Nothing is uploaded and there's no account. The microphone is used only when you press Hum.
 
 ## Run it
 
-### Option 1: Static mode (any static web server, no backend required)
-
-Composition, genre exploration, live playing, local saving and browser `.WAV` export all run directly in the browser:
-
-```bash
-python -m http.server 8790 --bind 127.0.0.1 --directory .
-```
-
-Then open `http://127.0.0.1:8790/static/index.html` (or `http://127.0.0.1:8790/`).
-
-### Option 2: Local Python studio server
-
-Requires Python 3.11 or newer (uses only the Python standard library):
+You need Python 3.11 or newer and a web browser. The app uses only the Python standard library.
 
 ```bash
 python app.py
 ```
 
-By default, `python app.py` starts the local studio server at `http://127.0.0.1:8765`. On Windows, you can double-click `launch.cmd`, which starts the local server on port 8777 (`http://127.0.0.1:8777/`) and opens your browser.
+Then open http://127.0.0.1:8765.
 
-Songs saved in static mode stay in that browser profile. Download the editable `.json` project file (`Save song file`) as a backup if you want to move a song to another device; a `.WAV` file alone cannot be reopened for note editing.
+On Windows you can double-click `launch.cmd` instead; it starts the app and opens your browser.
+
+Static mode, without the MusicLab server (composition, playback, local saving and export run in the browser):
+
+```bash
+python -m http.server 8790 --bind 127.0.0.1 --directory .
+```
+
+Then open http://127.0.0.1:8790/static/index.html.
+
+Songs saved in the browser stay in that browser profile. Download the editable song file as a backup; a WAV alone can't be reopened for editing.
+
+## Try the supported route
+
+Press **Listen and explore**. The band starts, and the circle shows where you are among the styles. Drag the dot, use the arrow keys, or open **Choose without dragging** for Previous style, Next style and Next family. Tap a pad or play A to K to join in. The band plays your phrase back; after you rest, it says one thing it heard and offers one move, which you can take or leave. How you play also steers Next family: play a lot and it picks a busier style, hold notes and it picks a calmer one. Undo brings any change back. The optional Beat cycle disclosure on the start screen chooses three beats for a new song; the default is four.
+
+Press **Make my song** to keep the moment. Play with your tune in the whole-band view, try an optional melody idea, then build Start, Big moment and Ending. Develop the selected Big moment and choose an ending. Shape shows the chapters; move, copy or remove a whole chapter, or open its notes for detailed edits. Long chapters contain several pages; the song supports eight underlying pages. **Make it nicer** offers three ideas at a time; Keep as is and Undo are always there. **Share** saves an editable song file in this browser and downloads a WAV. `examples/three-beat-song.musiclab.json` is an original generated demonstration, not a human performance; import it to inspect and edit its independent parts.
+
+## Recover your work
+
+Your playing is kept when you press **Make my song**. Until then it is only in the open page: the browser asks before you leave, but a crash, or a phone that skips the question, loses it. Stop sound or Escape silences everything. If the full sounds fail to load, the music keeps going on built-in sounds, a line under the music says so, and Help (inside More) offers **Load sounds again**. Download an editable backup before clearing browser data. After a page reload, your saved songs and any unfinished draft are listed under **Your songs** on the start screen. If the local server is unavailable, reopen `launch.cmd`. Do not overwrite or delete your song files to repair playback.
+
+The three-beat route uses individual-note editing and guided song parts. The older advanced section arranger and optional humming/grid-shape tools are not supported for that cycle. Sampled voices require browser WAV export; the Python renderer refuses them rather than substituting sounds. Sound can outlast the final musical step because exports retain release tails.
 
 ## Test it
 
-For development and verification you need Python (`pytest`) and Node.js 20+ (uses the built-in `node --test` runner):
+For development you also need `pytest` and Node.js.
 
 ```bash
 python -m pytest -q
+```
+
+```bash
 node --test "tests/js/**/*.test.mjs"
+```
+
+```bash
 python app.py --smoke-test
 ```
 
-The smoke test compiles and renders a song and checks the −3 dBFS safe-sound ceiling. An in-browser self-test is also available at `http://127.0.0.1:8790/static/index.html?selftest=1`.
+The smoke test renders a song and checks the −3 dBFS ceiling. The in-browser self-test page is being rebuilt and is not a way to confirm the app works in this release.
 
 ## Where things are
 
 | What | Where |
 | --- | --- |
-| Browser app (UI, Web Audio scheduler, musical spectrum & theory) | `static/` |
-| Python engine and local `127.0.0.1` server | `src/`, `app.py` |
-| Automated test suites (Python & JavaScript) | `tests/` |
-| Starter presets and examples | `presets/`, `examples/` |
-| Credits, third-party notices and licence | `NOTICES.md`, `LICENSE` |
+| Browser app (UI, audio, music logic) | `static/` |
+| Python engine and local server | `src/`, `app.py` |
+| Tests | `tests/` |
+| Sound presets | `presets/` |
+| Credits and licences | `NOTICES.md`, `LICENSE` |
 
 ## Help shape it
 
-Open an issue to tell us what worked, what got in the way, or what you made. We especially want to hear from people who were told they "aren't musical", music teachers, carers and support workers, disabled musicians and assistive-technology users, and Web Audio / sound designers. See `CONTRIBUTING.md`.
+There is no feedback channel for this first release. If you are reading this in a place that has an issue tracker, that tracker is the way to tell us what worked, what got in the way, or what you made. We especially want to hear from people who think they aren't musical; teachers, carers and support workers; disabled musicians and assistive-technology users; and sound designers, since the sound engine is the biggest open problem. Code contributions: see `CONTRIBUTING.md`.
 
 ## Licence
 
-Original application code: MIT (`LICENSE`). Bundled third-party code (`SpessaSynth`, Apache-2.0) and the `GeneralUser GS 2.0.3` sound bank have separate terms and disclosures; see `NOTICES.md` and `static/vendor/sampled-piano/`.
+Original application code: MIT. Bundled third-party code and sounds have separate terms; see `LICENSE`, `NOTICES.md` and the license files in `static/vendor/sampled-piano/`.

@@ -1,6 +1,7 @@
 import {planJamAnswer} from '../theory/jam_answer.js';
 import {validJamForm,formCursor,formVariant,validFormMode} from '../theory/jam_form.js';
 import {playedResponseSources} from '../theory/melodic_evolution.js';
+import {captureWindow,playedLive} from '../theory/capture_window.js';
 /**
  * Chris Wilson "A Tale of Two Clocks" 25ms/100ms Web Audio Lookahead Scheduler
  * Guarantees sub-millisecond AudioParam timing while decoupling visual playhead rendering.
@@ -8,9 +9,14 @@ import {playedResponseSources} from '../theory/melodic_evolution.js';
 import { MasterBus } from "./master_bus.js";
 import { triggerScheduledEvent } from "./voices.js";
 import { isSampledPatch, SAMPLE_TAIL, createPiano, renderPiano } from './sampled_piano.js';
+import { liveVelocity, dimmedVelocity, ENERGY_ROLL_LEVEL } from "../theory/scene_voice_levels.js";
+/** Native voices that stand in for sampled ones while the bank loads (phase 14.1), by role. */
+export const LOADING_VOICES = Object.freeze({ bass: "clean_bass", lead: "pluck_lead", harmony: "warm_keys", hocket: "warm_keys" });
 import { hzToMidiFloat, keyPhraseRelative, rmsToExpression } from "./hum_keying.js";
 
 export const LOOKAHEAD_INTERVAL_MS = 25;
+/** One render block ahead of the audio clock: soon enough to feel immediate, late enough that an attack is not cut. */
+export const LIVE_START_DELAY_SEC = 0.003;
 const microphoneSessions = new WeakMap();
 export function preferPlaybackAudioSession(nav = globalThis.navigator) {
   try {
@@ -126,6 +132,7 @@ export class LookaheadScheduler {
     this.activeJamLead = null;
     this.jamPhraseOrdinal = 0;
     this.lastJamLeadCommit = null;
+    this.partAudition = null;
   }
 
   setSpotlightRole(role = null) {
@@ -296,6 +303,7 @@ export class LookaheadScheduler {
   }
 
   setLoopRange(startStep = 0, endStep = null) {
+    if (startStep!==this.loopStartStep || endStep!==this.loopEndStep) this.clearPartAudition();
     this.loopStartStep = Math.max(0, Number(startStep) || 0);
     this.loopEndStep = endStep !== null ? Number(endStep) : null;
     if (this.currentStep < this.loopStartStep || (this.loopEndStep !== null && this.currentStep >= this.loopEndStep)) {
@@ -310,6 +318,7 @@ export class LookaheadScheduler {
   }
 
   seekToStep(stepIndex) {
+    this.clearPartAudition();
     this.currentStep = Math.max(0, Number(stepIndex) || 0);
     if (this.playbackEndTime !== null) {
       this.playbackEndTime = null;
@@ -345,6 +354,43 @@ export class LookaheadScheduler {
     return ctx.state;
   }
 
+  /**
+   * Phase 14.1: music within 3 seconds. A loading session lets a fresh Listen start at once on the
+   * bundled native voices while the sampled bank loads in the background. Every attack is resolved
+   * once, before dispatch, visuals and capture, so what is recorded is what was heard. Loaded sounds
+   * join at the next bar line; held notes keep the voice they started with. Stop ends the session,
+   * so a late load never starts music. Returns null when the sounds are already there.
+   */
+  beginLoadingSession() {
+    this.ensureContext();
+    if (this.masterBus?.piano && !this.masterBus.disposed) return null;
+    const listeners = new Set();
+    const session = {
+      state: "loading", generation: this.stopGeneration || 0, ready: null,
+      onChange(cb) { listeners.add(cb); return () => listeners.delete(cb); },
+      _set(state) { if (session.state === state) return; session.state = state; for (const cb of [...listeners]) cb(state, session); },
+      retry: null,
+    };
+    const load = () => {
+      session._set("loading");
+      session.ready = this.preparePiano().then(
+        () => { if (this.loadingSession === session) session._set("ready"); },
+        () => { if (this.loadingSession === session) session._set("failed"); });
+      return session.ready;
+    };
+    session.retry = load;
+    this.loadingSession = session;
+    load();
+    return session;
+  }
+
+  /** While a loading session is on, a sampled attack sounds on a native voice of the same role; the request is kept beside it. */
+  _resolveVoice(event) {
+    const session = this.loadingSession;
+    if (!session || session.state === "live" || !isSampledPatch(event?.patch_id)) return event;
+    return { ...event, patch_id: LOADING_VOICES[event.role] || LOADING_VOICES.harmony, requested_patch_id: event.patch_id, loading_voice: true };
+  }
+
   async preparePiano() {
     const ctx = this.ensureContext(), bus = this.masterBus;
     if (bus.piano) return bus.piano;
@@ -358,11 +404,14 @@ export class LookaheadScheduler {
   /** One short sound in answer to a press (a tapped pad, a tune note, or a Ghost Spark cushioned by chordFreqs). Never starts the loop. */
   previewSound({ patchId, role = "drums", midi = null, durationSec = 0.3, kit = null, chordFreqs = null, soundSeed = null, sourceNoteId = null } = {}) {
     if (this.previewsMuted) return;
+    const liveLevel = liveVelocity(patchId, role, isSampledPatch(patchId));
+    const resolvedPreview = this._resolveVoice({ patch_id: patchId, role });
+    patchId = resolvedPreview.patch_id;
     if (isSampledPatch(patchId) && (!this.masterBus?.piano || this.masterBus.disposed)) {
       this.onAudioError?.('Load sounds before playing. Your notes are preserved.'); return;
     }
     const ctx = this.ensureContext();
-    const now = ctx.currentTime + 0.01;
+    const now = ctx.currentTime + LIVE_START_DELAY_SEC;
     const bpm = this.compiledSong?.bpm || 100;
     if (Array.isArray(chordFreqs) && chordFreqs.length > 0) {
       triggerScheduledEvent(
@@ -389,7 +438,8 @@ export class LookaheadScheduler {
         role,
         patch_id: patchId,
         duration_sec: durationSec,
-        velocity: 0.85,
+        velocity: liveLevel,
+        ...(resolvedPreview.loading_voice ? { loading_voice: true } : {}),
         concrete: { freq_hz: freq },
         drum_kit: kit || "punchy",
         sound_seed: soundSeed || null,
@@ -400,10 +450,12 @@ export class LookaheadScheduler {
     );
     if(sourceNoteId)this.cancelJamAnswer('Your turn.');
     if (sourceNoteId) { const recorded=this._rememberPerformance({ id: sourceNoteId, source_note_id: sourceNoteId, role, patch_id: patchId,
-      duration_sec: durationSec, velocity: .85, concrete: { freq_hz: freq }, drum_kit: kit || 'punchy',
-      sound_seed: soundSeed || null, provenance: 'user_placed' }, now);
+      duration_sec: durationSec, velocity: liveLevel, concrete: { freq_hz: freq }, drum_kit: kit || 'punchy',
+      sound_seed: soundSeed || null, provenance: 'user_placed',
+      ...(resolvedPreview.loading_voice ? { requested_patch_id: resolvedPreview.requested_patch_id, loading_voice: true } : {}) }, now);
       if(recorded)recorded.released_at=ctx.currentTime;
     }
+    return true; // A successful live dispatch, distinct from muted or failed preview attempts.
   }
 
   /**
@@ -415,23 +467,23 @@ export class LookaheadScheduler {
     if (role !== 'drums' && patchId !== 'reverse_swell' && this.liveNotes.size >= LIVE_VOICE_LIMIT) throw Error('All held notes are in use. Release one to add a new note.');
     const ctx = this.ensureContext();
     const bus = this.masterBus;
-    const now = ctx.currentTime + 0.01;
+    const now = ctx.currentTime + LIVE_START_DELAY_SEC;
     const strike = role === "drums";
     // A reverse envelope reaches its peak at the end of its duration. Stretching
     // it to the hold cap makes a normal tap almost silent before noteOff gates it.
     // Keep this explicitly timed gesture short, just like its preview.
     const timedSwell = patchId === "reverse_swell";
     const id = ++this._liveSeq;
-    const event = {
+    const event = this._resolveVoice({
       role,
       patch_id: patchId,
       duration_sec: strike ? 0.3 : timedSwell ? LIVE_MIN_SEC : LIVE_MAX_HOLD_SEC,
-      velocity: 0.85,
+      velocity: liveVelocity(patchId, role, isSampledPatch(patchId)),
       concrete: { freq_hz: midi === null ? 55 : 440 * Math.pow(2, (Number(midi) - 69) / 12) },
       drum_kit: kit || "punchy",
       sound_seed: soundSeed || null,
       provenance: 'user_placed', source_note_id: sourceNoteId,
-    };
+    });
     // Read only reached metadata; do not clone a whole backing score per press.
     const mode=this.isPlaying?[...(this.jamBackingTimeline||[])].reverse()
       .find(snapshot=>snapshot.time<=ctx.currentTime)?.phraseContext?.mode:null;
@@ -475,9 +527,14 @@ export class LookaheadScheduler {
     gain.linearRampToValueAtTime(0, at + LIVE_RELEASE_SEC);
     if (note.recorded) {
       note.recorded.duration = Math.min(LIVE_MAX_HOLD_SEC, at - note.startTime);
-      note.recorded.released_at=ctx.currentTime;
+      // The attack was scheduled a hair ahead of the clock (noteOn's now). A tap released inside
+      // that hair must not be recorded as released before it started, or the reads that require
+      // release >= onset (exploration_bias, band_hand) drop every quick tap.
+      note.recorded.released_at=Math.max(ctx.currentTime, note.startTime);
     }
-    note.onRelease?.(Math.min(LIVE_MAX_HOLD_SEC, at - note.startTime));
+    // The fade is already scheduled above; a failing callback cannot hold the note or break the key's release.
+    try { note.onRelease?.(Math.min(LIVE_MAX_HOLD_SEC, at - note.startTime)); }
+    catch (error) { console.error('A key release kept going past an error', error); }
     setTimeout(() => note.hold.disconnect(), (at + LIVE_RELEASE_SEC - ctx.currentTime) * 1000 + 50);
   }
 
@@ -574,7 +631,60 @@ export class LookaheadScheduler {
     return false;
   }
 
+  /** Detached compiled-part audition. This is not Jam generation or live-input capture. */
+  beginPartAudition(compiledSong, {sectionId, requestId} = {}) {
+    if (this.isPlaying || !sectionId || !requestId || !compiledSong?.events) return {ok:false};
+    const song = structuredClone(compiledSong);
+    this.setCompiledSong(song);
+    this.lastPartAuditionState=null;
+    this.partAudition = {sectionId, requestedId:requestId, scheduledId:requestId,
+      initial:song, pending:null, timeline:[], loopStart:this.loopStartStep, loopEnd:this.loopEndStep};
+    return {ok:true};
+  }
+
+  queuePartAudition(compiledSong, {sectionId, requestId} = {}) {
+    const a=this.partAudition;
+    if (!a || !this.isPlaying || !requestId || sectionId!==a.sectionId || !compiledSong?.events
+      || this.loopStartStep!==a.loopStart || this.loopEndStep!==a.loopEnd
+      || !['bpm','swing','total_steps','steps_per_bar'].every(k=>compiledSong[k]===a.initial[k]))
+      return {ok:false,reason:'This band needs a new preview.'};
+    a.requestedId=requestId;
+    a.pending=requestId===a.scheduledId ? null : {requestId,song:structuredClone(compiledSong)};
+    return {ok:true};
+  }
+
+  getPartAuditionState() {
+    const a=this.partAudition;
+    if (!a) return null;
+    const realized=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1);
+    return {sectionId:a.sectionId, requestedId:a.requestedId, scheduledId:a.scheduledId,
+      realizedId:realized?.requestId ?? null, pending:Boolean(a.pending),
+      scheduledTime:a.timeline.at(-1)?.audioTime ?? null};
+  }
+
+  clearPartAudition() {
+    const a=this.partAudition;
+    if(a) this.lastPartAuditionState=this.getPartAuditionState();
+    if(a) this.compiledSong=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1)?.song || a.initial;
+    this.partAudition=null;
+  }
+
+  _commitPartAuditionIfDue() {
+    const a=this.partAudition;
+    if (!a) return;
+    if (!a.timeline.length) a.timeline.push({requestId:a.scheduledId,song:this.compiledSong,audioTime:this.nextStepAudioTime});
+    if (this.currentStep % (this.compiledSong.steps_per_bar || 16)!==0 || !a.pending) return;
+    const next=a.pending;
+    a.pending=null;a.scheduledId=next.requestId;this.compiledSong=next.song;
+    a.timeline.push({requestId:next.requestId,song:next.song,audioTime:this.nextStepAudioTime});
+    // Retain the latest realized candidate and all scheduled future entries.
+    let lastRealized=-1;
+    for(let i=0;i<a.timeline.length;i++) if(a.timeline[i].audioTime<=this.audioCtx.currentTime)lastRealized=i;
+    if(lastRealized>0)a.timeline.splice(0,lastRealized);
+  }
+
   setCompiledSong(compiledSong, { quantizeJamBacking = false, jamStyleBlend = null, jamStyleKey = null, initialJamLead = null, phraseContext = null, jamFormProgram = null, coalesceJamTransitions = false } = {}) {
+    this.clearPartAudition();
     if(jamFormProgram&&!validJamForm(jamFormProgram))throw Error('Invalid generated form. Your notes are unchanged.');
     const compatible = this.compiledSong && compiledSong
       && ["bpm", "swing", "total_steps", "steps_per_bar"].every(key => this.compiledSong[key] === compiledSong[key]);
@@ -772,31 +882,33 @@ export class LookaheadScheduler {
     return this.playEnergy * Math.exp(-Math.max(0, time - (this.playEnergyTime || 0)) / ENERGY_DECAY_SEC);
   }
 
+  /**
+   * Phase 15.2: a one-beat confirmation. When the person takes a move the band offers, or their
+   * playing steers Next family, the band answers with a short snare roll in the last beat of the
+   * current bar, so the link is heard as well as seen. Nothing when Calm asks for quiet.
+   */
+  requestConfirmFill() {
+    if (!this.isPlaying || this.quietOrnaments) return false;
+    this.confirmFill = { phrase: this.jamPhraseOrdinal, bar: Math.floor((this.currentStep || 0) / 16) };
+    return true;
+  }
+
+  setQuietOrnaments(quiet) { this.quietOrnaments = Boolean(quiet); if (this.quietOrnaments) this.confirmFill = null; }
+
   _energyOrnaments(step, stepSec, energy) {
     if (this.committedJamBacking === null || !this.repeatPlayback || (this.compiledSong?.steps_per_bar || 16) !== 16) return [];
-    const root = ((this.committedPhraseContext?.root ?? 0) % 12 + 12) % 12, out = [];
+    if (this.quietOrnaments) { this.energyDrop = null; return []; }
+    const out = [];
     const base = {provenance: 'jam_generated', generated_by: 'musiclab_energy', step, performance: {version: 1, offset_steps: 0}};
     const beat = step % 16;
+    const fill = this.confirmFill;
+    if (fill && (fill.phrase !== this.jamPhraseOrdinal || Math.floor(step / 16) !== fill.bar)) this.confirmFill = null;
+    else if (fill && beat >= 12) energy = Math.max(energy, .6);
     if (energy >= .45 && beat >= 12)
       out.push({...base, id: `energy-roll-${this.jamPhraseOrdinal}-${step}`, role: 'drums', patch_id: 'snare',
-        duration_sec: stepSec * .9, velocity: Number(Math.min(.95, .25 + .5 * energy * (beat - 11) / 4).toFixed(3)), concrete: {midi: 38, freq_hz: 200}});
-    // At its height, any bar line starts a riser; the drop lands at the next bar line.
-    const dropDue = this.energyDrop && this.energyDrop.phrase === this.jamPhraseOrdinal && this.energyDrop.step === step;
-    if (beat === 0 && energy >= .75 && !this.energyDrop && !dropDue) {
-      this.energyDrop = step === 48 ? {phrase: this.jamPhraseOrdinal + 1, step: 0} : {phrase: this.jamPhraseOrdinal, step: step + 16};
-      const midi = 60 + root;
-      out.push({...base, id: `energy-riser-${this.jamPhraseOrdinal}-${step}`, role: 'fx', patch_id: 'reverse_swell',
-        duration_sec: stepSec * 16, velocity: .55, concrete: {midi_pitch: midi, freq_hz: 440 * 2 ** ((midi - 69) / 12)}});
-    }
-    if (dropDue) {
-      this.energyDrop = null;
-      const midi = 36 + root;
-      out.push({...base, id: `energy-drop-${this.jamPhraseOrdinal}-${step}`, role: 'bass', patch_id: 'sub_drop_808',
-        duration_sec: stepSec * 8, velocity: .8, concrete: {midi_pitch: midi, freq_hz: 440 * 2 ** ((midi - 69) / 12)}});
-      // The drop releases the build.
-      this.playEnergy = this.energyAt(this.nextStepAudioTime) * .35;
-      this.playEnergyTime = this.nextStepAudioTime;
-    }
+        duration_sec: stepSec * .9, velocity: Number((ENERGY_ROLL_LEVEL * Math.min(.95, .25 + .5 * energy * (beat - 11) / 4)).toFixed(4)), concrete: {midi: 38, freq_hz: 200}});
+    // Energy may add a quiet rhythmic answer, never an unsolicited sweep or bass drop.
+    this.energyDrop = null;
     return out;
   }
 
@@ -949,8 +1061,8 @@ export class LookaheadScheduler {
       if(item.time<now-LATE_STEP_TOLERANCE_SEC){this.cancelJamAnswer('Answer cancelled after a pause. Your notes stay.');break;}
       if(this.mutedLayers.has('lead')||this.mutedLayers.has('tune')){this.cancelJamAnswer('Answer is muted. Your notes stay.');break;}
       try {
-        const event=this.spotlightRole&&!roleMatchesLayer(item.event.role,this.spotlightRole)
-          ?{...item.event,velocity:Math.max(.08,(item.event.velocity||.8)*.22)}:item.event;
+        const event=this._resolveVoice(this.spotlightRole&&!roleMatchesLayer(item.event.role,this.spotlightRole)
+          ?{...item.event,velocity:dimmedVelocity(item.event.velocity)}:item.event);
         triggerScheduledEvent(this.audioCtx,this.masterBus,event,item.time,this.compiledSong.bpm||100,{answer:true});
         this._rememberPerformance(event,item.time);
         item.state='scheduled';
@@ -979,32 +1091,76 @@ export class LookaheadScheduler {
       this.personalRoomUntil=Math.max(this.personalRoomUntil||0,time+Math.min(.25,record.duration));
     // Retain maximum supported form history before a later style can request it.
     // Silence is coverage too; expanding Keep never invents pruned earlier music.
-    const oldest = this.audioCtx.currentTime - 17 * (take.steps_per_bar||16) * 15 / take.bpm;
-    take.events = take.events.filter(item => item.time + item.duration > oldest);
+    this._pruneTake(take);
     return record;
+  }
+
+  /** The person's notes are never pruned. The band older than the recent bars stays only around them, for at most the
+   * newest notes, so a long session stays small. Runs about once a bar. */
+  _pruneTake(take) {
+    const now = this.audioCtx.currentTime, barSec = (take.steps_per_bar||16) * 15 / take.bpm;
+    if (now - (take.prunedAt ?? -Infinity) < barSec) return;
+    take.prunedAt = now;
+    const oldest = now - 17 * barSec, reach = 8 * barSec;
+    const times = take.events.filter(playedLive).map(item => item.time).slice(-512);
+    let next = 0;
+    take.events = take.events.filter(item => {
+      if (item.time + item.duration > oldest || playedLive(item)) return true;
+      while (next < times.length && times[next] < item.time - reach) next++;
+      return next < times.length && times[next] <= item.time + reach;
+    });
+  }
+
+  /** After Keep the played history belongs to the kept song, so a later Stop and Play does not bring it back. */
+  markPerformanceKept() { if (this.performanceTake) this.performanceTake.kept = true; this.lastStoppedPerformance = null; }
+
+  /** Stop and Play again on the same song is one performance, with the stopped gap closed: the band's earlier bars
+   * and the person's notes move forward as a block, keeping their spacing, ending on a bar line before the new start. */
+  _carryStoppedTake(start) {
+    const prev = this.performanceTake, spb = this.compiledSong.steps_per_bar||16;
+    if (!prev || prev.kept || prev.song_id !== this.compiledSong.song_id || (prev.steps_per_bar||16) !== spb || !Number.isFinite(this.stoppedAt)) return null;
+    const stoppedAt = this.stoppedAt;
+    if (!prev.events.some(item => playedLive(item) && item.time < stoppedAt)) return null;
+    const barSec = spb * 15 / prev.bpm;
+    const startOfRun = start - Math.ceil((stoppedAt - prev.start) / barSec) * barSec;
+    const shift = startOfRun - prev.start;
+    const events = prev.events.filter(item => item.time < stoppedAt).map(item => {
+      const stoppedShort = item.time + item.duration > stoppedAt;
+      return { ...item, time: item.time + shift, duration: stoppedShort ? stoppedAt - item.time : item.duration,
+        ...(Number.isFinite(item.released_at) ? { released_at: Math.min(item.released_at, stoppedAt) + shift } : playedLive(item) ? { released_at: Math.min(stoppedAt, item.time + item.duration) + shift } : {}) };
+    });
+    return { start: startOfRun, events, sequence: prev.sequence };
   }
 
   capturePerformance() {
     const take = this.performanceTake;
     if (!take || !this.isPlaying) return null;
     const end = this.audioCtx.currentTime;
-    const barSec = (take.steps_per_bar||16) * 15 / take.bpm;
-    const windowBars=Math.max(4,Math.min(16,take.capture_bars||4));
-    const start = take.start + Math.max(0, Math.ceil((end - take.start) / barSec) - windowBars) * barSec;
-    const events = take.events.filter(item => item.time < end && item.time + item.duration > start).map(item => ({
-      ...JSON.parse(JSON.stringify(item)), time: Math.max(start, item.time),
-      scheduled_time: item.time, scheduled_duration: item.duration, carried_in: item.time < start,
-      duration: Math.min(end, item.time + item.duration) - Math.max(start, item.time),
-    })).filter(item => item.duration > 0);
+    const { start, windowBars, bars, events, rests_left_out, earlier } = captureWindow({ events: take.events, start: take.start, end, bpm: take.bpm, stepsPerBar: take.steps_per_bar||16, captureBars: take.capture_bars||4 });
     return { version: 1, ...(take.song_id?{source_song_id:take.song_id}:{}), semantics: 'audio-clock attacks and clipped gates; not physical audibility',
-      start, end, bpm: take.bpm, ...(take.steps_per_bar===12?{steps_per_bar:12}:{}), bars: Math.max(1, Math.min(windowBars, Math.ceil((end - start) / barSec))), ...(windowBars>4?{window_bars:windowBars,form:this.activeJamBacking()?.phraseContext?.form||null}:{}), events };
+      start, end, bpm: take.bpm, ...(take.steps_per_bar===12?{steps_per_bar:12}:{}), bars, ...(windowBars>4?{window_bars:windowBars,form:this.activeJamBacking()?.phraseContext?.form||null}:{}), ...(rests_left_out?{rests_left_out:true}:{}), ...(earlier?{earlier:{...earlier,...(take.song_id?{source_song_id:take.song_id}:{})}}:{}), events };
   }
 
-  activeJamContext() {
+  activeJamContext({ readOnly = false } = {}) {
     if(!this.isPlaying)return null;
     const now=this.audioCtx.currentTime;
     const tick=[...(this.jamClockTimeline||[])].reverse().find(t=>t.time<=now);
-    const backing=this.activeJamBacking();
+    let backing;
+    if (readOnly) {
+      const snapshot=(this.jamBackingTimeline||[]).findLast(item=>item.time<=now);
+      if (!snapshot) return null;
+      // Pad lookup reads the same immutable reached score many times per frame.
+      // Cache a detached frozen copy, never the mutable scheduler ledger itself.
+      if (this._padBackingSource !== snapshot) {
+        const freeze = value => {
+          if (value && typeof value === 'object') { Object.values(value).forEach(freeze); Object.freeze(value); }
+          return value;
+        };
+        this._padBackingView=freeze(JSON.parse(JSON.stringify(snapshot)));
+        this._padBackingSource=snapshot;
+      }
+      backing=this._padBackingView;
+    } else backing=this.activeJamBacking();
     if(!tick||!backing)return null;
     const bpm=this.performanceTake?.bpm||this.compiledSong.bpm||100;
     return {audioTime:now,bpm,position:tick.step+Math.min(.999999,Math.max(0,(now-tick.time)/(15/bpm))),backing};
@@ -1078,7 +1234,7 @@ export class LookaheadScheduler {
 
   start() {
     if (this.isPlaying || !this.compiledSong) return;
-    if (this.compiledSong.events?.some(ev => isSampledPatch(ev.patch_id)) && (!this.masterBus?.piano || this.masterBus.disposed)) {
+    if (!this.loadingSession && this.compiledSong.events?.some(ev => isSampledPatch(ev.patch_id)) && (!this.masterBus?.piano || this.masterBus.disposed)) {
       this.onAudioError?.('Load sounds before playing. Your notes are preserved.'); return;
     }
     const ctx = this.ensureContext();
@@ -1090,8 +1246,9 @@ export class LookaheadScheduler {
     this.playbackEndTime = null;
     this.isPlaying = true;
     this.jamAnswer=null;this.answeredThrough=0;this.answerMessage='';this.answerFeedback=null;this.answerAvailableAt=0;this.personalRoomUntil=0;
+    const carried = this._carryStoppedTake(ctx.currentTime);
     this.lastStoppedPerformance = null;
-    this.performanceTake = { song_id: this.compiledSong.song_id, start: ctx.currentTime, bpm: this.compiledSong.bpm || 100, steps_per_bar:this.compiledSong.steps_per_bar||16, sequence: 0, events: [] };
+    this.performanceTake = { song_id: this.compiledSong.song_id, start: carried?.start ?? ctx.currentTime, bpm: this.compiledSong.bpm || 100, steps_per_bar:this.compiledSong.steps_per_bar||16, sequence: carried?.sequence ?? 0, events: carried?.events ?? [] };
     this.jamPhraseOrdinal = 0;
     this.retiredJamLeadDescriptor=null;
     this.clearJamLead();
@@ -1112,26 +1269,54 @@ export class LookaheadScheduler {
     this.jamBackingTimeline=[];
     this._rememberJamBacking(this.nextStepAudioTime);
     this.droppedSteps = 0;
+    this.droppedVoices = 0;
+    this.droppedVoicesSaid = false;
     this.timerId = window.setInterval(() => {
       try { this._lookaheadTick(); }
       catch (error) { this.stop(); this.onAudioError?.(error.message); }
     }, LOOKAHEAD_INTERVAL_MS);
   }
 
+  /** Cut every sound source, each on its own, so one failing cannot leave another playing. */
+  _silenceNow() {
+    const guarded = fn => { try { fn(); } catch (error) { console.error('Stop kept going past an error', error); } };
+    // Also stops auditions, which deliberately do not set isPlaying.
+    guarded(() => this.masterBus?.dispose?.());
+    guarded(() => this.masterBus?.piano?.stop());
+    const drone = this.droneNodes;
+    this.droneNodes = null;
+    if (drone) {
+      for (const osc of [drone.oscRoot, drone.oscFifth]) guarded(() => osc.stop());
+      guarded(() => drone.gain.disconnect());
+    }
+  }
+
   stop() {
+    // Silence comes first: nothing after this line can leave sound playing.
+    this._silenceNow();
+    if(this.partAudition) {
+      const a=this.partAudition;
+      this.compiledSong=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1)?.song || a.initial;
+      this.clearPartAudition();
+    }
     this.playEnergy = 0;
     this.leadAnswer = null;
     this.energyDrop = null;
     if(this.isPlaying) {
-      this.lastStoppedPerformance=this.capturePerformance();
-      const snapshot=this.activeJamBacking();
-      this.lastStoppedJamLead=snapshot?{source_song_id:snapshot.source_song_id,plan:snapshot.leadPlan,formCursor:snapshot.phraseContext?.form}:null;
-      if(snapshot?.phraseContext?.form&&this.requestedJamFormProgram&&snapshot.source_song_id===this.compiledSong?.song_id&&snapshot.phraseContext.form.id===this.requestedJamFormProgram.id)
-        this.requestedJamFormProgram={...this.requestedJamFormProgram,cursor:JSON.parse(JSON.stringify(snapshot.phraseContext.form))};
-      this.initialJamLead=snapshot?.leadPlan||null;
+      try {
+        this.lastStoppedPerformance=this.capturePerformance();
+        const snapshot=this.activeJamBacking();
+        this.lastStoppedJamLead=snapshot?{source_song_id:snapshot.source_song_id,plan:snapshot.leadPlan,formCursor:snapshot.phraseContext?.form}:null;
+        if(snapshot?.phraseContext?.form&&this.requestedJamFormProgram&&snapshot.source_song_id===this.compiledSong?.song_id&&snapshot.phraseContext.form.id===this.requestedJamFormProgram.id)
+          this.requestedJamFormProgram={...this.requestedJamFormProgram,cursor:JSON.parse(JSON.stringify(snapshot.phraseContext.form))};
+        this.initialJamLead=snapshot?.leadPlan||null;
+      } catch (error) { console.error('Stop kept going past an error', error); }
     }
+    if(this.isPlaying)this.stoppedAt=this.audioCtx?.currentTime;
     this.stopGeneration=(this.stopGeneration||0)+1;
     this.isPlaying = false;
+    // Stop ends a loading session: a bank that finishes later starts nothing.
+    this.loadingSession = null;
     this.cancelJamAnswer('Stopped.');
     this.clearJamLead();
     this.jamBackingTimeline=[];
@@ -1159,19 +1344,9 @@ export class LookaheadScheduler {
     this.liveNotes.clear();
     for (const note of stoppedNotes) {
       clearTimeout(note.timer);
-      // Stop cuts the graph immediately, even before a tap's minimum gate.
-      note.onRelease?.(Math.max(0.001, Math.min(LIVE_MAX_HOLD_SEC, this.audioCtx.currentTime - note.startTime)));
-    }
-    // Also stops auditions, which deliberately do not set isPlaying.
-    this.masterBus?.dispose?.();
-    this.masterBus?.piano?.stop();
-    const drone = this.droneNodes;
-    this.droneNodes = null;
-    if (drone) {
-      for (const osc of [drone.oscRoot, drone.oscFifth]) {
-        try { osc.stop(); } catch (_) {}
-      }
-      drone.gain.disconnect();
+      // Stop cuts the graph immediately, even before a tap's minimum gate. Every note gets its release.
+      try { note.onRelease?.(Math.max(0.001, Math.min(LIVE_MAX_HOLD_SEC, this.audioCtx.currentTime - note.startTime))); }
+      catch (error) { console.error('Stop kept going past an error', error); }
     }
   }
 
@@ -1195,31 +1370,30 @@ export class LookaheadScheduler {
     // After a stall (busy page, throttled timer), skip the missed steps rather than starting them all at once.
     const missed = overdueSteps(this.nextStepAudioTime, this.audioCtx.currentTime, stepSec);
     for (let i = 0; i < missed; i++) {
-      this._commitJamBackingIfDue(true);
-      this._commitJamFormIfDue();
+      if(!this.partAudition) {this._commitJamBackingIfDue(true);this._commitJamFormIfDue();}
       this.droppedSteps += 1;
       if (!this._advanceStep(totalSteps, stepSec)) return;
     }
 
     this.visualNotes = this.visualNotes.filter(note => note.end > this.audioCtx.currentTime - Number(this.audioCtx.outputLatency || this.audioCtx.baseLatency || 0));
-    this._serviceAutomaticAnswer();
-    this._serviceJamAnswer();
+    if(!this.partAudition) {this._serviceAutomaticAnswer();this._serviceJamAnswer();}
     while (this.nextStepAudioTime < this.audioCtx.currentTime + SCHEDULE_AHEAD_SEC) {
-      this._commitJamBackingIfDue();
-      this._commitJamFormIfDue();
-      this._commitJamLeadIfDue();
+      this._commitPartAuditionIfDue();
+      if(!this.partAudition) {this._commitJamBackingIfDue();this._commitJamFormIfDue();this._commitJamLeadIfDue();}
+      // Loaded sounds join at a bar line, for attacks from here on; nothing already sounding changes.
+      if (this.loadingSession?.state === "ready" && this.currentStep % (this.compiledSong.steps_per_bar || 16) === 0) this.loadingSession._set("live");
       const stepIndex = this.currentStep;
       const swingOffset = (stepIndex % 2 === 1) ? ((swing - 0.50) * 2.0 * stepSec * 0.5) : 0.0;
       const exactStepTime = this.nextStepAudioTime + swingOffset;
 
       const events = this.committedJamBacking === null ? (this.compiledSong.events || [])
         : [...(this.compiledSong.events || []).filter(event => event.provenance !== "jam_generated"), ...this._effectiveJamBacking()];
-      const energy = this.energyAt(this.nextStepAudioTime);
-      const stepEvents = [...this._applyLeadAnswer(stepIndex, events.filter((e) => e.step === stepIndex), stepSec), ...this._energyOrnaments(stepIndex, stepSec, energy)];
+      const energy = this.partAudition ? 0 : this.energyAt(this.nextStepAudioTime);
+      const stepEvents = this.partAudition ? events.filter(e=>e.step===stepIndex) : [...this._applyLeadAnswer(stepIndex, events.filter((e) => e.step === stepIndex), stepSec), ...this._energyOrnaments(stepIndex, stepSec, energy)];
       const submitted = [];
       for (const ev of stepEvents) {
         const attack=this.nextStepAudioTime+performanceOffsetSeconds(ev,stepSec,swingOffset);
-        if(ev.provenance==='jam_generated'&&ev.role==='lead'
+        if(!this.partAudition&&ev.provenance==='jam_generated'&&ev.role==='lead'
           &&(this._answerOccupies(attack)||(this.makeRoomForLive&&(this.liveNotes.size||attack<(this.personalRoomUntil||0)))))continue;
         if (this.mutedLayers && this.mutedLayers.size > 0) {
           let isMuted = false;
@@ -1231,14 +1405,27 @@ export class LookaheadScheduler {
           }
           if (isMuted) continue;
         }
-        let evToPlay = ev;
+        // Resolve once; the energy and spotlight shapes build on the resolved event, not the request.
+        let evToPlay = this._resolveVoice(ev);
         if (energy > .02 && ev.provenance === 'jam_generated' && (ev.role === 'drums' || ev.role === 'bass') && ev.generated_by !== 'musiclab_energy')
-          evToPlay = { ...ev, velocity: Math.min(1, (ev.velocity ?? .8) * (1 + .45 * energy)) };
+          evToPlay = { ...evToPlay, velocity: Math.min(1, (ev.velocity ?? .8) * (1 + .45 * energy)) };
         if (this.spotlightRole && !roleMatchesLayer(ev.role, this.spotlightRole)) {
-          evToPlay = { ...ev, velocity: Math.max(0.08, (ev.velocity || 0.8) * 0.22) };
+          evToPlay = { ...evToPlay, velocity: dimmedVelocity(ev.velocity) };
         }
-        triggerScheduledEvent(this.audioCtx, this.masterBus, evToPlay,
-          this.nextStepAudioTime + performanceOffsetSeconds(ev, stepSec, swingOffset), bpm);
+        try {
+          triggerScheduledEvent(this.audioCtx, this.masterBus, evToPlay,
+            this.nextStepAudioTime + performanceOffsetSeconds(ev, stepSec, swingOffset), bpm);
+        } catch (error) {
+          // No free voice costs this note, never the band, and never a note someone is holding.
+          // It did not sound, so it is not history. Any other failure still stops, as it should.
+          if (!error?.voicesFull) throw error;
+          this.droppedVoices = (this.droppedVoices || 0) + 1;
+          if (ev.provenance !== 'jam_generated' && !this.droppedVoicesSaid) {
+            this.droppedVoicesSaid = true;
+            this.onAudioError?.('Some notes could not sound. Your notes are safe.');
+          }
+          continue;
+        }
         submitted.push(evToPlay);
         if (Number(evToPlay.velocity ?? .85) > 0) this.visualNotes.push({ event: evToPlay, time: attack, end: attack + Math.max(.001, Number(evToPlay.duration_sec) || Number(evToPlay.duration_steps || 1)*stepSec) });
         this._rememberPerformance(evToPlay, this.nextStepAudioTime + performanceOffsetSeconds(ev, stepSec, swingOffset));
@@ -1280,7 +1467,9 @@ export class LookaheadScheduler {
     if (!this.lastVisualClock?.scheduledVisual) return passed.length ? { ...passed[passed.length-1], passed } : null;
     this.visualNotes = this.visualNotes.filter(note => note.end > now);
     const sounding = this.visualNotes.filter(note => note.time <= now).map(note => note.event);
-    return { ...this.lastVisualClock, passed, sounding };
+    const stepSec = 15 / (this.compiledSong?.bpm || 100);
+    const fraction = Math.max(0, Math.min(.999999, (now - this.lastVisualClock.time) / stepSec));
+    return { ...this.lastVisualClock, position: this.lastVisualClock.step + fraction, passed, sounding };
   }
 
   auditionPatchNote(patchId, freqHz, gesture, durationSec = 0.45) {

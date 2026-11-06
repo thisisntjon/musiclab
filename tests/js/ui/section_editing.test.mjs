@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PlayFlow } from "../../../static/ui/stages/play_flow.js";
-import { addSongCard } from "../../../static/js/theory/song_view.js";
+import { addSongCard, songArcFromCapture, ensureSectionIds } from "../../../static/js/theory/song_view.js";
 import { loadPiece, loadWorkingSong, stashWorkingSong, savePiece } from "../../../static/js/theory/save_store.js";
 import { startJam } from "../../../static/js/theory/jam_session.js";
 
@@ -78,18 +78,18 @@ test("live jam direction preserves contributions and capture preserves the exact
   const notes = structuredClone(flow.doc.notes);
   const events = structuredClone(flow.app.compiledSong.events);
   await press(flow, "capture-direction");
-  assert.equal(flow.stage, "song");
+  assert.equal(flow.stage, "tune");
   assert.deepEqual(flow.doc.notes, notes);
   // The capture now becomes a three-part song of itself; every original event still plays in it.
-  assert.equal(flow.doc.song_cards.length, 3);
+  assert.equal(flow.doc.song_cards.length, 1);
   const ids = new Set(flow.app.compiledSong.events.map(e => e.id));
   assert.ok(events.every(e => ids.has(e.id) || flow.app.compiledSong.events.some(x => x.source_note_id === e.id || x.id.startsWith(e.id))));
   flow._save();
   assert.deepEqual(loadPiece(window.localStorage, flow.doc.id).notes, notes);
 });
 
-test("capture enters the whole song first (top-down) without creating sections or losing the visited route", async () => {
-  for (const [kind, patchId, expected] of [["pitched", "warm_keys", "song"], ["drums", "snare", "song"]]) {
+test("capture enters the tune first without creating sections or losing the visited route", async () => {
+  for (const [kind, patchId, expected] of [["pitched", "warm_keys", "tune"], ["drums", "snare", "tune"]]) {
     const flow = setup();
     flow.stage = "jam";
     flow.doc.song_cards = flow.doc.song_cards.slice(0, 1);
@@ -103,9 +103,9 @@ test("capture enters the whole song first (top-down) without creating sections o
     assert.equal(flow.tuneTab, "main"); assert.equal(flow.tunePage, 0); assert.equal(flow.activeSongCard, 0);
     assert.equal(flow.editingCard, null, "capture must not detach or silently narrow shared edits");
     assert.deepEqual(flow.doc.notes, before.notes);
-    assert.deepEqual(flow.doc.song_cards.map(c => c.role_name), ["Beginning", "Main part", "Ending"], "the capture becomes a song made of itself");
+    assert.equal(flow.doc.song_cards.length, before.cards.length, "Keep does not add an arrangement");
     assert.ok(flow.doc.song_cards.every(c => c.bars === before.cards[0].bars), "the captured length is kept");
-    assert.equal(flow.doc.song_cards[0].under, false); assert.equal(flow.doc.song_cards[1].big, true); assert.equal(flow.doc.song_cards[2].fx, "drum_roll");
+    assert.deepEqual(flow.doc.song_cards, before.cards, "Keep preserves the chosen band");
     flow._back(); assert.equal(flow.stage, "jam");
     await press(flow, "capture-direction");
     await press(flow, "card-bars:0:1");
@@ -155,6 +155,7 @@ test("untouched legacy jam captures reopen on the whole song while later work re
     await press(flow, "jam-pad:0");
     await press(flow, "capture-direction");
     const legacy = structuredClone(flow.doc);
+    legacy.song_cards=ensureSectionIds(songArcFromCapture(legacy.song_cards));delete legacy.song_path;
     delete legacy.capture_development_started;
     legacy.last_stage = "song";
     const original = structuredClone({ notes: legacy.notes, cards: legacy.song_cards });
@@ -464,7 +465,7 @@ test("short-ending alternatives survive resizing and reopening", async () => {
   assert.deepEqual(flow.tuneGrid.ending, original);
 });
 
-test("journey bar names one route and Make my song lands on the whole song with music kept going", async () => {
+test("journey bar names one route and Make my song lands on the tune with music kept going", async () => {
   const flow = setup();
   flow.stage = "jam";
   flow.doc.song_cards = flow.doc.song_cards.slice(0, 1);
@@ -483,8 +484,8 @@ test("journey bar names one route and Make my song lands on the whole song with 
   try {
     await press(flow, "journey:shape");
   } finally { delete globalThis.document; }
-  assert.equal(flow.stage, "song");
-  assert.equal(flow._journeyLevel(), "shape");
+  assert.equal(flow.stage, "tune");
+  assert.equal(flow._journeyLevel(), "detail");
   assert.equal(resumed, 1, "the music keeps playing when the jam becomes the song");
   assert.equal(loadWorkingSong(window.localStorage, flow.doc.id)?.id, flow.doc.id, "the new song is saved without asking");
   await press(flow, "journey:detail");

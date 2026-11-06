@@ -256,7 +256,7 @@ test("12e-1 (#3): toggleCardFx applies beat_drop, high_lift, and drum_roll while
   assert.equal(rollSong.events.filter((e) => String(e.id).startsWith("fx-roll-c0-")).length, 8);
 });
 
-test("12e-2 (#11, #13): toggleCardBig silences pre-drop breath (steps 61..63) and injects pitched reverse_swell riser", () => {
+test("12e-2 (#11, #13): toggleCardBig keeps pre-drop breath without injecting a surprise siren", () => {
   const loop = sampleLoop();
   loop.events[1].concrete = { midi: 60, freq_hz: 261.63 };
   loop.events.push({
@@ -274,8 +274,7 @@ test("12e-2 (#11, #13): toggleCardBig silences pre-drop breath (steps 61..63) an
   const card0 = song.events.filter((e) => e.card === 0);
   assert.equal(card0.some((e) => e.id === "drum-hat-62"), false, "step 62 drum silenced before Big card");
   const swell = card0.find((e) => e.patch_id === "reverse_swell");
-  assert.ok(swell, "reverse_swell riser injected into card 0 before Big card 1");
-  assert.equal(swell.concrete.freq_hz, 261.63);
+  assert.equal(swell, undefined, "Big does not add an implicit swell");
 });
 
 test("12f-2 (Proposals #6 & #11): revealSongArc builds Beginning/Main/Ending and capturePerformedArrangement records sequence", () => {

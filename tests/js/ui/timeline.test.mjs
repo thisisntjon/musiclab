@@ -1,3 +1,4 @@
+import {songArcFromCapture} from '../../../static/js/theory/song_view.js';
 // Phase 13.6b, part two: the timeline. The whole song on one axis; drag anywhere to play from there.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -29,6 +30,10 @@ async function song() {
   flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
   await press(flow, "jam-pad:0");
   await press(flow, "capture-direction");
+  // Existing three-part songs remain supported; new onboarding has separate coverage.
+  flow._finishPartEdit(); flow.doc.song_cards=songArcFromCapture(flow.doc.song_cards);
+  delete flow.doc.song_path; flow._compile(); flow._go("song");
+  flow.app.scheduler.isPlaying=true;
   return flow;
 }
 const svgFor = m => ({ getBoundingClientRect: () => ({ left: 0, top: 0, width: 46 + m.total * 6 + 8, height: 82 }), setPointerCapture() {}, releasePointerCapture() {} });

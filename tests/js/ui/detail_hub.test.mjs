@@ -1,3 +1,4 @@
+import {songArcFromCapture} from '../../../static/js/theory/song_view.js';
 // Detail arrives as three tiles: Beat, Tune, Backing. The depth is visible at a glance; the music keeps playing.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -27,6 +28,10 @@ async function song() {
   flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
   await press(flow, "jam-pad:0");
   await press(flow, "capture-direction");
+  // Existing three-part songs remain supported; new onboarding has separate coverage.
+  flow._finishPartEdit(); flow.doc.song_cards=songArcFromCapture(flow.doc.song_cards);
+  delete flow.doc.song_path; flow._compile(); flow._go("song");
+  flow.app.scheduler.isPlaying=true;
   await press(flow, "adjust-keep-as-is");
   flow.app.scheduler.start();          // the harness's fresh state stops the stub; in the app the music is playing here
   return flow;

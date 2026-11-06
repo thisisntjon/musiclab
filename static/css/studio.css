@@ -1290,7 +1290,9 @@ body.pf-mode .play-flow {
   border-color: var(--pf-next-line);
 }
 .pf-journey-step:disabled {
-  opacity: .45;
+  /* Dimmed, but still readable: at .45 the label rendered at 3.9:1 on the page; .62 keeps it above the 4.5:1
+     text bar of the standing rules (.qa-tools/access-contrast-gate.cjs measures the rendered pair). */
+  opacity: .62;
 }
 .pf-speed {
   min-width: 3ch;
@@ -2509,13 +2511,16 @@ body.pf-listening .transport-bar { background: #050507; z-index: 10; }
 .pf-phrase-picture { position:relative; height:210px; border:1px solid #526074; border-radius:14px; background:repeating-linear-gradient(to right, transparent 0, transparent calc(var(--phrase-beat-width,25%) - 1px), #344150 var(--phrase-beat-width,25%)),repeating-linear-gradient(to bottom,#111923 0,#111923 41px,#293443 42px); }
 .pf-phrase-note { position:absolute; min-width:44px; min-height:44px; height:44px; padding:0; border:2px solid #75dbef; border-radius:10px; background:#173b49; color:#fff; z-index:1; }
 .pf-phrase-note[aria-pressed="true"] { background:#b8eaf3; color:#10212c; outline:2px solid #fff; outline-offset:2px; z-index:3; }
+.pf-phrase-note.pf-phrase-own, .pf-phrase-note.pf-phrase-own[aria-pressed="true"] { border:4px solid var(--pf-own); font-weight:800; }
+/* Controls reached by keyboard must not land under the sticky header (it wraps taller on phones). */
+html:has(body.pf-mode) { scroll-padding-top: 140px; }
 .pf-phrase-note:focus-visible { outline:3px solid #ffbb46; outline-offset:4px; z-index:4; }
 .pf-phrase-cursor { position:absolute; top:0; bottom:0; width:2px; background:#ffbb46; pointer-events:none; z-index:2; }
 .pf-phrase-cursor[hidden] { display:none; }
 .pf-phrase-beats { display:flex; justify-content:space-around; color:#b8c4d3; margin:8px 0 18px; }
 .pf-phrase-empty { padding:24px; }
 .pf-event-tune details summary { cursor:pointer; padding:12px 0; }
-@media (prefers-reduced-motion: reduce) { .pf-phrase-cursor { display:none; } }
+/* The playback marker is essential information: reduced motion uses stepped positions. */
 
 /* Phase 13.2: on a phone the journey stays one row, and the circle leaves room so
    "Make my song" and the pads sit above the fold. */
@@ -2673,3 +2678,139 @@ body.pf-less-motion [data-enter] > *, body.pf-less-motion [data-enter] .pf-song-
 /* Detail's three tiles: the same shape as Shape's parts, so the depth reads at a glance. */
 .pf-detail-hub .pf-song-cards { display: flex; flex-wrap: wrap; gap: 12px; }
 .pf-hub-tile { flex: 1 1 200px; min-width: 0; }
+
+/* 14.4: a quiet link-sized button inside a line of text (For parents on the front door). */
+.pf-for-parents .pf-link { display: inline-block; vertical-align: baseline; margin-left: 8px; padding: 2px 10px; }
+
+
+/* Phase 14.3b: the band shows its hand, one read and one move under the pads. */
+.pf-band-hand:empty { display: none; }
+.pf-band-hand { margin: 8px 0 4px; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); }
+.pf-band-hand .pf-band-hand-heard { margin: 0 0 6px; }
+.pf-band-hand .pf-row { margin: 0; gap: 8px; }
+
+
+/* Phase 15.1: the heard meter, the hold ring and the direction glow. */
+.pf-heard { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; font-size: 13px; opacity: .85; }
+.pf-heard-end { min-width: 36px; text-align: center; }
+.pf-heard-track { position: relative; flex: 1; height: 10px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: visible; }
+.pf-heard-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--pf-part-tune); opacity: .45; transition: width 120ms linear; }
+.pf-heard-mark { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%; background: var(--pf-part-tune); border: 2px solid #fff; transform: translate(-50%,-50%); transition: left 120ms linear; box-shadow: 0 0 8px var(--pf-part-tune); }
+.pf-heard[data-settled="false"] .pf-heard-mark { opacity: .45; box-shadow: none; }
+.pf-jam-pad.pf-pad-leaned { box-shadow: 0 0 0 3px var(--pf-part-tune), 0 0 22px var(--pf-part-tune); }
+/* Hold ring: a held pad grows a ring for as long as it sounds; a tap only flashes. */
+.pf-jam-pad.pf-pad-sounding { animation: pf-pad-hold 1400ms ease-out forwards; }
+@keyframes pf-pad-hold { from { outline: 2px solid currentColor; outline-offset: 0; } to { outline: 6px solid currentColor; outline-offset: 10px; } }
+@media (prefers-reduced-motion: reduce) { .pf-jam-pad.pf-pad-sounding { animation: none; outline: 4px solid currentColor; outline-offset: 6px; } .pf-heard-fill, .pf-heard-mark { transition: none; } }
+body.pf-less-motion .pf-jam-pad.pf-pad-sounding { animation: none; outline: 4px solid currentColor; outline-offset: 6px; }
+/* Direction glow on the circle ticks, and the short arrow from the ring toward the brightest. */
+.pf-circle-tick { transition: opacity 200ms linear, transform 200ms linear, background 200ms linear; }
+.pf-circle-tick.pf-tick-toward { background: #fff; width: 7px; height: 7px; box-shadow: 0 0 8px #fff; }
+.pf-circle-tick.pf-tick-away { width: 3px; height: 3px; }
+.pf-circle-arrow { position: absolute; width: 46px; height: 0; pointer-events: none; transform-origin: 0 50%; }
+.pf-circle-arrow::after { content: ""; position: absolute; right: 0; top: -6px; border-left: 14px solid #fff; border-top: 6px solid transparent; border-bottom: 6px solid transparent; filter: drop-shadow(0 0 4px #fff); }
+.pf-circle-arrow::before { content: ""; position: absolute; left: 16px; right: 12px; top: -1px; height: 2px; background: #fff; }
+@media (forced-colors: active) { .pf-heard-fill, .pf-heard-mark { background: Highlight; } .pf-circle-tick.pf-tick-toward { background: Highlight; } .pf-circle-arrow::after { border-left-color: Highlight; } .pf-circle-arrow::before { background: Highlight; } }
+
+/* Phase 15.2: receipts in pictures, adopted notes lit, the melody connector, the Reading sign. */
+.pf-receipt { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 6px 0 2px; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); font-size: 14px; animation: pf-receipt-in 240ms ease-out; }
+.pf-receipt[hidden] { display: none; }
+.pf-receipt-cell { display: inline-flex; align-items: center; gap: 8px; }
+.pf-receipt-arrow { font-size: 20px; opacity: .8; }
+.pf-receipt-glyph { display: inline-block; width: 26px; height: 18px; border-radius: 4px; background: var(--pf-own); position: relative; }
+.pf-receipt-did[data-glyph="many"] .pf-receipt-glyph { background: repeating-linear-gradient(90deg, var(--pf-own) 0 4px, transparent 4px 7px); border-radius: 2px; }
+.pf-receipt-did[data-glyph="hold"] .pf-receipt-glyph { width: 34px; height: 8px; border-radius: 4px; }
+.pf-receipt-did[data-glyph="lean"] .pf-receipt-glyph { width: 18px; height: 18px; border-radius: 5px; box-shadow: 0 0 10px var(--pf-own); }
+.pf-receipt-did[data-glyph="offbeat"] .pf-receipt-glyph { background: repeating-linear-gradient(90deg, transparent 0 3px, var(--pf-own) 3px 7px, transparent 7px 10px); border-radius: 2px; }
+.pf-receipt-did[data-glyph="tune"] .pf-receipt-glyph { width: 14px; height: 14px; border-radius: 50%; transform: rotate(-20deg) scaleX(1.3); }
+.pf-receipt-so[data-part="drums"] .pf-receipt-glyph { background: var(--pf-part-tick); width: 18px; height: 18px; border-radius: 50%; }
+.pf-receipt-so[data-part="tune"] .pf-receipt-glyph { background: var(--pf-part-tune); width: 14px; height: 14px; border-radius: 50%; transform: rotate(-20deg) scaleX(1.3); }
+.pf-receipt-so[data-part="chords"] .pf-receipt-glyph { background: var(--pf-part-under); width: 22px; height: 12px; }
+.pf-receipt-so[data-part="band"] .pf-receipt-glyph { background: linear-gradient(90deg, var(--pf-part-tick) 0 25%, var(--pf-part-boom) 25% 50%, var(--pf-part-under) 50% 75%, var(--pf-part-tune) 75%); }
+@keyframes pf-receipt-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.pf-adopted:empty { display: none; }
+.pf-adopted { color: var(--pf-own); margin: 2px 0; }
+.pf-jam-pad.pf-pad-adopted { border-color: var(--pf-own); box-shadow: 0 0 0 2px var(--pf-own), 0 0 16px var(--pf-own); }
+.pf-sheet-note.adopted { stroke: var(--pf-own); stroke-width: 2px; }
+.pf-sheet-connector { stroke: var(--pf-own); stroke-width: 1.6px; stroke-dasharray: 4 3; opacity: .9; }
+.pf-reading { margin: 0 0 6px; padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,.08); display: inline-block; }
+@media (prefers-reduced-motion: reduce) { .pf-receipt { animation: none; } }
+body.pf-less-motion .pf-receipt { animation: none; }
+@media (forced-colors: active) { .pf-receipt-glyph, .pf-receipt-so .pf-receipt-glyph { background: Highlight; } .pf-sheet-connector, .pf-sheet-note.adopted { stroke: Highlight; } }
+
+/* ── Access batch 2026-11-02: every rendered control meets the target size ──
+   A drawer handle (<summary>) and a slider are controls like any button, so they take the shared target height
+   rather than one line of text; .qa-tools/access-target-gate.cjs measures every rendered box on each screen. */
+body.pf-mode summary[data-key] { display: list-item; box-sizing: border-box; min-height: var(--pf-target); padding: 8px 4px; align-content: center; cursor: pointer; }
+body.pf-mode input[type="range"] { box-sizing: border-box; min-height: 32px; height: 32px; }
+
+/* Exact sounding spans remain separate from the larger accessible note handles. */
+.pf-phrase-duration { position:absolute; height:4px; background:#75dbef; border-radius:2px; pointer-events:none; z-index:4; }
+
+.pf-song-blocks { display:flex; gap:12px; overflow-x:auto; padding:6px 3px 12px; }
+.pf-song-block { flex-basis:150px; min-width:150px; padding:14px; display:flex; flex-direction:column; gap:8px; text-align:left; }
+.pf-song-block svg { width:100%; min-height:75px; overflow:visible; }
+.pf-song-block.selected { outline:3px solid #76d9ef; outline-offset:0; }
+.pf-song-block.now { box-shadow:inset 0 -4px #ffbc45; }
+.pf-song-block [data-block-progress] { stroke:#ffbc45; stroke-width:3; }
+.pf-song-selected { margin-top:12px; padding:16px; }
+
+.pf-song-block { border-radius:18px; }
+:root .pf-library-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; max-width:760px; }
+.pf-library-tile { display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-height:128px; text-align:left; }
+.pf-song-library { margin-block:24px; padding:20px; border:1px solid #515863; border-radius:20px; }
+.pf-library-actions { margin-top:16px; padding-top:12px; border-top:1px solid #515863; }
+.pf-phrase-note.pf-note-playing { background:#ffbc53; color:#101218; box-shadow:0 0 0 3px #ffbc53; }
+.pf-phrase-note[aria-pressed="true"] { outline:3px solid #fff; outline-offset:3px; }
+.pf-phrase-picture .pf-phrase-note { background:transparent !important; border-color:transparent !important; color:transparent !important; font-size:0; box-shadow:none !important; }
+.pf-phrase-picture .pf-phrase-note[aria-pressed="true"] { outline:none; }
+.pf-phrase-picture .pf-phrase-note:focus-visible { outline:2px dashed #fff; outline-offset:1px; }
+.pf-phrase-picture .pf-phrase-duration { height:22px; min-width:2px; border-radius:5px; background:#36d5eb; pointer-events:none; }
+.pf-phrase-picture .pf-phrase-duration.pf-note-selected { outline:2px solid #fff; outline-offset:2px; }
+.pf-phrase-picture .pf-phrase-duration.pf-note-playing { background:#ffbc53; box-shadow:0 0 0 2px #ffbc53; }
+.pf-phrase-picture .pf-phrase-duration.pf-note-own { border:1px solid white; box-sizing:border-box; }
+
+/* Keep whole-song transport with its heading at narrow widths. */
+.pf-song > .pf-head-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+
+/* Drum sound lanes retain the same time geometry as melodic notes. */
+.pf-drum-grid { display:grid; grid-template-columns:100px minmax(0,1fr); gap:8px; }
+.pf-drum-labels { padding-top:12px; }
+.pf-drum-label { display:block; width:100%; min-width:0; padding:4px; font-size:12px; white-space:normal; border-radius:8px; }
+.pf-drum-grid .pf-phrase-picture { background-size:auto; background-image:repeating-linear-gradient(to right,transparent 0,transparent calc(var(--phrase-beat-width,25%) - 1px),#344150 var(--phrase-beat-width,25%)),repeating-linear-gradient(to bottom,#111923 0,#111923 55px,#293443 56px); }
+
+.pf-drum-beats { margin-left:108px; }
+
+.pf-phrase-cursor { width:3px; z-index:5; background:#ffcf63; box-shadow:0 0 0 1px #181b22; transition:none; }
+.pf-phrase-cursor::before { content:""; position:absolute; top:0; left:-5px; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #ffcf63; }
+.pf-melody-sound span { color:var(--pf-muted,#b9c3cf); }
+
+/* Piano-style pitch guide shares scrolling and exact row geometry with editable notes. */
+.pf-pitch-scroll { max-height:420px; overflow:auto; border:1px solid #526074; border-radius:12px; }
+.pf-pitch-grid { display:grid; grid-template-columns:52px minmax(0,1fr); }
+.pf-pitch-key { height:28px; box-sizing:border-box; border-bottom:1px solid #47515d; background:#d9e0e8; color:#19212b; font-size:12px; line-height:28px; padding-left:6px; }
+.pf-pitch-key.pf-pitch-black { background:#242d3a; color:#e6edf5; }
+.pf-pitch-grid .pf-phrase-picture { border:0; border-radius:0; background-image:repeating-linear-gradient(to right,transparent 0,transparent calc(var(--phrase-beat-width,25%) - 1px),#475565 var(--phrase-beat-width,25%)),repeating-linear-gradient(to bottom,#111923 0,#111923 27px,#344150 28px); }
+.pf-pitch-picture .pf-phrase-note { min-height:28px; height:28px; border-radius:4px; }
+.pf-pitch-beats { margin-left:52px; }
+
+/* Melody suggestions: discrete directions, with shared-scale note previews. */
+.pf-melody-compass { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; max-width:560px; padding:20px; border-radius:48%; background:radial-gradient(ellipse,#173f4b,#151924 65%,transparent 72%); }
+.pf-melody-compass [data-key="compare-original"] { grid-column:2; }
+.pf-melody-pictures { display:flex; flex-wrap:wrap; gap:12px; max-width:800px; }
+.pf-melody-pictures figure { flex:1 1 240px; margin:0; padding:12px; border:1px solid #55606b; border-radius:12px; }
+.pf-melody-pictures svg { width:100%; display:block; }
+
+.pf-melody-compass [data-key="melody-direction:rise"] { grid-column:2; grid-row:1; }
+.pf-melody-compass [data-key="melody-direction:fall"] { grid-column:1; grid-row:2; }
+.pf-melody-compass [data-key="melody-direction:arch"] { grid-column:3; grid-row:2; }
+.pf-melody-compass [data-key="compare-original"] { grid-column:2; grid-row:2; }
+
+/* Shared band context: compact marks are not mandatory tiny targets. */
+.pf-band-view{display:grid;gap:8px}.pf-band-row{border:1px solid #37434f;border-radius:12px;padding:8px;min-width:0}.pf-band-selected{border-color:#23def4}.pf-band-summary{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px;align-items:center}.pf-band-label{min-height:52px;white-space:normal}.pf-band-label small{display:block;color:#b9c2cc}.pf-band-track{position:relative;height:48px;overflow:hidden;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(25% - 1px),#39444f 25%)}.pf-band-mark{position:absolute;top:20px;height:8px;min-width:2px;background:#69a8b5;border-radius:3px}.pf-band-playing{background:#fff;box-shadow:0 0 8px #20e5ff}.pf-band-cursor{position:absolute;top:0;bottom:0;width:2px;background:#ffbc55}.pf-band-row .pf-pitch-scroll,.pf-band-row .pf-drum-grid{margin-top:10px}@media(max-width:600px){.pf-band-summary{grid-template-columns:92px minmax(0,1fr)}.pf-band-label{padding:6px;font-size:13px}}
+
+.pf-band-row .pf-pitch-scroll{margin-left:76px}.pf-band-row .pf-pitch-beats{margin-left:128px}.pf-band-row .pf-drum-grid{grid-template-columns:120px minmax(0,1fr)}.pf-band-row .pf-drum-beats{margin-left:128px}@media(max-width:600px){.pf-band-row .pf-pitch-scroll{margin-left:48px}.pf-band-row .pf-pitch-beats,.pf-band-row .pf-drum-beats{margin-left:100px}.pf-band-row .pf-drum-grid{grid-template-columns:92px minmax(0,1fr)}}
+
+.pf-band-label{display:block;text-align:left}.pf-band-label>span{display:inline-block;width:1em}.pf-band-label small{margin-top:3px;font-weight:normal}
+
+.pf-comparison-band{border:1px solid #37434f;border-radius:12px;padding:12px;margin:12px 0}.pf-comparison-band .pf-band-summary{border-bottom:1px solid #26333e}.pf-audition-cursor{position:absolute;top:0;bottom:0;width:2px;background:#ffbc55}

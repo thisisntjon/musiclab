@@ -37,6 +37,8 @@ export function pianoNotes(event) {
     pan: Math.max(0, Math.min(127, Math.round(64 + 63 * Number(event.pan || 0)))),
   }));
 }
+/** Marked so a caller can tell "this note has no voice" from a real failure. No voice is ever stolen. */
+const voicesFull = () => Object.assign(Error('Too many overlapping sampled notes. Stop and reduce the overlap; no notes were removed.'), { voicesFull: true });
 export class PianoAllocation {
   constructor() { this.slots = Array.from({length:TOTAL_CHANNELS}, () => []); }
   claim(at, duration, pitch = 60, pan = 64, program = 0, answerMode = null) {
@@ -46,10 +48,10 @@ export class PianoAllocation {
       channel=active.findIndex((notes,ch)=>ch>=CHANNELS&&notes.every(note=>note.pitch!==pitch&&note.pan===pan&&note.program===program));
     if(channel<0&&answerMode==='reply')throw Error('Answer voices are still fading. Your notes and band stay.');
     if(channel<0) {
-      if(active.slice(0,CHANNELS).flat().length>=120)throw Error('Too many overlapping sampled notes. Stop and reduce the overlap; no notes were removed.');
+      if(active.slice(0,CHANNELS).flat().length>=120)throw voicesFull();
       channel=active.findIndex((notes,ch)=>ch<CHANNELS&&ch%16!==9&&notes.every(note=>note.pitch!==pitch&&note.pan===pan&&note.program===program));
     }
-    if (channel < 0) throw Error('Too many overlapping sampled notes. Stop and reduce the overlap; no notes were removed.');
+    if (channel < 0) throw voicesFull();
     this.slots = active;
     this.slots[channel].push({pitch,pan,program,until:at + duration + SAMPLE_TAIL});
     return channel;

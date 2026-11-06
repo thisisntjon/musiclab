@@ -9,8 +9,8 @@ export function hasLeadCollisions(notes, bars = 4) {
   return false;
 }
 
-export function editLeadEvent(notes, id, action, { totalSteps = 64 } = {}) {
-  const matches = notes.filter(n => n.role === 'lead' && n.id === id);
+export function editLeadEvent(notes, id, action, { totalSteps = 64, role = 'lead' } = {}) {
+  const matches = notes.filter(n => n.role === role && n.id === id);
   if (matches.length !== 1) throw new Error('Choose one note first.');
   return notes.flatMap(note => {
     if (note !== matches[0]) return [note];

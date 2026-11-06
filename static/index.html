@@ -467,6 +467,22 @@
     </div>
   </div>
 
-  <script type="module" src="./ui/app.js"></script>
+  <div id="boot-failed" role="alert" style="display: none; position: fixed; inset: 0; z-index: 2147483647; align-items: center; justify-content: center; padding: 2rem; text-align: center; font: 600 1.75rem/1.4 system-ui, sans-serif; background: #111; color: #fff;"></div>
+  <script id="boot-check">
+    // One module that fails leaves the page dead and silent, so say so. Only a real failure does this: there is no timer,
+    // because a slow phone must never be told a page did not load while it is still loading.
+    (function () {
+      var box = document.getElementById("boot-failed");
+      function failed() {
+        if (window.musicLabApp) return;
+        box.textContent = "This did not load. Reload the page.";
+        box.style.display = "flex";
+      }
+      window.musicLabBootFailed = failed;
+      window.addEventListener("error", failed);
+      window.addEventListener("load", function () { if (window.musicLabApp) box.style.display = "none"; });
+    })();
+  </script>
+  <script type="module" src="./ui/app.js" onerror="musicLabBootFailed()"></script>
 </body>
 </html>

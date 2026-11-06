@@ -30,7 +30,7 @@ test('switching song ids retains each unfinished draft, legacy state, and separa
 });
 
 test('failed or malformed draft writes retain the exact previous storage bytes',()=>{
- let raw=null,fail=false;const storage={getItem:()=>raw,setItem:(k,v)=>{if(fail)throw Error('quota');raw=v;}};
+ let raw=null,fail=false;const storage={getItem:k=>k===WORKING_KEY?raw:null,setItem:(k,v)=>{assert.equal(k,WORKING_KEY);if(fail)throw Error('quota');raw=v;}};
  stashWorkingSong(storage,{id:'a',notes:[{id:'mine'}]});const before=raw;fail=true;
  assert.equal(stashWorkingSong(storage,{id:'b',notes:[]}),false);assert.equal(raw,before);
  fail=false;raw='{broken';assert.equal(stashWorkingSong(storage,{id:'c',notes:[]}),false);assert.equal(raw,'{broken');

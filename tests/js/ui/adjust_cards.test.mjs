@@ -1,3 +1,4 @@
+import {songArcFromCapture} from '../../../static/js/theory/song_view.js';
 // Phase 13.6c: Adjust. Three concrete ideas on arrival; hear one in place, keep it or not, one Undo.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -28,6 +29,10 @@ async function song() {
   flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
   await press(flow, "jam-pad:0");
   await press(flow, "capture-direction");
+  // Existing three-part songs remain supported; new onboarding has separate coverage.
+  flow._finishPartEdit(); flow.doc.song_cards=songArcFromCapture(flow.doc.song_cards);
+  delete flow.doc.song_path; flow._compile(); flow._go("song");
+  flow.app.scheduler.isPlaying=true;
   return flow;
 }
 
@@ -50,14 +55,14 @@ test("a hand is three applicable cards of different kinds; every card has a shor
   assert.ok(CARDS.every(c => c.hint.length <= 60));
 });
 
-test("cards appear once on arrival at Shape, Detail and Share, and Adjust can bring them back", async () => {
+test("cards stay optional on arrival and Adjust opens them", async () => {
   const flow = await song();
-  assert.equal(flow.adjustOpen, true, "dealt on arrival at Shape");
+  assert.equal(flow.adjustOpen, false, "optional on arrival at Shape");
   assert.equal(flow.adjustHand.length, 3);
   await press(flow, "adjust-keep-as-is");
   assert.equal(flow.adjustOpen, false);
   await press(flow, "journey:detail");
-  assert.equal(flow.adjustOpen, true, "dealt on arrival at Detail");
+  assert.equal(flow.adjustOpen, false, "optional on arrival at Detail");
   await press(flow, "adjust-keep-as-is");
   await press(flow, "journey:shape");
   assert.equal(flow.adjustOpen, false, "not dealt twice at the same level");

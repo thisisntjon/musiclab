@@ -137,10 +137,8 @@ async function runIsolatedSelfTest(app) {
     loop_started_without_play: false,
   };
   try {
-    const loc = typeof window !== "undefined" && window.location ? window.location : null;
-    const isLocalStudio = loc && (loc.hostname === "127.0.0.1" || loc.hostname === "localhost") && !String(loc.pathname || "").startsWith("/static/");
-    const res = isLocalStudio ? await fetch("/api/patches") : { ok: false };
-    out.server = Boolean(res.ok);
+    const res = await fetch("/api/patches");
+    out.server = res.ok;
   } catch (_e) {
     out.server = false;
   }

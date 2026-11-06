@@ -34,7 +34,9 @@ export function keySignature(rootPc = 0, scaleType = "major") {
   return { fifths, mode, root: rootPc % 12, flats: fifths < 0 };
 }
 
-export function spellPitch(midi, flats = false) {
+export function spellPitch(pitch, flats = false) {
+  // A staff has whole semitones only. A pitch worked out from a frequency is rarely exact, and an array index must be.
+  const midi = Number.isFinite(pitch) ? Math.round(pitch) : 60;
   const pc = ((midi % 12) + 12) % 12, name = (flats ? FLATS : SHARPS)[pc];
   return { step: name[0], alter: name[1] === "#" ? 1 : name[1] === "b" ? -1 : 0, octave: Math.floor(midi / 12) - 1 };
 }
@@ -74,7 +76,10 @@ export function scoreFromEvents(events, { title = "My song", bpm = 100, rootPc =
         const { steps, type, dots } = noteType(dur);
         items.push({ kind: "note", step: onset - start, steps, type, dots, notes: stack.map(e => ({
           id: e.id, midi: Number(e.concrete?.midi_pitch ?? e.concrete?.midi ?? (part.id === "drums" ? DRUM_MIDI[e.patch_id] ?? 38 : 60)),
-          patch: e.patch_id || null, own: OWN.has(e.provenance), velocity: e.velocity ?? .8 })) });
+          patch: e.patch_id || null, own: OWN.has(e.provenance), velocity: e.velocity ?? .8,
+          // Phase 15.2: a band note that opens on the person's note points back at it. A live key
+          // press is recorded with a source id and no id, so that is what the answer names.
+          source: e.source_note_id || null, answered: e.evolution?.answered?.source_note_id || null })) });
         cursor = onset + steps;
       });
       if (cursor < end) items.push(...rests(cursor, end - cursor, start));
@@ -248,6 +253,7 @@ export function renderSheetSvg(score, { playheadStep = null, width = null, beat 
   const out = [`<svg class="pf-sheet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${xml(score.title)} as sheet music">`];
   out.push(`<text x="${LEFT}" y="18" class="pf-sheet-title">${xml(score.title)}</text>`);
   out.push(`<text x="${w - 16}" y="18" text-anchor="end" class="pf-sheet-tempo">♩ = ${Math.round(score.bpm)}</text>`);
+  const placed = new Map(), connectors = []; // Phase 15.2: where each note head sits, for the melody connector
   score.measures.forEach((m, mi) => {
     const sys = Math.floor(mi / PER_LINE), col = mi % PER_LINE;
     const x0 = LEFT + col * BAR_W, y0 = TOP + sys * systemH;
@@ -292,8 +298,10 @@ export function renderSheetSvg(score, { playheadStep = null, width = null, beat 
         for (const h of heads) {
           for (const ly of h.ledger) out.push(`<line x1="${x - 7}" x2="${x + 7}" y1="${ly}" y2="${ly}" class="pf-sheet-line"/>`);
           if (h.acc) out.push(`<text x="${x - 11}" y="${h.y + 4}" class="pf-sheet-acc">${h.acc > 0 ? "♯" : "♭"}</text>`);
-          const cls = `pf-sheet-note pf-part-${p.id}${h.n.own ? " own" : ""}${sounding ? " now" : ""}`;
-          const attrs = `class="${cls}" data-id="${xml(h.n.id)}" data-step="${mi * score.stepsPerBar + item.step}"`;
+          const cls = `pf-sheet-note pf-part-${p.id}${h.n.own ? " own" : ""}${h.n.answered ? " adopted" : ""}${sounding ? " now" : ""}`;
+          const attrs = `class="${cls}" data-id="${xml(h.n.id)}" data-step="${mi * score.stepsPerBar + item.step}"${h.n.answered ? ` data-answers="${xml(h.n.answered)}"` : ""}`;
+          for (const anchor of [h.n.id, h.n.source]) if (anchor && !placed.has(anchor)) placed.set(anchor, { x, y: h.y });
+          if (h.n.answered) connectors.push({ from: h.n.answered, to: { x, y: h.y } });
           if (h.headKind === "x" || h.headKind === "circle-x") out.push(`<path d="M${x - 4} ${h.y - 4}L${x + 4} ${h.y + 4}M${x - 4} ${h.y + 4}L${x + 4} ${h.y - 4}" ${attrs} fill="none"/>`);
           else out.push(`<ellipse cx="${x}" cy="${h.y}" rx="4.6" ry="3.4" ${attrs}${open ? ' data-open="1"' : ""} transform="rotate(-20 ${x} ${h.y})"/>`);
         }
@@ -327,6 +335,12 @@ export function renderSheetSvg(score, { playheadStep = null, width = null, beat 
       }
     }
   });
+  // Phase 15.2: the melody connector, a line from the person's note to the band note that answered it.
+  for (const c of connectors) {
+    const from = placed.get(c.from);
+    if (!from || from.x >= c.to.x) continue;
+    out.push(`<path d="M${from.x} ${from.y} Q ${(from.x + c.to.x) / 2} ${Math.min(from.y, c.to.y) - 18} ${c.to.x} ${c.to.y}" class="pf-sheet-connector" fill="none" data-from="${xml(c.from)}"/>`);
+  }
   out.push("</svg>");
   return out.join("");
 }

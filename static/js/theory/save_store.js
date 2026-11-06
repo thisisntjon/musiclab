@@ -8,6 +8,19 @@
 import { MAX_PROJECT_BYTES, validateProject } from './project_validation.js';
 export { MAX_PROJECT_BYTES } from './project_validation.js';
 const KEY = "musiclab.saves.v1";
+export const TRASH_KEY = "musiclab.trash.v1";
+function trashEntries(storage) {
+  try {
+    const entries = JSON.parse(storage.getItem(TRASH_KEY) || '[]');
+    return Array.isArray(entries) && entries.every(e => e && typeof e.id === 'string' && e.id)
+      ? entries : null;
+  } catch { return null; }
+}
+function hiddenSong(storage, id) { return trashEntries(storage)?.some(e => e.id === id) || false; }
+function writableSong(storage, id) {
+  const trash = trashEntries(storage);
+  return trash === null ? 'unreadable' : trash.some(e => e.id === id) ? 'trashed' : null;
+}
 
 function readAll(storage) {
   try {
@@ -30,8 +43,8 @@ function readForWrite(storage) {
 }
 
 /** Only pieces the person made in the play flow are listed (never starter or test songs). */
-export function listSaves(storage) {
-  return readAll(storage).filter((s) => s && s.source === "person" && s.song && s.id);
+export function listSaves(storage, { includeTrashed = false } = {}) {
+  return readAll(storage).filter((s) => s && s.source === "person" && s.song && s.id && (includeTrashed || !hiddenSong(storage, s.id)));
 }
 
 export const SLOT_COUNT = 6;
@@ -64,13 +77,25 @@ export function summarizeCartridge(song) {
   return { kit, feel, parts, notes: leadNotes };
 }
 
+/** Browsers usually allow about 5.2 million characters here; some allow far less, and then a write fails and says so. */
+const NEARLY_FULL_CHARS = 4_000_000;
+export function storageNearlyFull(storage) {
+  try {
+    let total = 0;
+    for (let i = 0; i < storage.length; i += 1) { const key = storage.key(i); total += key.length + (storage.getItem(key)?.length || 0); }
+    return total >= NEARLY_FULL_CHARS;
+  } catch (_e) { return false; }
+}
+
 /** Stash the person's active working song so reopening the app shows it where they left it (paused). */
 export function stashWorkingSong(storage, song) {
   if (!storage || !song || !song.id) return false;
+  if (writableSong(storage, song.id)) return false;
   try {
     // One atomic localStorage replacement retains every other unfinished song.
     // Read strictly here: malformed stored JSON must not be silently overwritten.
     const old = JSON.parse(storage.getItem(WORKING_KEY) || "null");
+    if (!validWorkingRecord(old)) return false;
     const previous = workingEntries(old);
     const drafts = previous.filter(entry => entry.song.id !== song.id
       && workingDiffersFromSave(storage, entry.song));
@@ -99,13 +124,60 @@ function workingEntries(raw) {
     .map(({drafts, ...entry}) => entry);
 }
 
-export function listWorkingSongs(storage) {
+function validWorkingRecord(raw) {
+  if (raw === null) return true;
+  const valid = entry => entry && entry.source === 'person' && typeof entry.song?.id === 'string';
+  return valid(raw) && (raw.drafts === undefined || (Array.isArray(raw.drafts) && raw.drafts.every(valid)));
+}
+
+/** One library identity; saved checkpoints and unfinished edits stay distinct. */
+export function songLibrary(storage, { trash = false } = {}) {
+  try {
+    const removed = trashEntries(storage), saved = readForWrite(storage);
+    const working = JSON.parse(storage.getItem(WORKING_KEY) || 'null');
+    if (removed === null || saved === null || !validWorkingRecord(working)) return {ok:false,reason:'unreadable',songs:[]};
+    const entries = new Map();
+    for (const entry of listSaves(storage, {includeTrashed:true})) entries.set(entry.id, {id:entry.id,saved:entry.song,updated:entry.saved_at});
+    for (const entry of workingEntries(working)) {
+      const row = entries.get(entry.song.id) || {id:entry.song.id};
+      if (!row.draft) { row.draft=entry.song; row.updated=entry.updated_at || row.updated; }
+      entries.set(row.id,row);
+    }
+    const songs=[...entries.values()].filter(row => removed.some(e=>e.id===row.id) === trash).map(row=>({
+      ...row, title:(row.draft || row.saved).title || 'My song',
+      unfinished:!!row.draft && JSON.stringify(row.draft)!==JSON.stringify(row.saved),
+    }));
+    return {ok:true,songs};
+  } catch { return {ok:false,reason:'unavailable',songs:[]}; }
+}
+
+export function trashSong(storage, id) {
+  const library=songLibrary(storage), removed=trashEntries(storage);
+  if(!library.ok || removed===null) return {ok:false,reason:'unreadable'};
+  if(!library.songs.some(row=>row.id===id)) return {ok:false,reason:'missing'};
+  try {
+    storage.setItem(TRASH_KEY,JSON.stringify([...removed,{id,removed_at:new Date().toISOString()}]));
+    return {ok:true};
+  } catch { return {ok:false,reason:'storage'}; }
+}
+
+export function restoreSong(storage,id) {
+  const library=songLibrary(storage,{trash:true}), removed=trashEntries(storage);
+  if(!library.ok || removed===null) return {ok:false,reason:'unreadable'};
+  const row=library.songs.find(row=>row.id===id);
+  if(!row) return {ok:false,reason:'missing'};
+  if(row.saved && listSaves(storage).length>=SLOT_COUNT) return {ok:false,reason:'slots_full'};
+  try { storage.setItem(TRASH_KEY,JSON.stringify(removed.filter(e=>e.id!==id))); return {ok:true}; }
+  catch { return {ok:false,reason:'storage'}; }
+}
+
+export function listWorkingSongs(storage, { includeTrashed = false } = {}) {
   if (!storage) return [];
   try {
     const raw = JSON.parse(storage.getItem(WORKING_KEY) || "null");
     const unique = new Map();
     for (const entry of workingEntries(raw)) if (!unique.has(entry.song.id)) unique.set(entry.song.id, entry.song);
-    return JSON.parse(JSON.stringify([...unique.values()]));
+    return JSON.parse(JSON.stringify([...unique.values()].filter(song => includeTrashed || !hiddenSong(storage, song.id))));
   } catch (_e) {
     return [];
   }
@@ -179,6 +251,8 @@ function entryFor(song, now) {
 /** Save a piece. Saving it again updates its own slot; a new piece needs a free slot (reason "slots_full" if none). */
 export function savePiece(storage, song, { now = new Date().toISOString() } = {}) {
   const entry = entryFor(song, now);
+  const reason = writableSong(storage, song.id);
+  if (reason) return {ok:false, reason, entry};
   const all = readForWrite(storage);
   if(all===null)return {ok:false,reason:"unreadable",entry};
   const at = all.findIndex((s) => s.id === song.id);
@@ -194,6 +268,8 @@ export function savePiece(storage, song, { now = new Date().toISOString() } = {}
 /** Put a piece in the slot of another one (the caller has had the second press). */
 export function replacePiece(storage, oldId, song, { now = new Date().toISOString() } = {}) {
   const entry = entryFor(song, now);
+  const reason = writableSong(storage, oldId) || writableSong(storage, song.id);
+  if (reason) return {ok:false, reason, entry};
   const stored = readForWrite(storage);
   if(stored===null)return {ok:false,reason:"unreadable",entry};
   const all = stored.filter((s) => s.id !== song.id);

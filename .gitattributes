@@ -1,0 +1,6 @@
+# Preserve existing bytes and candidate fingerprints on checkout.
+* -text
+*.sf2 binary
+*.png binary
+*.wav binary
+*.zip binary

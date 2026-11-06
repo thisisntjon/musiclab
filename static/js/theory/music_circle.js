@@ -149,7 +149,11 @@ export function circleStep(id,delta) {
   const i=Math.max(0,CIRCLE_SCENES.indexOf(id));return CIRCLE_SCENES[((i+delta)%CIRCLE_SCENES.length+CIRCLE_SCENES.length)%CIRCLE_SCENES.length];
 }
 export function circleFamilyStep(id,delta) {
-  const i=Math.max(0,CIRCLE_GROUPS.findIndex(g=>g.sceneIds.includes(id)));return CIRCLE_GROUPS[(i+delta+CIRCLE_GROUPS.length)%CIRCLE_GROUPS.length].sceneIds[0];
+  return circleFamilyScenes(id,delta)[0];
+}
+/** The next family's scenes in circle order; the first is the plain Next family landing. */
+export function circleFamilyScenes(id,delta) {
+  const i=Math.max(0,CIRCLE_GROUPS.findIndex(g=>g.sceneIds.includes(id)));return CIRCLE_GROUPS[(i+delta+CIRCLE_GROUPS.length)%CIRCLE_GROUPS.length].sceneIds;
 }
 
 // Only this explicitly scored family has continuous coordinates. Other sectors

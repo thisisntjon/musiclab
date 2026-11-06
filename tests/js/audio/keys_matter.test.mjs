@@ -100,7 +100,7 @@ test("pressing S or F gives different band notes at the start of the next bar; y
   assert.equal(queued.length, 0, "with no press the band carries on unchanged");
 });
 
-test("12 fast presses build a roll, a riser and a drop; personal notes keep their exact level", () => {
+test("12 fast presses build a rhythm without surprise sweeps or drops; personal notes keep their exact level", () => {
   const mine = { id: "mine", step: 62, role: "lead", patch_id: "warm_keys", duration_sec: .2, velocity: .42, provenance: "user_placed", concrete: { midi_pitch: 64, freq_hz: 329.63 } };
   const s = scheduler([mine]);
   const seen = [];
@@ -109,8 +109,8 @@ test("12 fast presses build a roll, a riser and a drop; personal notes keep thei
   s.audioCtx.currentTime = s.nextStepAudioTime - .05;
   for (let i = 0; i < 20; i++) seen.push(step(s));
   const all = seen.flatMap(v => v.events);
-  assert.ok(all.some(e => e.id.startsWith("energy-riser-")), "riser over the last bar");
-  assert.ok(all.some(e => e.id.startsWith("energy-drop-") && e.patch_id === "sub_drop_808"), "drop on the next downbeat");
+  assert.ok(!all.some(e => e.id.startsWith("energy-riser-")), "no automatic riser");
+  assert.ok(!all.some(e => e.id.startsWith("energy-drop-")), "no automatic drop");
   const kickAfterPress = all.find(e => e.role === "drums" && e.patch_id === "kick");
   assert.ok(kickAfterPress.velocity > .3, "generated drums grow with energy");
   assert.equal(all.find(e => e.id === "mine").velocity, .42, "the person's note is never changed");

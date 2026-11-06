@@ -4,7 +4,7 @@ Thank you for helping. MusicLab is early, and the most useful thing you can give
 
 ## Feedback
 
-Open an issue and tell us:
+There is no feedback address for this first release. If you are reading this somewhere with an issue tracker, open an issue there and tell us:
 
 - who was playing (no names or diagnoses needed, just what kind of access they use: touch, mouse, keyboard, switch, screen reader);
 - what they were trying to do;

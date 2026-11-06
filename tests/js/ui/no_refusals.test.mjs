@@ -66,7 +66,7 @@ async function fuzz(seed, presses) {
       else if (roll < .2 && flow.stage === "jam") flow._playJamPad(Math.floor(rand() * 4), rand() < .5 ? "key:a" : null);
       else if (keys.length) await press(keys[Math.floor(rand() * keys.length)]);
       await Promise.resolve();
-    } catch (error) { errors.add(String(error.message).slice(0, 80)); }
+    } catch (error) { errors.add(process.env.FUZZ_DEBUG ? String(error.stack).slice(0, 700) : String(error.message).slice(0, 80)); }
     const said = announced.slice(before);
     if (flow.jamMessage && flow.jamMessage !== message) said.push(flow.jamMessage);
     for (const m of said) if (REFUSAL.test(m) && !ALLOWED.some(a => a.test(m))) refusals.add(`${flow.stage}: ${m}`);

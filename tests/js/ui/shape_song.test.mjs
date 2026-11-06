@@ -1,3 +1,4 @@
+import {songArcFromCapture} from '../../../static/js/theory/song_view.js';
 // Phase 13.4: a captured jam becomes a real song of itself, shaped with plain choices.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -31,10 +32,14 @@ async function captured() {
   flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
   await press(flow, "jam-pad:0");
   await press(flow, "capture-direction");
+  // Existing three-part songs remain supported; new onboarding has separate coverage.
+  flow._finishPartEdit(); flow.doc.song_cards=songArcFromCapture(flow.doc.song_cards);
+  delete flow.doc.song_path; flow._compile(); flow._go("song");
+  flow.app.scheduler.isPlaying=true;
   return flow;
 }
 
-test("capture makes at least two contrasting parts and an ending whose last bar differs from the main part", async () => {
+test("legacy arc retains at least two contrasting parts and an ending whose last bar differs from the main part", async () => {
   const flow = await captured();
   assert.equal(flow.stage, "song");
   const cards = flow.doc.song_cards;
@@ -78,10 +83,15 @@ test("the ending's three choices each change the final bar, and Drum roll adds r
 test("Shape shows at most five primary controls beyond the part tiles", async () => {
   const flow = await captured();
   const html = flow._renderSong();
-  const outsideTiles = html.replace(/<div class="pf-song-card[\s\S]*?<\/div>\s*<\/div>/g, "").replace(/<details[\s\S]*<\/details>/, "");
+  const outsideTiles = html.replace(/<button\b[^>]*class="[^"]*\bpf-song-block\b[^>]*>[\s\S]*?<\/button>/g, "")
+    .replace(/<section class="pf-song-selected\b[\s\S]*?<\/section>/g, "")
+    .replace(/<details[\s\S]*<\/details>/, "");
   const keys = [...outsideTiles.matchAll(/data-key="([^"]+)"/g)].map(m => m[1]);
   assert.ok(keys.length <= 5, keys.join(", "));
-  assert.ok(html.includes('data-key="part-mood:1:calmer"') && html.includes('data-key="ending-style:roll"'));
+  assert.ok(html.includes(`data-key="part-mood:${flow.activeSongCard || 0}:calmer"`));
+  assert.ok(!html.includes('data-key="ending-style:roll"'), "ending choices appear only when ending is selected");
+  await press(flow, `select-card:${flow.doc.song_cards.length - 1}`);
+  assert.ok(flow._renderSong().includes('data-key="ending-style:roll"'));
 });
 
 test("opening a part while the song plays keeps the music going, looping that part", async () => {

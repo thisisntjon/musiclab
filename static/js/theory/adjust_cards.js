@@ -6,7 +6,7 @@
  *
  * Import-light so it runs in Node tests and the browser.
  */
-import { normalizeSongCards, setPartMood, setEndingStyle, addSongCard, toggleCardTuneVariation, partMood, endingStyle, MAX_SONG_CARDS } from "./song_view.js";
+import { normalizeSongCards, setPartMood, setEndingStyle, ensureSectionIds, insertSongPart, toggleCardTuneVariation, partMood, endingStyle, MAX_SONG_CARDS } from "./song_view.js";
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const own = note => note.provenance === "user_placed" || note.provenance === "hummed_confirmed";
@@ -47,10 +47,10 @@ export const CARDS = [
   endingCard("big", "Big finish", "The whole band ends it."),
   endingCard("quiet", "Quiet end", "The drums and bass drop out at the end."),
   {
-    id: "longer", kind: "shape", title: "One more part", hint: "Adds a part at the end, like the last one.",
+    id: "longer", kind: "shape", title: "One more part", hint: "Copies a part before the ending. Edits stay separate.",
     applicable: doc => normalizeSongCards(doc.song_cards).length < MAX_SONG_CARDS,
-    apply: doc => ({ ...clone(doc), song_cards: addSongCard(doc.song_cards) }),
-    seek: doc => partStart(doc, normalizeSongCards(doc.song_cards).length - 1),
+    apply: doc => { const cards = ensureSectionIds(doc.song_cards); return { ...clone(doc), song_cards: insertSongPart(cards, cards.at(-1).section_id, doc).cards }; },
+    seek: doc => partStart(doc, Math.max(0, normalizeSongCards(doc.song_cards).length - 2)),
   },
   {
     id: "lift", kind: "sound", title: "Lift the tune", hint: "The tune moves up in one part.",

@@ -55,9 +55,8 @@ def compile_song_cards(doc: dict[str, Any], options: dict | None, compiler: Call
         sec_offset = offset * step_sec
         sec_id = f"card-{index}"
         next_card = cards[index + 1] if index + 1 < len(cards) else {}
-        next_big = isinstance(next_card, dict) and bool(next_card.get("big"))
+        next_big = card["pre_big_breath"] if type(card.get("pre_big_breath")) is bool else isinstance(next_card, dict) and bool(next_card.get("big"))
         fx = card.get("fx")
-        first_lead = next((e for e in source["events"] if e["role"] == "lead" and e.get("concrete", {}).get("freq_hz")), None)
         for original in source["events"]:
             role = original["role"]
             layer = "beat" if role == "drums" else "tune" if role == "lead" else "under"
@@ -75,7 +74,7 @@ def compile_song_cards(doc: dict[str, Any], options: dict | None, compiler: Call
             event["bar"] = event["step"] // steps_per_bar
             performance = original.get("performance")
             performed_duration = original.get("duration_steps")
-            keeps_final_tail = (index == len(cards) - 1 and not _capture_segment(card.get("capture_segment")) and isinstance(performance, dict)
+            keeps_final_tail = ((card.get("preserve_performed_holds") is True or (index == len(cards) - 1 and not _capture_segment(card.get("capture_segment")))) and isinstance(performance, dict)
                                 and type(performance.get("version")) in (int, float) and performance.get("version") == 1
                                 and type(performed_duration) in (int, float)
                                 and 0 < performed_duration <= 64 and math.isfinite(performed_duration))
@@ -126,9 +125,6 @@ def compile_song_cards(doc: dict[str, Any], options: dict | None, compiler: Call
                 if next_big and step >= card_steps - 3:
                     continue
                 events.append(dict(id=f"fx-roll-c{index}-s{step}", role="drums", patch_id="snare", step=offset + step, bar=(offset + step) // steps_per_bar, start_sec=round(sec_offset + step * step_sec, 4), duration_sec=round(step_sec, 4), velocity=round(.38 + (step - (card_steps - 8)) / 7 * .48, 3), provenance="generator_default", concrete={"midi": 38, "freq_hz": 200.0}, card=index, section_id=sec_id))
-        if next_big and card.get("under") is not False:
-            pitch = first_lead.get("concrete", {}) if first_lead else {}
-            events.append(dict(id=f"fx-swell-c{index}", role="harmony", patch_id="reverse_swell", step=offset + card_steps - 12, bar=(offset + card_steps - 12) // steps_per_bar, start_sec=round(sec_offset + (card_steps - 12) * step_sec, 4), duration_sec=round(9 * step_sec, 4), velocity=.72, provenance="generator_default", concrete={"midi": pitch.get("midi", pitch.get("midi_pitch", 60)), "freq_hz": pitch.get("freq_hz", 261.63)}, card=index, section_id=sec_id))
         gravity.extend(copy.deepcopy(source.get("gravity_by_step", [])[:card_steps]))
         sections.append(dict(id=sec_id, index=index, name=card.get("role_name") or f"Part {index + 1}", type="guided", bars=card_steps // steps_per_bar, start_bar=offset // steps_per_bar, end_bar=(offset + card_steps) // steps_per_bar, start_step=offset, end_step=offset + card_steps, start_sec=sec_offset, end_sec=sec_offset + duration, active_event_count=sum(e["card"] == index for e in events)))
         offset += card_steps

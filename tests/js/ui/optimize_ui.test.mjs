@@ -32,48 +32,18 @@ async function song() {
   return flow;
 }
 
-test("the button is on every level after Find", async () => {
+test("unnamed optimization is replaced by optional named previews without mutation", async () => {
   const flow = await song();
-  assert.match(flow._journeyHtml(), /data-key="optimize"[^>]*>Make it nicer/);
-  await press(flow, "journey:detail"); assert.match(flow._journeyHtml(), /data-key="optimize"/);
-  await press(flow, "journey:share"); assert.match(flow._journeyHtml(), /data-key="optimize"/);
-});
-
-test("on Detail, one tap moves a wrong note to the chord, says so, leaves one Undo, and a second tap finds nothing to do", async () => {
-  const flow = await song();
-  await press(flow, "edit-card:1"); await press(flow, "adjust-keep-as-is");
-  const mine = flow.doc.notes.find(n => n.provenance === "user_placed");
-  mine.concrete = { ...mine.concrete, midi_pitch: 61 }; flow._compile();
-  const depth = flow.undoStack.length, others = JSON.stringify(flow.doc.notes.filter(n => n.provenance !== "user_placed"));
-  await press(flow, "optimize");
-  const after = flow.doc.notes.find(n => n.id === mine.id);
-  assert.notEqual(after.concrete.midi_pitch, 61);
-  assert.equal(JSON.stringify(flow.doc.notes.filter(n => n.provenance !== "user_placed")), others, "the band's notes are untouched");
-  assert.match(flow.said.at(-1), /moved to the chord|comes home/);
-  assert.equal(flow.undoStack.length, depth + 1);
-  await press(flow, "optimize");
-  assert.match(flow.said.at(-1), /as near as I can get it/);
-  assert.equal(flow.undoStack.length, depth + 1, "a tap that changes nothing adds no Undo step");
-  await press(flow, "undo");
-  assert.equal(flow.doc.notes.find(n => n.id === mine.id).concrete.midi_pitch, 61);
-  assert.equal(flow.app.scheduler.isPlaying, true, "the music never stopped");
-});
-
-test("on Shape, one tap gives a flat song a calmer start and a real ending", async () => {
-  const flow = await song();
-  flow.doc.song_cards = flow.doc.song_cards.map(c => ({ ...c, under: true, big: false, fx: null })); flow._compile();
-  await press(flow, "optimize");
-  assert.equal(flow.doc.song_cards[0].under, false);
-  assert.equal(flow.doc.song_cards.at(-1).fx, "drum_roll");
-  assert.match(flow.said.at(-1), /calmer start/);
-});
-
-test("on Play, one tap moves the keys to the band's register", async () => {
-  const flow = setup();
-  flow.stage = "jam";
-  flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
-  flow.doc.jam_session.live_keys = true; flow.jamPlayed = true;
-  await press(flow, "optimize");
-  assert.equal(flow.padOctave, 1);
-  assert.match(flow.said.at(-1), /Keys moved up/);
+  for (const route of ['journey:shape','journey:detail','journey:share']) {
+    await press(flow, route);
+    assert.doesNotMatch(flow._journeyHtml(), /data-key="optimize"/);
+    assert.match(flow._journeyHtml(), /data-key="adjust-open"/);
+    const before = JSON.stringify(flow._canonicalDoc());
+    const depth = flow.undoStack.length;
+    await press(flow, 'optimize'); // legacy route is safe too
+    assert.equal(JSON.stringify(flow._canonicalDoc()), before);
+    assert.equal(flow.undoStack.length, depth);
+    assert.match(flow._adjustHtml(), /Whole song/);
+    await press(flow, 'adjust-keep-as-is');
+  }
 });

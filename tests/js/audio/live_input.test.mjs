@@ -9,7 +9,8 @@ import assert from "node:assert/strict";
 
 import { LookaheadScheduler, overdueSteps, LATE_STEP_TOLERANCE_SEC, LIVE_MIN_SEC, LIVE_RELEASE_SEC,
 
-  LIVE_MAX_HOLD_SEC, LIVE_VOICE_LIMIT } from "../../../static/js/audio/scheduler.js";
+  LIVE_MAX_HOLD_SEC, LIVE_VOICE_LIMIT, LIVE_START_DELAY_SEC } from "../../../static/js/audio/scheduler.js";
+import { liveVelocity } from "../../../static/js/theory/scene_voice_levels.js";
 
 import { PlayFlow } from "../../../static/ui/stages/play_flow.js";
 import {planMelodicPhrase} from '../../../static/js/theory/melodic_evolution.js';
@@ -285,13 +286,13 @@ test("reverse swell remains a short audible gesture instead of a four-second att
 
   const envelope = created.find(node => node.name === "Gain" &&
 
-    node.gain.calls.some(call => call[0] === "exp" && call[1] === 0.45 * 0.85));
+    node.gain.calls.some(call => call[0] === "exp" && call[1] === 0.45 * liveVelocity("reverse_swell", "lead", false)));
 
   assert.ok(envelope, "reverse voice has a swell envelope");
 
-  const peak = envelope.gain.calls.find(call => call[0] === "exp" && call[1] === 0.45 * 0.85);
+  const peak = envelope.gain.calls.find(call => call[0] === "exp" && call[1] === 0.45 * liveVelocity("reverse_swell", "lead", false));
 
-  assert.ok(Math.abs(peak[2] - (0.01 + LIVE_MIN_SEC - 0.015)) < 1e-9,
+  assert.ok(Math.abs(peak[2] - (LIVE_START_DELAY_SEC + LIVE_MIN_SEC - 0.015)) < 1e-9,
 
     "swell peaks during a tap, before release");
 
@@ -497,13 +498,13 @@ test("release reports audio-clock gates once, including cap, stealing and immedi
 
   id = on(); s.audioCtx.currentTime = .86; s.noteOff(id);
 
-  assert.ok(Math.abs(reports[1] - .8) < 1e-9);
+  assert.ok(Math.abs(reports[1] - (.86 - .05 - LIVE_START_DELAY_SEC)) < 1e-9);
 
   id = on(); s.audioCtx.currentTime = 10; s.noteOff(id); assert.equal(reports[2], 4);
 
   id = on(); s.audioCtx.currentTime = 10.11; s.stop();
 
-  assert.ok(Math.abs(reports[3] - .1) < 1e-9); assert.equal(reports.length, 4);
+  assert.ok(Math.abs(reports[3] - (.11 - LIVE_START_DELAY_SEC)) < 1e-9); assert.equal(reports.length, 4);
 
 }));
 
@@ -529,7 +530,7 @@ test("performed holds survive later presses, capture and undo without resurrecti
 
   assert.equal(held.length, 4);
 
-  for (const n of held) assert.ok(Math.abs(n.duration_steps - .8 * flow.doc.global_context.bpm / 15) < 1e-9);
+  for (const n of held) assert.ok(Math.abs(n.duration_steps - (.81 - LIVE_START_DELAY_SEC) * flow.doc.global_context.bpm / 15) < 1e-9);
 
   flow._undo(); // discard D, keep completed S recording
 
@@ -543,7 +544,7 @@ test("performed holds survive later presses, capture and undo without resurrecti
 
   for (const n of held) assert.deepEqual(flow.doc.notes.find(x => x.id === n.id), n);
 
-  assert.equal(flow.stage, "song");
+  assert.equal(flow.stage, "tune");
 
 }));
 
@@ -823,8 +824,8 @@ test('Keep midway through handoff retains performed bridge and held note through
   const expected=Array.from({length:16},(_,step)=>['drums','bass','harmony'].map(r=>`A-${r}-${step}`)).flat();
   for(let step=16;step<20;step++)expected.push(`B-drums-${step}`,...(step===16?[`A-bass-${step}`]:[]),`A-harmony-${step}`);
   expected.push('held-mine');assert.deepEqual(ids,expected);
-  const held=capture.events.at(-1);assert.ok(Math.abs(held.time-2.61)<1e-9);
-  assert.ok(Math.abs(held.duration-.39)<1e-9); // live attack uses the existing10ms scheduling lead
+  const held=capture.events.at(-1);assert.ok(Math.abs(held.time-(2.6+LIVE_START_DELAY_SEC))<1e-9);
+  assert.ok(Math.abs(held.duration-(.4-LIVE_START_DELAY_SEC))<1e-9);
   assert.equal(ids.filter(id=>id==='held-mine').length,1);
   const {flow}=jamFlow(),source=structuredClone(flow.doc),doc=materializePerformance(source,capture);
   assert.deepEqual(doc.capture_source,source);
@@ -928,7 +929,7 @@ test('Keep captures past committed occurrences, partial bar and held input, excl
   const expected=[...Array.from({length:16},(_,i)=>`A-${i}`),'B-16','personal-held','B-17'];
   assert.deepEqual(ids,expected);assert.ok(!ids.includes('B-18'));assert.ok(!ids.some(id=>id.startsWith('C-')));
   assert.equal(capture.bars,2);assert.equal(capture.end,2.65);
-  const held=capture.events.find(e=>e.event.source_note_id==='personal-held');assert.ok(Math.abs(held.duration-.14)<1e-9);
+  const held=capture.events.find(e=>e.event.source_note_id==='personal-held');assert.ok(Math.abs(held.duration-(.15-LIVE_START_DELAY_SEC))<1e-9);
   assert.equal(ids.filter(id=>id==='personal-held').length,1);
   const {flow}=jamFlow();const original=structuredClone(flow.doc);const doc=materializePerformance(original,capture);
   assert.deepEqual(doc.capture_source,original);assert.deepEqual(original,flow.doc);
@@ -1153,8 +1154,8 @@ test('a synthesized press at capacity cannot truncate sampled personal holds or 
  assert.throws(()=>scheduler.noteOn({patchId:'pluck_lead',role:'lead',midi:80,sourceNoteId:'overflow'}),/All held notes/);
  assert.deepEqual([...scheduler.liveNotes.keys()],ids);assert.equal(releases.length,0);assert.equal(durations.length,0);assert.equal(scheduler.performanceTake.events.length,LIVE_VOICE_LIMIT);
  scheduler.audioCtx.currentTime=.8214;scheduler.allNotesOff();
- assert.equal(releases.length,LIVE_VOICE_LIMIT);assert.ok(durations.every(d=>Math.abs(d-.8114)<1e-9));
- const capture=scheduler.capturePerformance();assert.equal(capture.events.length,LIVE_VOICE_LIMIT);assert.ok(capture.events.every((r,i)=>r.event.source_note_id===`personal-${i}`&&Math.abs(r.duration-.8114)<1e-9));
+ assert.equal(releases.length,LIVE_VOICE_LIMIT);assert.ok(durations.every(d=>Math.abs(d-(.8214-LIVE_START_DELAY_SEC))<1e-9));
+ const capture=scheduler.capturePerformance();assert.equal(capture.events.length,LIVE_VOICE_LIMIT);assert.ok(capture.events.every((r,i)=>r.event.source_note_id===`personal-${i}`&&Math.abs(r.duration-(.8214-LIVE_START_DELAY_SEC))<1e-9));
 }));
 
 

@@ -83,16 +83,20 @@ test("the eight-step journey passes in order, on a random style, with no refusal
 
   // 3. Make my song: the music keeps playing and Shape opens.
   await press(flow, "capture-direction");
-  assert.equal(flow.stage, "song");
-  assert.equal(flow.app.scheduler.isPlaying, true, "music carries through");
-  assert.ok(flow.adjustOpen && flow.adjustHand.length >= 2, "three ideas are dealt on arrival");
+  assert.equal(flow.stage, "tune");
+  assert.equal(flow.doc.song_cards.length,1,"Keep does not generate extra parts");
+  await press(flow,"build-starter");
+  assert.equal(flow.partComparison?.kind,"starter");
+  await press(flow,"compare-keep");
+  assert.equal(flow.app.scheduler.isPlaying, false, "accepting a preview does not unexpectedly start audio");
+  assert.ok(!flow.adjustOpen && flow.adjustHand.length >= 2, "ideas are available without opening on arrival");
   await press(flow, "adjust-keep-as-is");
 
   // 4. Two contrasting parts and an ending.
   const cards = flow.doc.song_cards;
   assert.ok(cards.length >= 3);
-  assert.notEqual(sig(byPart(flow, 0)), sig(byPart(flow, 1)), "beginning and main part contrast");
-  assert.ok(byPart(flow, cards.length - 1).some(e => String(e.id).startsWith("fx-roll-")), "the ending rolls into its last bar");
+  assert.notEqual(sig(byPart(flow, 0)), sig(byPart(flow, 2)), "ending band is softer");
+  assert.equal(flow.doc.song_path.groups.length,3,"three deliberate song chapters");
   assert.ok(primaryCount(flow._renderSong()) <= 5, "five primary controls on Shape");
 
   // 5. Calmer changes only that part; Undo restores it exactly.

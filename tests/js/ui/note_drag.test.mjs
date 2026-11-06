@@ -41,7 +41,7 @@ test("dragging a note up changes its pitch in the key, sounds it as it moves, an
   const flow = await inDetail();
   const note = flow.doc.notes.find(n => n.role === "lead");
   const { low, high } = flow.phraseRange;
-  const yFor = midi => 12 + 22 + (high - midi) / (high - low) * 140;
+  const yFor = midi => (high - midi + .5) * flow.phraseRange.rowHeight;
   const buttonFor = n => ({ dataset: { phraseNote: n.id }, getBoundingClientRect: () => ({ left: 0, right: 44, top: 0, bottom: 44 }) });
   const undoBefore = flow.undoStack.length, startPitch = note.concrete.midi_pitch, startStep = note.step;
   flow._beginNoteDrag(pointer(10, yFor(startPitch), 7, buttonFor(note)), picture);
@@ -62,8 +62,8 @@ test("dragging a note up changes its pitch in the key, sounds it as it moves, an
 test("dragging sideways snaps to the grid; dragging the right edge changes the length", async () => {
   const flow = await inDetail();
   const note = flow.doc.notes.find(n => n.role === "lead");
-  const { low, high, stepCount } = flow.phraseRange, y = 12 + 22 + (high - note.concrete.midi_pitch) / (high - low) * 140;
-  const colW = (444 - 44) / stepCount;
+  const { low, high, stepCount } = flow.phraseRange, y = (high - note.concrete.midi_pitch + .5) * flow.phraseRange.rowHeight;
+  const colW = 444 / stepCount;
   const buttonFor = n => ({ dataset: { phraseNote: n.id }, getBoundingClientRect: () => ({ left: 0, right: 44, top: 0, bottom: 44 }) });
   const startStep = note.step;                   // the note object itself is edited in place
   flow._beginNoteDrag(pointer(2, y, 7, buttonFor(note)), picture);
@@ -105,10 +105,10 @@ test("starting a drag on an existing note does not re-render, and the drag measu
   const stale = { getBoundingClientRect: () => ({ left: 0, top: 0, width: 0, height: 0 }), setPointerCapture() {}, releasePointerCapture() {} };
   flow.root = { querySelector: sel => sel === "[data-phrase-picture]" ? picture : null, querySelectorAll: () => [] };
   const { low, high } = flow.phraseRange, startPitch = note.concrete.midi_pitch, startStep = note.step;
-  const yFor = midi => 12 + 22 + (high - midi) / (high - low) * 140;
+  const yFor = midi => (high - midi + .5) * flow.phraseRange.rowHeight;
   flow._beginNoteDrag(pointer(10, yFor(startPitch), 3, buttonFor(note)), stale);
   assert.equal(renders, 0, "no re-render mid-gesture");
-  flow._moveNoteDrag(pointer(10, yFor(startPitch) - 30, 3));
+  flow._moveNoteDrag(pointer(10, yFor(startPitch) - 2 * flow.phraseRange.rowHeight, 3));
   flow._endNoteDrag();
   const after = flow.doc.notes.find(n => n.id === note.id);
   assert.ok(after.concrete.midi_pitch > startPitch && after.concrete.midi_pitch < startPitch + 12, `moved up a little, got ${after.concrete.midi_pitch}`);
@@ -120,7 +120,7 @@ test("a pitch-only drag keeps the note's timing feel: its offset, release and ho
   const flow = await inDetail();
   const note = flow.doc.notes.find(n => n.role === "lead");
   note.performance = { version: 1, offset_steps: .37, released_at: 12.5, hold_id: "h1" };
-  const { low, high } = flow.phraseRange, yFor = midi => 12 + 22 + (high - midi) / (high - low) * 140, p0 = note.concrete.midi_pitch;
+  const { low, high } = flow.phraseRange, yFor = midi => (high - midi + .5) * flow.phraseRange.rowHeight, p0 = note.concrete.midi_pitch;
   const buttonFor = n => ({ dataset: { phraseNote: n.id }, getBoundingClientRect: () => ({ left: 0, right: 44, top: 0, bottom: 44 }), setAttribute() {} });
   flow._beginNoteDrag(pointer(10, yFor(p0), 7, buttonFor(note)), picture);
   flow._moveNoteDrag(pointer(10, yFor(p0 + 5), 7));
@@ -134,11 +134,35 @@ test("a cancelled drag restores the note and leaves the undo stack as it was", a
   const flow = await inDetail();
   const note = flow.doc.notes.find(n => n.role === "lead");
   const snapshot = JSON.stringify(note), depth = flow.undoStack.length;
-  const { low, high } = flow.phraseRange, yFor = midi => 12 + 22 + (high - midi) / (high - low) * 140;
+  const { low, high } = flow.phraseRange, yFor = midi => (high - midi + .5) * flow.phraseRange.rowHeight;
   const buttonFor = n => ({ dataset: { phraseNote: n.id }, getBoundingClientRect: () => ({ left: 0, right: 44, top: 0, bottom: 44 }), setAttribute() {} });
   flow._beginNoteDrag(pointer(10, yFor(note.concrete.midi_pitch), 7, buttonFor(note)), picture);
   flow._moveNoteDrag(pointer(10, yFor(note.concrete.midi_pitch + 7), 7));
   flow._endNoteDrag({ cancelled: true });
   assert.equal(JSON.stringify(flow.doc.notes.find(n => n.id === note.id)), snapshot);
   assert.equal(flow.undoStack.length, depth);
+});
+
+test("the note editor opens on your own notes and names them apart from the band's", async () => {
+  const flow = setup();
+  flow.stage = "jam";
+  flow.doc.song_cards = flow.doc.song_cards.slice(0, 1);
+  flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
+  await press(flow, "jam-pad:0");
+  await press(flow, "capture-direction");
+  await press(flow, "edit-card:1");
+  flow.tuneGrid.eventEditor = true;
+  const mine = flow.doc.notes.find(n => n.provenance === "user_placed");
+  assert.ok(mine, "the pad press was kept as your note");
+  const html = flow._renderEventTune();
+  assert.equal(flow.eventTuneBar, Math.floor(mine.step / 16));
+  assert.equal(flow.eventTuneId, mine.id, "your note is the one selected");
+  assert.match(html, /pf-phrase-own/);
+  assert.match(html, /aria-label="[^"\n]*Your note \d+, beat/);
+  assert.doesNotMatch(html, /aria-label="Selected note"/);
+  await press(flow, `event-select:${mine.id}`);
+  assert.match(flow._renderEventTune(), /Your note \d+ selected/);
+  flow.eventTuneZoom = true;
+  assert.match(flow._renderEventTune(), /Bar \d+ · your notes/);
+  assert.match(html, /Your notes have a bright edge\./);
 });

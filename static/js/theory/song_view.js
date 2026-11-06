@@ -12,6 +12,53 @@
  */
 
 export const MAX_SONG_CARDS = 8;
+export const SECTION_DIRECTION_VERSION = 1;
+export function validSectionDirection(value) {
+  return value?.version === SECTION_DIRECTION_VERSION && typeof value.catalogue === 'string' && value.catalogue.length <= 64
+    && typeof value.scene_id === 'string' && value.scene_id.length <= 64 && Array.isArray(value.roles) && value.roles.length <= 3
+    && value.roles.every(role => ['drums', 'bass', 'harmony'].includes(role));
+}
+const validSectionId = id => typeof id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(id);
+
+/** Stable document identities, independent of their current position or compiled event section. */
+export function ensureSectionIds(cards) {
+  const list = normalizeSongCards(cards);
+  const reserved = new Set(list.map(c => c.section_id).filter(validSectionId)), used = new Set();
+  let next = 1;
+  return normalizeSongCards(list.map(card => {
+    let id = card.section_id;
+    if (!validSectionId(id) || used.has(id)) {
+      while (reserved.has(`section-${next}`) || used.has(`section-${next}`)) next++;
+      id = `section-${next++}`;
+    }
+    used.add(id);
+    return { ...card, section_id: id };
+  }));
+}
+
+/** Add an independent musical copy before the chosen ending, preserving all existing parts. */
+export function insertSongPart(cards, selectedSectionId, sharedMaterial) {
+  const list = ensureSectionIds(cards);
+  let index = list.findIndex(c => c.section_id === selectedSectionId);
+  if (index < 0) index = 0;
+  if (list.length >= MAX_SONG_CARDS) return { cards: list, selectedSectionId: list[index].section_id };
+  const source = list[index === list.length - 1 && index > 0 ? index - 1 : index];
+  const copy = { ...clone(source), role_name: 'New part', fx: null,
+    material: extractSongMaterial(source.material || sharedMaterial || {}) };
+  delete copy.section_id;
+  delete copy.capture_segment; // A copy is independent, not a continuation of a captured segment.
+  const all = ensureSectionIds([...list, copy]);
+  const added = all.pop();
+  all.splice(all.length - 1, 0, added);
+  return { cards: all, selectedSectionId: added.section_id };
+}
+
+export function removeSongPart(cards, sectionId) {
+  const list = ensureSectionIds(cards), index = list.findIndex(c => c.section_id === sectionId);
+  if (list.length === 1 || index < 0) return { cards: list, selectedSectionId: list[Math.max(0, index)].section_id };
+  list.splice(index, 1);
+  return { cards: list, selectedSectionId: list[Math.min(index, list.length - 1)].section_id };
+}
 
 export const CARD_LAYERS = [
   { id: "beat", label: "Beat", icon: "drum" },
@@ -57,6 +104,22 @@ export const SONG_MATERIAL_FIELDS = [
 ];
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
+export function isGeneratedBuildEffect(note) {
+  if (!note || ['user_placed', 'hummed_confirmed'].includes(note.provenance) || note.edited_from_generator) return false;
+  if (!['reverse_swell', 'sub_drop_808'].includes(note.patch_id)) return false;
+  return (note.provenance === 'jam_generated' && note.generated_by === 'musiclab_energy')
+    || (note.provenance === 'generator_default' && /^fx-swell-/.test(note.source_note_id || note.id || ''));
+}
+
+/** Explicit removal from one editable part; the original performance record remains recoverable. */
+export function removeGeneratedBuildEffects(doc, index) {
+  const next = clone(doc);
+  next.song_cards = detachSongCard(next.song_cards, index, next);
+  const material = next.song_cards[index]?.material;
+  if (material) material.notes = (material.notes || []).filter(note => !isGeneratedBuildEffect(note));
+  return next;
+}
+
 export function extractSongMaterial(doc) {
   const material = {};
   for (const field of SONG_MATERIAL_FIELDS) {
@@ -92,6 +155,7 @@ export function defaultSongCards() {
 
 export function normalizeSongCards(cards) {
   if (!Array.isArray(cards) || cards.length === 0) return defaultSongCards();
+  const seenSections = new Set();
   return cards.slice(0, MAX_SONG_CARDS).map((c) => {
     const out = {
       beat: c?.beat !== false,
@@ -102,9 +166,16 @@ export function normalizeSongCards(cards) {
       tune_variant: c?.tune_variant === "lift" ? "lift" : null,
       bars: normalizedBars(c?.bars),
     };
+    if(c?.preserve_performed_holds===true)out.preserve_performed_holds=true;
+    if(typeof c?.pre_big_breath === "boolean")out.pre_big_breath=c.pre_big_breath;
+    if (validSectionId(c?.section_id) && !seenSections.has(c.section_id)) {
+      out.section_id = c.section_id;
+      seenSections.add(c.section_id);
+    }
+    if (validSectionDirection(c?.section_direction)) out.section_direction = clone(c.section_direction);
     if(c?.capture_segment?.version===1&&typeof c.capture_segment.take_id==='string'&&c.capture_segment.take_id.length<=256
       &&Number.isInteger(c.capture_segment.start_step)&&c.capture_segment.start_step>=0
-      &&Number.isInteger(c.capture_segment.end_step)&&c.capture_segment.end_step>c.capture_segment.start_step&&c.capture_segment.end_step<=256)
+      &&Number.isInteger(c.capture_segment.end_step)&&c.capture_segment.end_step>c.capture_segment.start_step&&c.capture_segment.end_step<=512)
       out.capture_segment=clone(c.capture_segment);
     if (typeof c?.role_name === "string" && c.role_name) out.role_name = c.role_name;
     if (c?.material && typeof c.material === "object" && !Array.isArray(c.material)) {
@@ -204,7 +275,8 @@ export function addSongCard(cards) {
   const list = normalizeSongCards(cards);
   if (list.length >= MAX_SONG_CARDS) return list;
   const last = list[list.length - 1] || { beat: true, tune: true, under: true, fx: null, big: false };
-  return [...list, { ...clone(last), fx: null, big: false }];
+  const { section_id: _copiedIdentity, ...copy } = clone(last);
+  return [...list, { ...copy, fx: null, big: false }];
 }
 
 export function removeSongCard(cards, idx = -1) {
@@ -261,17 +333,6 @@ function layerOfEvent(ev) {
   return "under";
 }
 
-function firstLeadFreqAndMidi(srcEvents) {
-  const leadEv = srcEvents.find((e) => e.role === "lead" && e.concrete?.freq_hz);
-  if (leadEv) {
-    return {
-      freq_hz: Number(leadEv.concrete.freq_hz),
-      midi: Number(leadEv.concrete.midi ?? leadEv.concrete.midi_pitch ?? 60),
-    };
-  }
-  return { freq_hz: 261.63, midi: 60 };
-}
-
 /**
  * Turn compiled 4-bar sources into the full song's compiled object (10-1).
  * Callers compile detached material into compiledCards at the matching card index.
@@ -290,8 +351,7 @@ export function songEvents(loopCompiled, cards, compiledCards = []) {
     const card = list[c];
     const source = compiledCards[c] || loopCompiled;
     const srcEvents = Array.isArray(source?.events) ? source.events : [];
-    const firstLead = firstLeadFreqAndMidi(srcEvents);
-    const nextIsBig = c + 1 < list.length && Boolean(list[c + 1].big);
+    const nextIsBig = typeof card.pre_big_breath === "boolean" ? card.pre_big_breath : c + 1 < list.length && Boolean(list[c + 1].big);
     const stepOffset = ranges[c].start_step;
     const secOffset = stepOffset * stepSec;
     const cardSteps = ranges[c].end_step - stepOffset;
@@ -316,7 +376,7 @@ export function songEvents(loopCompiled, cards, compiledCards = []) {
 
       const startSec = Number(ev.start_sec ?? localStep * stepSec) + secOffset;
       const performedDuration = ev.duration_steps;
-      const keepFinalRelease = ev.performance?.version === 1 && !card.capture_segment && c === list.length - 1 && typeof performedDuration === "number"
+      const keepFinalRelease = ev.performance?.version === 1 && (card.preserve_performed_holds===true || (!card.capture_segment && c === list.length - 1)) && typeof performedDuration === "number"
         && Number.isFinite(performedDuration) && performedDuration > 0 && performedDuration <= 64;
       let availableSteps=cardSteps;
       if(ev.performance?.version===1&&Number.isInteger(ev.capture_occurrence)&&card.capture_segment&&!card.fx&&!card.big&&!card.tune_variant){
@@ -408,24 +468,8 @@ export function songEvents(loopCompiled, cards, compiledCards = []) {
       }
     }
 
-    // Proposal #13: Reverse-Cymbal Swell into the next Big card (steps 52..60 of Card c)
-    if (nextIsBig && card.under) {
-      const swellStartStep = cardSteps - 12;
-      const swellDurSteps = 9;
-      events.push({
-        id: `fx-swell-c${c}`,
-        role: "harmony",
-        patch_id: "reverse_swell",
-        step: stepOffset + swellStartStep,
-        bar: 4,
-        start_sec: Number((secOffset + swellStartStep * stepSec).toFixed(4)),
-        duration_sec: Number((swellDurSteps * stepSec).toFixed(4)),
-        velocity: 0.72,
-        provenance: "generator_default",
-        concrete: { midi: firstLead.midi, freq_hz: firstLead.freq_hz },
-        card: c,
-      });
-    }
+    // Big changes the arrangement; it does not add a surprise sweep.
+
   }
 
   events.sort((a, b) => Number(a.start_sec || 0) - Number(b.start_sec || 0));

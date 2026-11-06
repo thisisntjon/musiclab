@@ -32,7 +32,7 @@ test('stopped captured history from another song is never kept; Keep keeps this 
  const messages=[];f.app._announce=m=>messages.push(m);
  f._stopForScopeChange=()=>{};f._finishPartEdit=()=>{};f._compile=()=>{};f._resetCapturedView=()=>{};f._go=stage=>{f.stage=stage;};
  f._captureDirection();
- assert.equal(f.stage,'song');assert.equal(f.doc.captured_performance,undefined,'playing from another song is not captured');
+ assert.equal(f.stage,'tune');assert.equal(f.doc.captured_performance,undefined,'playing from another song is not captured');
  assert.ok(!messages.some(m=>/Press Play|first|No notes/.test(m)),'no refusal');
 });
 
