@@ -154,7 +154,7 @@
     "static/js/visual/look.js": "fd8b3604bd52a909ceb8c6499b9ffa8f87436fc4eb172b1a1be501d792ae02c8",
     "static/js/visual/particle_canvas.js": "85f35ee0702c653f2b4716aa230a196dbf22007cd416b638f020dfd40fe7bc1c",
     "static/js/visual/particles.js": "0128912524da5266841eb94444495f1db7edee004019246bd83af3a94701f061",
-    "static/ui/app.js": "2fd2b137ac913d15666d4be888f3c546ead24f54df295b8fe6821faa6c54aafb",
+    "static/ui/app.js": "6f79ea8ff555c2f5ff9f7eb9f502691b0a8e1cdbc92045a9385fa305bf32ee73",
     "static/ui/arranger.js": "d4c22cf9d53bcc58eef2317b647dd7e3c99afed504b5b1d900bd02a10bce8ec9",
     "static/ui/band_view.js": "8f50bd2b2620d7acea1fb2b024a3d6a88b3709520466c2fc496d67defcb52109",
     "static/ui/big_moment.js": "a95ebdba8a4783026dcf04fe3d51c3215d9e1931b8869b2b56bfcea52c65c17f",
@@ -169,7 +169,7 @@
     "static/ui/noise_sculptor.js": "1658084091d29a756214cd6f67ffccb0aebb25b8da3dfe8da8df7a207861984c",
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
-    "static/ui/stages/play_flow.js": "75a0c67c89384495bf5e000219c310cb14b42dac09adc61c2f96562b2003f36d",
+    "static/ui/stages/play_flow.js": "d53f2c505a85b28cbdf61e9b88d00677699fd9d956ebf133b6673c952419c699",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63"
@@ -209,13 +209,13 @@
     }
   ],
   "original_index_sha256": "67f79c7ab0af54b00a0f4525002ad34ea0b630ff13121cf6627f632a2c9775b2",
-  "index_sha256": "510c1a60b3871ebb15cab8cd295d289dea6b0ffee47611b36f751b4f3e579017",
+  "index_sha256": "7238fb3f8ae8a73e0e91ad1d22e6d6bb854927a13b26bea1277f0b440e0a3ed0",
   "outputs": [
     {
       "kind": "app",
-      "path": "static/ui/app.8eaabdd2d70d3fd6c3881589ed836d794bd057dea89f49e84a5a8b3dade4bb27.bundle.js",
-      "bytes": 1526097,
-      "sha256": "8eaabdd2d70d3fd6c3881589ed836d794bd057dea89f49e84a5a8b3dade4bb27"
+      "path": "static/ui/app.72318dc32174fafa8e26be8ed42d2a7d861546542b56a268fdbb869fe9fc529d.bundle.js",
+      "bytes": 1526345,
+      "sha256": "72318dc32174fafa8e26be8ed42d2a7d861546542b56a268fdbb869fe9fc529d"
     },
     {
       "kind": "worker",

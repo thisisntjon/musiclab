@@ -1,7 +1,7 @@
 {
   "version": 1,
   "publication_approved": false,
-  "commit": "2b5fdafa78c7e972d0ce4eb01027f9583219362f",
+  "commit": "bafb51d3d3be013794071130ae7184c7d03bcc97",
   "files": {
     ".gitattributes": "23183e8a3fa56753e1f294404b2c462a2b0ce981a0e3aa4990409cd4b527bbc9",
     ".github/ISSUE_TEMPLATE/accessibility_feedback.yml": "e759c14ef382b4aca329970055126f9d3a4bcc74e550b792abd7702429d62023",
@@ -13,7 +13,7 @@
     "ACCESSIBILITY.md": "c2a6ec79ce35e553b7b88da256a489f736e0b91ee1ee432d1c4ee850d1f90f24",
     "AGENTS.md": "cbf9c220935d871bb9e8eace9d0f77887a1944d2ec143993dd68da0435ec96d6",
     "app.py": "761a56f1aaeab9dd1742e90be1b665d4dd3ac80678793f327d74708b5f8dd0aa",
-    "BUNDLE-PROVENANCE.json": "9e076eb8278513778da35c4c1a3cc946e6204c1bc80f836abc01a8a0f9732c4e",
+    "BUNDLE-PROVENANCE.json": "57513cd74d5435520817e3c696bcc073a5054daf26f7fa2ea8f6e5844e5a1b15",
     "CLAUDE.md": "895c0d1f6fcaeff275669875c1d99cf983a66d61cfc92b495fedd32b19397469",
     "CODE_OF_CONDUCT.md": "50613afc51b498f8ad9fa47c413982374106d2efcc1c541cbcc441519a5f4cda",
     "CONTRIBUTING.md": "f7dc916691c99c541b1c602c84c3c9ca0f878b603e760db6886047d32c9e5286",
@@ -69,7 +69,7 @@
     "static/assets/instruments/synth.svg": "c983bc6214ad2ff64e4fe3293071f3e1d6ef97317f845393f9317c1d70a2f389",
     "static/assets/instruments/trumpet.svg": "08d2bf88cd290130ba7272acbc6f0864fef4f28bfab53da2f975eb3004a76b38",
     "static/css/studio.css": "547b33e2c0d7dbf4ba7522156e58ca879889c1130219892919b61cbddbd2b99e",
-    "static/index.html": "510c1a60b3871ebb15cab8cd295d289dea6b0ffee47611b36f751b4f3e579017",
+    "static/index.html": "7238fb3f8ae8a73e0e91ad1d22e6d6bb854927a13b26bea1277f0b440e0a3ed0",
     "static/js/audio/hum_keying.js": "5c6bb0579b6510eb857ec6eb3a8d38f2ea115584c6e02a67fe91327807b2a2c1",
     "static/js/audio/master_bus.js": "89880340f3d66a41a0b04b39cb3cf4de7c424af1cda4781e37ad7c0fec0426dc",
     "static/js/audio/melody_field_view.js": "117f5093bf8b32326041fb495b300665a3ddf6ce5c6b3c3d4052c49e43bc7016",
@@ -204,8 +204,7 @@
     "static/js/visual/particle_canvas.js": "85f35ee0702c653f2b4716aa230a196dbf22007cd416b638f020dfd40fe7bc1c",
     "static/js/visual/particles.js": "0128912524da5266841eb94444495f1db7edee004019246bd83af3a94701f061",
     "static/parents.html": "6048a5afb197005e91f5685bdb7567b84715504c98c55c052f7ae9d52cddbdd9",
-    "static/ui/app.8eaabdd2d70d3fd6c3881589ed836d794bd057dea89f49e84a5a8b3dade4bb27.bundle.js": "8eaabdd2d70d3fd6c3881589ed836d794bd057dea89f49e84a5a8b3dade4bb27",
-    "static/ui/app.js": "2fd2b137ac913d15666d4be888f3c546ead24f54df295b8fe6821faa6c54aafb",
+    "static/ui/app.js": "6f79ea8ff555c2f5ff9f7eb9f502691b0a8e1cdbc92045a9385fa305bf32ee73",
     "static/ui/arranger.js": "d4c22cf9d53bcc58eef2317b647dd7e3c99afed504b5b1d900bd02a10bce8ec9",
     "static/ui/band_view.js": "8f50bd2b2620d7acea1fb2b024a3d6a88b3709520466c2fc496d67defcb52109",
     "static/ui/big_moment.js": "a95ebdba8a4783026dcf04fe3d51c3215d9e1931b8869b2b56bfcea52c65c17f",
@@ -223,7 +222,7 @@
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
     "static/ui/selftest.js": "5015d80cd61c28b9bc80c86aac6b21300e415cd275a4f555bdbef252b29ef607",
-    "static/ui/stages/play_flow.js": "75a0c67c89384495bf5e000219c310cb14b42dac09adc61c2f96562b2003f36d",
+    "static/ui/stages/play_flow.js": "d53f2c505a85b28cbdf61e9b88d00677699fd9d956ebf133b6673c952419c699",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63",
@@ -473,6 +472,7 @@
     "tests/test_source_chord_context.py": "89b95994f028efafa58f10288bd32f909cda0a6c52ec0280f6a380cc24b88a0f",
     "tests/test_starter_holds.py": "411c83959575625f167c3abcdae5f35896b60433a1fbceefc0f747a38384d2cc",
     "tests/test_style_velocity.py": "8b5fd36a637dd69e1a7d699a26df91c043a64eab1c8a878177383184480d5531",
-    "tests/test_theory_core.py": "3fbf0ca97969135553b65e2020020481d1fb744172861ac0ddc33ede497d39ab"
+    "tests/test_theory_core.py": "3fbf0ca97969135553b65e2020020481d1fb744172861ac0ddc33ede497d39ab",
+    "static/ui/app.72318dc32174fafa8e26be8ed42d2a7d861546542b56a268fdbb869fe9fc529d.bundle.js": "72318dc32174fafa8e26be8ed42d2a7d861546542b56a268fdbb869fe9fc529d"
   }
 }

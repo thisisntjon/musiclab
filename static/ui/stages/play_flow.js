@@ -1359,7 +1359,8 @@ export class PlayFlow {
     }
     if (this.stage !== "start" && this.doc && this.legendOpen) this.root.insertAdjacentHTML("afterbegin", this._legendHtml());
     if (this.stage !== "start" && this.doc && this.adjustOpen) this.root.insertAdjacentHTML("afterbegin", this._adjustHtml());
-    if (!this.melodyField && this.stage !== "start" && this.doc && this.partComparison?.kind!=='melody' && !(this.stage==='tune'&&this.tuneGrid.eventEditor)) this.root.insertAdjacentHTML("afterbegin", this._journeyHtml());
+    const wheelJam = this.stage === 'jam' && (this.doc?.jam_session?.music_field || this.doc?.jam_session?.exploration_map);
+    if (!this.melodyField && !wheelJam && this.stage !== "start" && this.doc && this.partComparison?.kind!=='melody' && !(this.stage==='tune'&&this.tuneGrid.eventEditor)) this.root.insertAdjacentHTML("afterbegin", this._journeyHtml());
     if(this.stage!=='start'&&(this.melodyField||!(this.stage==='jam'&&(this.doc?.jam_session?.music_field||this.doc?.jam_session?.exploration_map))))this.root.insertAdjacentHTML('beforeend',`<section aria-label="Help and access"><div class="pf-row">
       ${this._btn('settings',this.comfortOpen?'Close help':'Help','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}</div>${this.comfortOpen?this._helpPanelHtml():''}</section>`);
     if(this.partComparison && this.stage==='song'){this.root.insertAdjacentHTML('afterbegin',this._comparisonHtml());this._syncPartAudition();}
@@ -2367,6 +2368,7 @@ export class PlayFlow {
       ${this.jamMessage?`<p role="status" class="pf-sub">${esc(this.jamMessage)}</p>`:''}
       ${this._sheetBoxHtml()}
       <details class="pf-demo-tools" ${this.demoToolsOpen?'open':''}><summary data-key="demo-tools">Go deeper</summary>
+        <div class="pf-row">${this._btn('capture-direction','Build a song','pf-btn pf-small')}</div>
         ${jam.live_keys?`<div class="pf-row">${this._btn('jam-answer','Answer this','pf-btn pf-small')}${this._btn('jam-auto-answer','Band answers me','pf-btn pf-small',`aria-pressed="${jam.auto_answer===true}"`)}</div>
         <p id="pf-answer-status" class="pf-sub" role="status">${jam.auto_answer===true?'Play, then pause. The band plays your notes back.':'Play and let go. Answer this plays your last notes back.'}</p>`:''}
         ${stepsPerBar(this.doc)!==16?'':jam.exploration_map?this._btn('enter-field','Slide between six styles','pf-btn pf-small'):this._btn('enter-circle','Back to the circle','pf-btn pf-small')}

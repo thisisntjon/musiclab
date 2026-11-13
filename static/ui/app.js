@@ -119,7 +119,9 @@ class MusicLabStudioApp {
     window.addEventListener('pagehide', () => this._stopMusicDirector());
     window.addEventListener('pageshow', () => this._startMusicDirector());
     const params = new URLSearchParams(window.location.search);
-    if (!params.has("studio")) {
+    // Old links such as ?studio=false must not bypass the wheel-first experience.
+    // The developer studio remains an explicit opt-in for existing tools.
+    if (params.get("studio") !== "1") {
       this.songDoc = buildStandaloneSeed("starter_neutral_100_cm");
       this.compiledSong = compileSongStandalone(this.songDoc, this._buildScaffoldOptions());
       this.scheduler.setCompiledSong(this.compiledSong);
