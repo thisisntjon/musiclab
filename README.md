@@ -151,3 +151,10 @@ For code contributions and new styles, see [`CONTRIBUTING.md`](CONTRIBUTING.md) 
 ## Licence
 
 Original application code: MIT. Bundled third-party code and sounds have separate terms; see [`LICENSE`](LICENSE), [`NOTICES.md`](NOTICES.md) and the license files in `static/vendor/sampled-piano/`.
+
+
+## Released bundle and local edits
+
+The released page loads the checked, content-hashed app and melody-worker bundles. The original modules are retained beside them. To customize the source locally, change the module script in `static/index.html` from `./ui/app.<hash>.bundle.js` to `./ui/app.js` before trying your edits. No bundler is required for that development route. Do not assume edits to raw modules change an already generated bundle.
+
+For release packaging, rebuild and verify the bundles using `hosting/BUNDLING.md`, or deliberately use and test the modular entry. Preserve sound assets and saved-song identity. The shipped `BUNDLE-PROVENANCE.json` identifies the original verified release inputs; source changes invalidate that record.

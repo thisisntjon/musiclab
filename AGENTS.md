@@ -34,7 +34,7 @@ Never break these principles unless the user explicitly asks in their private fo
 
 ## 3. Zero-build architecture & fast file map
 
-- **No bundler required for local work:** [`static/index.html`](static/index.html) loads [`./ui/app.js`](static/ui/app.js) directly as native browser ES modules.
+- **Local source editing:** the release entry loads checked bundles. Switch its module script to `./ui/app.js` for no-build development, as described below; raw-module edits do not alter generated bundles.
 - **Run locally:** `python app.py` (serves `http://127.0.0.1:8765`, loopback-only) or Windows `launch.cmd`, or static mode `python -m http.server 8790 --bind 127.0.0.1 --directory .` (`http://127.0.0.1:8790/static/index.html`).
 
 ### Where to make common customizations
@@ -65,3 +65,10 @@ node --test "tests/js/**/*.test.mjs"
 # Full Python suite (167 tests)
 python -B -m pytest -q
 ```
+
+
+## Released bundle and local edits
+
+The released page loads the checked, content-hashed app and melody-worker bundles. The original modules are retained beside them. To customize the source locally, change the module script in `static/index.html` from `./ui/app.<hash>.bundle.js` to `./ui/app.js` before trying your edits. No bundler is required for that development route. Do not assume edits to raw modules change an already generated bundle.
+
+For release packaging, rebuild and verify the bundles using `hosting/BUNDLING.md`, or deliberately use and test the modular entry. Preserve sound assets and saved-song identity. The shipped `BUNDLE-PROVENANCE.json` identifies the original verified release inputs; source changes invalidate that record.

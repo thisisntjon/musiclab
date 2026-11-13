@@ -1,6 +1,6 @@
 # Optional entry bundling & Cloudflare Workers self-hosting
 
-Local development and `python app.py` need **no bundling** — `static/index.html` loads `./ui/app.js` directly as native ES modules so you can edit files and reload immediately.
+The released `static/index.html` loads checked, content-hashed app and melody-worker bundles. Original modules remain beside them. For local source editing, change its module script URL to `./ui/app.js` and reload; that development route needs no bundler. Editing raw modules alone does not change an existing bundle.
 
 The helpers in `hosting/` are provided for self-hosters who want faster web startup or static edge deployment.
 
@@ -8,14 +8,16 @@ The helpers in `hosting/` are provided for self-hosters who want faster web star
 
 `hosting/bundle_entry.cjs` collapses the startup ES module graph (`static/ui/app.js` and `static/ui/melody_composer_worker.js`) into content-hashed bundles using a pinned `esbuild@0.28.2` installation while preserving dynamic `AudioWorklet` and SoundFont URLs and recording `BUNDLE-PROVENANCE.json`.
 
-Run it only against a fresh copy of the repository (before generating `MANIFEST.json`):
+Run it only in a new, separate staging directory. Copy the source files into that directory while excluding `.git/`, `MANIFEST.json`, `BUNDLE-PROVENANCE.json` and generated `*.bundle.js` files. In that scratch copy only, set the module script in `static/index.html` to `./ui/app.js`. Keep the checked release unchanged. The helper refuses a finalized stage or stale generated output; an ordinary clone already contains these artifacts and is not a fresh stage.
 
 ```bash
 node hosting/bundle_entry.cjs --root <fresh-stage-directory> --esbuild <path-to-esbuild-0.28.2>
 node hosting/bundle_entry.cjs --root <fresh-stage-directory> --verify 1
 ```
 
-> Note: `bundle_entry.cjs` pins `esbuild@0.28.2` API and `@esbuild/win32-x64` binary SHA-256 digests for reproducible release builds; if you bundle on macOS or Linux, update or relax `loadTool()` in your fork's copy of `hosting/bundle_entry.cjs`.
+> Note: `bundle_entry.cjs` admits the reviewed `esbuild@0.28.2` API and Windows x64 binary hashes. Other build platforms have not been admitted by this release process. Do not remove integrity checks to call a different build verified. Use the modular development route, or independently validate and record a new toolchain for your fork.
+
+After a successful build, generate a fresh `MANIFEST.json` over the final stage bytes and verify the actual bundled browser journey. Never copy the old manifest onto changed files.
 
 Hashed bundles (`*.<sha256>.bundle.js`) may be cached immutably. Entry HTML (`index.html`, `static/index.html`) and `MANIFEST.json` must revalidate (`must-revalidate`); do not apply indefinite cache headers to HTML.
 
