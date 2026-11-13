@@ -1,0 +1,42 @@
+name: Something didn't work
+description: Report a broken button, silent sound, saving problem, or error in plain language.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tell us what went wrong in plain words. Only the first box is required.
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened, and what did you expect instead?
+      placeholder: "Example: I pressed Download audio after keeping my melody, and nothing downloaded."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to make it happen again (optional)
+      placeholder: |
+        1. Open Listen and explore
+        2. Pick Reggae
+        3. Press Make my tune...
+
+  - type: dropdown
+    id: how_running
+    attributes:
+      label: How were you running MusicLab?
+      options:
+        - Online at musiclab.simoneresearch.com
+        - Offline on my computer (launch.cmd or python app.py)
+        - Static local server
+        - Not sure
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system (optional)
+      placeholder: "Example: Edge on Windows 11"

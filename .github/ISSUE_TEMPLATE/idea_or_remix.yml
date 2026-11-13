@@ -1,0 +1,19 @@
+name: Share an idea, adaptive setup, or remix
+description: Suggest a gentler workflow, share how you adapted MusicLab for switches/classrooms, or propose a musical style.
+title: "[Idea / Remix]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to build, change, or share?
+      description: Whether it's a custom switch mapping, a classroom tip, a new instrument from the SoundFont, or a musical style idea, we'd love to hear it.
+      placeholder: "Describe the idea and who it helps..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Any extra details or files you modified (optional)
+      placeholder: "Example: Changed COMFORT_DEFAULTS in static/js/theory/comfort.js so Bigger buttons and Calm start on."

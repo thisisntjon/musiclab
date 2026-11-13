@@ -1,0 +1,46 @@
+name: Accessibility, comfort, or play feedback
+description: Tell us what felt good or where someone got stuck (no coding knowledge, names, or diagnoses needed).
+title: "[Play feedback]: "
+labels: ["accessibility", "feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for trying MusicLab! You do **not** need technical terms.
+        **Privacy reminder:** Please do **not** include real names, photos, voice recordings, or medical diagnoses — just describe the controls or setup used.
+
+  - type: checkboxes
+    id: access_way
+    attributes:
+      label: How were you (or the player) interacting with MusicLab?
+      description: Check all that apply.
+      options:
+        - label: Touch screen (phone, tablet, or touch monitor)
+        - label: Mouse or trackpad
+        - label: Keyboard only (Tab, Arrow keys, or letter pads A–K)
+        - label: Two-switch scanning (Space + Enter, or adaptive switch interface)
+        - label: Screen reader or spoken prompts (Read out loud / NVDA / VoiceOver / JAWS / TalkBack)
+        - label: Playing together with a parent, carer, teacher, or therapist
+
+  - type: textarea
+    id: felt_good
+    attributes:
+      label: What worked well or felt joyful?
+      description: Optional — helps us avoid breaking things that already feel good.
+      placeholder: "Example: Moving between styles with the buttons was easy, and Calm mode kept the screen comfortable."
+
+  - type: textarea
+    id: got_stuck
+    attributes:
+      label: Where did you get stuck, confused, or uncomfortable?
+      description: Tell us about any confusing words, focus jumps, hard-to-reach buttons, or surprising sounds.
+      placeholder: "Example: When pressing Space to scan on the tune screen, it took too many presses to reach Keep this melody."
+    validations:
+      required: true
+
+  - type: input
+    id: setup
+    attributes:
+      label: Browser and device (if you know it)
+      description: Optional — for example "Chrome on Windows laptop" or "Safari on iPad".
+      placeholder: "Chrome on Windows"

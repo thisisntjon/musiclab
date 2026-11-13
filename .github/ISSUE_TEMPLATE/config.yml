@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Play MusicLab in your browser
+    url: https://musiclab.simoneresearch.com/
+    about: Open the free web instrument right away with nothing to install.
+  - name: Guide for parents, carers & teachers
+    url: https://musiclab.simoneresearch.com/static/parents.html
+    about: Plain-language tips for starting together, setting safe volume, and saving backups.
