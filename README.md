@@ -3,6 +3,7 @@
 A free, open instrument for people who believe they "aren't musical" — and for anyone for whom traditional instruments or music software weren't accessible.
 
 - **Play right now in your browser (nothing to install):** https://musiclab.simoneresearch.com/
+- **Brand new to GitHub or coding? Start here (includes AI harness remix ideas):** [`START_HERE.md`](START_HERE.md)
 - **Accessibility, keyboard, switch & sensory guide:** [`ACCESSIBILITY.md`](ACCESSIBILITY.md)
 - **Short guide for parents, carers & teachers:** [`static/parents.html`](static/parents.html) (online: https://musiclab.simoneresearch.com/static/parents.html)
 - **Customize or adapt MusicLab (including gentle 5-minute edits):** [`CUSTOMIZING.md`](CUSTOMIZING.md)
@@ -97,6 +98,7 @@ The three-beat route uses individual-note editing and guided song parts. The old
 
 | What | Where |
 | --- | --- |
+| Beginner guide to GitHub & tweaking with AI coding harnesses | [`START_HERE.md`](START_HERE.md), [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md) |
 | Accessibility, switch, keyboard & comfort setup guide | [`ACCESSIBILITY.md`](ACCESSIBILITY.md), [`static/parents.html`](static/parents.html) |
 | Customization & adaptive hardware remix guide | [`CUSTOMIZING.md`](CUSTOMIZING.md) |
 | 78 connected styles, circle geometry, melody composers (`v4`–`v9`), harmony, comfort & scan logic | [`static/js/theory/`](static/js/theory/) |

@@ -2,6 +2,8 @@
 
 MusicLab ships **unbundled** with zero accounts, zero cloud services, and zero mandatory build tools so anyone — from a teacher or assistive-tech specialist tweaking keys for one player, to a musician adding new styles and instruments — can make it their own.
 
+> **New to GitHub or want to customize MusicLab using an AI coding harness** (Claude Code, Codex, Cursor, Antigravity, Gemini CLI, or GitHub Copilot)? Start with **[`START_HERE.md`](START_HERE.md)** for a plain-English GitHub walkthrough and ready-to-paste prompt ideas! This repo also includes [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) so AI coding tools automatically understand MusicLab's layout and safety rules.
+
 [`static/index.html`](static/index.html) loads [`./ui/app.js`](static/ui/app.js) directly as standard browser ES modules. Edit any file under `static/` in a plain text editor (such as Notepad, TextEdit, or VS Code), save, refresh `http://127.0.0.1:8765`, and your change is live immediately.
 
 ---
