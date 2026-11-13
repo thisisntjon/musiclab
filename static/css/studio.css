@@ -2258,6 +2258,9 @@ body.pf-mode .transport-bar {
 }
 .pf-start .pf-heading {
   font-size: clamp(40px, 6.4vw, 76px);
+  /* Gradient text only paints inside the box: leave room for descenders. */
+  line-height: 1.2;
+  padding-bottom: .08em;
   background: linear-gradient(180deg, #ffffff 0%, #c9ccd6 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2432,6 +2435,11 @@ body.pf-listening .transport-bar { background: #050507; z-index: 10; }
 .pf-listening-stage, .pf-listening .pf-start { max-width: 840px; margin: 0 auto; }
 .pf-listening .pf-heading { letter-spacing: -.035em; }
 .pf-listening .pf-say, .pf-listening .pf-sub { max-width: 64ch; }
+.pf-listening .pf-start .pf-say, .pf-listening .pf-start .pf-sub { margin-inline: auto; }
+.pf-start .pf-listening-visual { height: clamp(88px, 14vh, 150px); }
+.pf-start .pf-next { min-height: 56px; padding: 0 28px; font-size: var(--pf-text-lg); }
+.pf-start .pf-row + .pf-sub { margin-top: 14px; }
+.pf-start .pf-start-songs { margin-top: 32px; }
 .pf-other-ways { margin: 24px 0; }
 .pf-other-ways > summary { cursor: pointer; padding: 14px 4px; }
 .pf-other-ways > summary:focus-visible { outline: 3px solid #9ba9e9; outline-offset: 3px; }
@@ -2814,3 +2822,153 @@ body.pf-mode input[type="range"] { box-sizing: border-box; min-height: 32px; hei
 .pf-band-label{display:block;text-align:left}.pf-band-label>span{display:inline-block;width:1em}.pf-band-label small{margin-top:3px;font-weight:normal}
 
 .pf-comparison-band{border:1px solid #37434f;border-radius:12px;padding:12px;margin:12px 0}.pf-comparison-band .pf-band-summary{border-bottom:1px solid #26333e}.pf-audition-cursor{position:absolute;top:0;bottom:0;width:2px;background:#ffbc55}
+.pf-melody-field { max-width: 1080px; margin: 0 auto; }
+.pf-mf-main { display: grid; gap: 8px 32px; align-items: center; }
+.pf-mf-wheel { min-width: 0; }
+.pf-mf-wheel [data-mf-status] { text-align: center; min-height: 1.4em; margin: 0; }
+@media (max-width: 480px) { .pf-melody-field > .pf-row { gap: 6px; margin: 8px 0; } .pf-melody-field > .pf-row .pf-btn { min-height: 44px; padding: 0 12px; font-size: .9rem; } .pf-melody-field > p { margin: 6px 0; } }
+@media (min-width: 960px) { .pf-mf-main { grid-template-columns: auto minmax(0, 1fr); } }
+.pf-melody-disk { width: min(76vw, 470px, max(230px, calc(100svh - 370px))); aspect-ratio: 1; position: relative; margin: .6rem auto; border-radius: 50%; border: 1px solid #7592a8; touch-action: none; background: radial-gradient(circle, #090c16 12%, #202536 54%, transparent 76%), conic-gradient(#456a77, #674367, #687a4a, #3e7682, #456a77); }
+.pf-melody-disk:focus-visible { outline: 3px solid #2fe3f4; outline-offset: 5px; }
+.pf-mf-label { position: absolute; font-weight: 600; font-size: .85rem; pointer-events: none; white-space: nowrap; text-shadow: 0 1px 6px #05070c; transition: opacity .15s; }
+.pf-mf-region[data-near="true"] { opacity: .12; }
+.pf-mf-region { transform: translate(-50%, -50%); }
+.pf-mf-score text, .pf-live-score text { fill: #b5c4d2; font: 600 10px system-ui, sans-serif; }
+.pf-mf-band { display: block; margin: .9rem 0; }
+.pf-mf-band .pf-mf-score { height: auto; max-height: 240px; margin: 0; }
+.pf-mf-roles { position: relative; font-size: 12px; color: #c4d3df; }
+.pf-mf-roles span { position: absolute; right: 0; transform: translateY(-50%); }
+.pf-mf-top { top: 10%; left: 50%; transform: translateX(-50%); }
+.pf-mf-bottom { bottom: 10%; left: 50%; transform: translateX(-50%); }
+.pf-mf-left { top: 50%; left: 4%; transform: translateY(-50%); }
+.pf-mf-right { top: 50%; right: 4%; transform: translateY(-50%); }
+.pf-mf-centre { position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap; }
+.pf-mf-request, .pf-mf-reached { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; }
+.pf-mf-request { width: 18px; height: 18px; background: #35e5f4; box-shadow: 0 0 15px #35e5f4; }
+.pf-mf-reached { width: 30px; height: 30px; border: 3px solid white; }
+.pf-mf-score, .pf-live-score { display: block; width: 100%; height: auto; max-height: 224px; background: #0c131d; border: 1px solid #3f5062; border-radius: 14px; margin: .45rem 0; }
+/* CVD-safe per-part colors and non-strobing outline highlights live on .pf-vis-note below. */
+/* Active notes highlight via stroke outline, never white fill flash. */
+/* Playhead and lane lines use .pf-vis-playhead / .pf-vis-barline / .pf-vis-lane-line. */
+.pf-melody-field details label { display: flex; align-items: center; gap: 1rem; margin: .7rem 0; }
+.pf-live-score-wrap { margin: .65rem 0; } .pf-live-score-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; color: #b9c6d4; margin: 0 2px 4px; } .pf-vis-barline { stroke: #273444; stroke-width: 1; } .pf-vis-lane-line { stroke: #1d2836; stroke-width: 1; stroke-dasharray: 3 3; } .pf-vis-beat-tick { fill: #4d5d70; opacity: .65; } .pf-vis-beat-tick.landing { fill: #8fa2b7; opacity: .9; } .pf-vis-note { opacity: .78; } .pf-vis-note.pf-part-tune { fill: var(--pf-part-tune); } .pf-vis-note.pf-part-chords { fill: var(--pf-part-under); opacity: .48; } .pf-vis-note.pf-part-bass { fill: var(--pf-part-boom); opacity: .82; } .pf-vis-note.pf-part-drums.pf-drum-boom { fill: var(--pf-part-boom); opacity: .88; } .pf-vis-note.pf-part-drums.pf-drum-clap { fill: var(--pf-part-clap); opacity: .88; } .pf-vis-note.pf-part-drums.pf-drum-tick { fill: var(--pf-part-tick); opacity: .86; } .pf-vis-note.own { stroke: var(--pf-own); stroke-width: 2.2; opacity: 1; } .pf-vis-note.pf-vis-diff-pitch, .pf-vis-note.pf-vis-diff-rhythm, .pf-vis-note.pf-vis-diff-both, .pf-vis-note.pf-vis-diff-added { opacity: .94; } .pf-vis-note.playing { stroke: #ffffff; stroke-width: 2; opacity: 1; } .pf-vis-note.own.playing { stroke: var(--pf-own); stroke-width: 2.8; opacity: 1; } .pf-vis-contour { stroke: var(--pf-part-tune); stroke-width: 1.5; opacity: .45; pointer-events: none; } .pf-vis-ghost-contour { stroke: #9fb4c7; stroke-width: 1.3; stroke-dasharray: 4 3; opacity: .48; pointer-events: none; } .pf-vis-ghost-note { fill: none; stroke: #9fb4c7; stroke-width: 1.3; stroke-dasharray: 3 2; opacity: .52; } .pf-vis-preview-contour { stroke: var(--pf-part-tune); stroke-width: 1.4; stroke-dasharray: 5 3; opacity: .75; pointer-events: none; } .pf-vis-preview-note { fill: none; stroke: var(--pf-part-tune); stroke-width: 1.5; stroke-dasharray: 4 2; opacity: .82; } .pf-vis-playhead { stroke: var(--pf-own); stroke-width: 2; opacity: .9; } .pf-vis-ball { fill: var(--pf-own); } .pf-vis-calm-beat { fill: var(--pf-part-tune); } .pf-band-mark.pf-part-tune { background: var(--pf-part-tune); } .pf-band-mark.pf-part-chords { background: var(--pf-part-under); opacity: .55; } .pf-band-mark.pf-part-bass { background: var(--pf-part-boom); } .pf-band-mark.pf-part-drums { background: var(--pf-part-tick); } .pf-band-mark.own { outline: 2px solid var(--pf-own); opacity: 1; } .pf-phrase-picture .pf-phrase-duration.pf-note-own { border: 2px solid var(--pf-own); box-sizing: border-box; } @media (prefers-reduced-motion: reduce) { .pf-vis-ball { display: none; } } body.pf-less-motion .pf-vis-ball { display: none; } @media (forced-colors: active) { .pf-vis-note, .pf-vis-ghost-note, .pf-vis-preview-note { fill: CanvasText; stroke: CanvasText; } .pf-vis-playhead { stroke: Highlight; } } .pf-melody-field input[type=range] { flex: 1; min-width: 0; }
+
+/* Jam circle view: wheel beside the controls and live notes, pads directly below, so playing and steering share one screen. */
+@media (min-width: 960px) {
+  .pf-listening-stage.pf-jam-circle { max-width: 1080px; display: grid; grid-template-columns: fit-content(420px) minmax(0, 1fr); column-gap: 32px; align-items: start; }
+  .pf-jam-circle > * { grid-column: 2; min-width: 0; }
+  .pf-jam-circle > .pf-heading { grid-column: 1 / -1; }
+  .pf-jam-circle > section { grid-column: 1; grid-row: 2 / span 4; }
+  .pf-jam-circle > .pf-jam-pads, .pf-jam-circle > .pf-jam-pads ~ * { grid-column: 1 / -1; }
+  .pf-demo-stage.pf-jam-circle .pf-music-circle { width: clamp(248px, calc(100svh - 460px), 420px); margin: 8px auto; }
+}
+@media (min-width: 960px) and (max-height: 760px) {
+  .pf-jam-circle .pf-jam-pad { min-height: 56px; padding: 4px; }
+  .pf-jam-circle .pf-jam-pad kbd { font-size: 20px; line-height: 1.1; }
+  .pf-jam-circle > .pf-jam-pads { margin-top: 4px; }
+}
+@media (max-width: 480px) {
+  .pf-jam-circle .pf-jam-pad { min-height: 56px; padding: 2px; }
+  .pf-jam-circle .pf-jam-pad kbd { line-height: 1.1; }
+}
+
+/* Phone: keep the top bar on one row and the Jam screen tight, so the wheel and pads share a screen. */
+@media (max-width: 480px) {
+  body.pf-mode .transport-bar { padding: 6px 10px; gap: 6px; flex-wrap: nowrap; }
+  body.pf-mode .transport-controls { flex-wrap: nowrap; gap: 6px; min-width: 0; }
+  body.pf-mode .transport-bar .volume-control { gap: 4px !important; min-width: 0; }
+  body.pf-mode #input-volume { width: 44px !important; }
+  body.pf-mode #btn-stop-sound { padding: 0 12px; font-size: .9rem; white-space: nowrap; }
+  body.pf-mode .pf-calm-btn { padding-inline: 10px; font-size: .9rem; }
+  body.pf-mode #btn-volume-lock { padding-inline: 8px; font-size: .7rem; line-height: 1.05; }
+  .pf-jam-circle > .pf-sub, .pf-jam-circle > section > .pf-sub { margin: 4px 0; }
+  .pf-jam-circle > .pf-row { margin: 6px 0; }
+  .pf-jam-circle > section > details > summary { padding-block: 6px; }
+  .pf-jam-circle .pf-live-score-wrap { margin: 4px 0; }
+  .pf-jam-circle > .pf-jam-pads { gap: 8px; margin: 8px 0; }
+}
+
+/* The top bar (Stop sound, volume, Calm, Lock) always stays above scrolled page content. */
+body.pf-mode .transport-bar { z-index: 10; }
+
+/* Jam on wide screens: the right column keeps its place when the style details open. */
+@media (min-width: 960px) {
+  .pf-listening-stage.pf-jam-circle { grid-template-rows: auto auto auto auto 1fr; }
+}
+
+/* Style picker matches the dark theme. */
+#pf-circle-picker {
+  background: var(--pf-surface-2); color: var(--pf-text);
+  border: 1px solid var(--pf-line); border-radius: var(--pf-radius-sm);
+  font: inherit; padding: 0 12px; color-scheme: dark;
+}
+#pf-circle-picker:focus-visible { outline: 3px solid var(--pf-focus); outline-offset: 2px; }
+@media (forced-colors: active) { #pf-circle-picker { background: Field; color: FieldText; border-color: CanvasText; } }
+
+/* Phone top bar: buttons keep their own width, the slider takes what is left, and Calm drops its icon. */
+@media (max-width: 480px) {
+  body.pf-mode .transport-bar .pf-calm-btn, body.pf-mode .transport-bar #btn-stop-sound { flex: none; }
+  body.pf-mode .transport-bar #btn-volume-lock { flex: 0 0 62px; }
+  body.pf-mode .transport-bar #input-volume { flex: 1 1 56px; min-width: 56px; width: auto !important; }
+  body.pf-mode .transport-bar .pf-calm-btn svg { display: none; }
+}
+
+/* Keep screen: Save here is the one main button; the two downloads are ordinary buttons of the same size. */
+.pf-btn.pf-big[data-key="download"], .pf-btn.pf-big[data-key="dl-project"],
+.pf-btn.pf-big[data-key="download"]:hover, .pf-btn.pf-big[data-key="dl-project"]:hover {
+  background: rgba(255, 255, 255, 0.06); color: var(--pf-text);
+  border: 1px solid var(--pf-hair-strong); box-shadow: none;
+}
+.pf-btn.pf-big[data-key="download"]:hover, .pf-btn.pf-big[data-key="dl-project"]:hover { background: rgba(255, 255, 255, 0.11); }
+
+/* Short laptops: a long style name stays on two lines inside the Jam wheel. */
+@media (min-width: 960px) and (max-height: 760px) { .pf-jam-circle .pf-circle-title { font-size: 14px; } }
+
+/* Bigger buttons: keep the Jam pads and the tune screen's Keep button on screen. Nothing here applies when it is off. */
+@media (min-width: 960px) {
+  body.pf-bigger .pf-demo-stage.pf-jam-circle .pf-music-circle { width: clamp(248px, calc(100svh - 500px), 420px); }
+  body.pf-bigger .pf-jam-circle .pf-circle-title { font-size: 16px; }
+}
+@media (min-width: 960px) and (max-height: 760px) {
+  body.pf-bigger .pf-demo-stage.pf-jam-circle .pf-music-circle { margin: 0 auto; }
+  body.pf-bigger .pf-jam-circle .pf-circle-title { font-size: 14px; }
+  body.pf-bigger .pf-jam-circle > section > .pf-sub { margin: 0; }
+  body.pf-bigger .pf-jam-circle .pf-jam-pad { padding: 0 4px; gap: 0; }
+  body.pf-bigger .pf-jam-circle .pf-jam-pad kbd { line-height: 1; }
+}
+@media (max-width: 480px) { body.pf-bigger .pf-melody-disk { width: min(59vw, 470px, max(230px, calc(100svh - 370px))); } }
+body.pf-bigger #pf-circle-picker { min-height: var(--pf-target); }
+
+/* Optional note names on the pads: the note takes the big line, the letter key moves to a small corner hint. */
+.pf-jam-pad.pf-pad-named { position: relative; }
+.pf-jam-pad .pf-pad-keyhint { position: absolute; top: 4px; left: 8px; font-size: 12px; font-weight: 600; line-height: 1; opacity: .7; }
+@media (max-width: 480px) { .pf-octave { flex-wrap: nowrap; gap: 6px; } .pf-octave .pf-btn { flex: 1 1 0; min-width: 0; padding-inline: 6px; white-space: nowrap; } }
+/* Keep screen: the two download buttons match Save here in height (their border added 2px). */
+.pf-btn.pf-big[data-key="download"], .pf-btn.pf-big[data-key="dl-project"] { box-sizing: border-box; }
+/* Jam wheel: a family name fades while a marker sits on it. */
+.pf-circle-family { transition: opacity 160ms ease; }
+.pf-circle-family[data-near="true"] { opacity: .25; }
+
+/* Respect the selected target size in compact phone melody and journey rows. */
+@media (max-width: 480px) {
+  body.pf-bigger .pf-melody-field > .pf-row .pf-btn,
+  body.pf-bigger .pf-journey-step { min-height: var(--pf-target); }
+}
+
+/* System-colour users must see both a requested position and the Save button boundary. */
+@media (forced-colors: active) {
+  .pf-mf-request { border: 3px solid Highlight; background: Canvas; box-shadow: none; }
+  .pf-btn.pf-big[data-key="save"] { border: 2px solid ButtonText; }
+}
+
+/* An unavailable score action stays focusable so its reason can be announced.
+   Do not advertise it with the active orange glow while sounds are loading. */
+.pf-melody-field .pf-btn[aria-disabled="true"],
+.pf-melody-field .pf-btn[aria-disabled="true"]:hover {
+  color: var(--pf-text);
+  background: var(--pf-surface-2);
+  border-color: var(--pf-hair-strong);
+  border-style: dashed;
+  box-shadow: none;
+  cursor: default;
+}

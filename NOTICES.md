@@ -38,6 +38,7 @@ These products and papers inspired features. Only ideas were borrowed; no code, 
 | Teenage Engineering OP-Z | Part FX: Beat drop, High lift, Drum roll | Proprietary product; idea only | https://teenage.engineering/products/op-z; `static/js/theory/song_view.js` |
 | Chrome Music Lab | General inspiration for playful music-making on the web; the colours are not copied | Apache-2.0 (recorded in the development investigation) | https://github.com/googlecreativelab/chrome-music-lab |
 | Hyperscore (MIT Media Lab), Electroplankton and Tenori-On (Toshio Iwai) | Inspiration only: drawing and playing music without notation | Products and papers; idea only | development investigation |
+| OpenScore Lieder Corpus and its transcribers | 39 rest-delimited vocal phrase rhythms and relative contours in `static/js/theory/melody_phrase_library_v1.js` (no lyrics; upstream commit `38c5db510224d9facdc4b08d741fc788cfb58ea8`) | CC0-1.0 (pinned licence text retained in the development repository) | https://github.com/OpenScore/Lieder |
 
 ## 4. Trademarks
 
@@ -54,3 +55,7 @@ flush/fsync, replace and cleanup method from the project author's earlier
 local simulation project. MusicLab uses an exclusive same-directory temporary
 file and preserves its existing JSON format. No game assets or simulation code
 are included. The development repository retains the detailed source record.
+
+### Smaller delivery bank
+
+The app loads `GeneralUser-GS-2.0.3-MusicLab17-v1.sf2`, a MusicLab 17-program subset of GeneralUser GS 2.0.3 (8,970,282 bytes; SHA-256 `0d4e4d241e4d9c060f941eb9f7857c66bce0e5bfaef48beeebea8aaf98ad254b`). This is modified packaging under the accompanying GeneralUser license, not an MIT-licensed or unmodified bank. It retains the original samples, loops, tuning, preset/instrument generators and modulators for bank 0 programs 0, 4, 16, 22, 24, 25, 27, 28, 29, 32, 33, 48, 53, 56, 66, 71 and 105. Programs 28 and 32 are muted guitar and upright bass. The unmodified source bank remains bundled for reproducibility and rollback. Credit to S. Christian Collins and the inherited sample-origin uncertainty disclosed above remain applicable; no new sample-origin audit is claimed.

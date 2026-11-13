@@ -1,0 +1,1253 @@
+{
+  "source_commit": "7a81afe3f78980ff00ae8691d1570bc45244179d",
+  "fixtures": [
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "house-v1",
+        "root": 0,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 0.5,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 0.5,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 6
+      },
+      "sha256": "b3e9a7e4f203fe516128bc2371bd41f894a862d72e714aa149ae86205fd58266"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "house-v1",
+        "root": 0,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 0.5,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 0.5,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 7
+      },
+      "sha256": "d7b1b133d4daca996cdd93fb33a2eaa6e5159abba46bb6fb9117137b005698c2"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "house-v1",
+        "root": 7,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 1,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 1,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 6
+      },
+      "sha256": "7862dcd8107a239a052eaf4893cf5a727e2cc80bbff841b227c9ed5e4cc4a621"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "house-v1",
+        "root": 7,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 1,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 1,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 7
+      },
+      "sha256": "6500da4e75c16bfe508357f396c355fd7ac6a53277fb454f7124a0534e5feaa7"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "reggae-v1",
+        "root": 0,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 0.5,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 0.5,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 6
+      },
+      "sha256": "a412223d9bb8670f6094824b5ccacaf72f9c463961fbc3528c41ca98c85e1351"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "reggae-v1",
+        "root": 0,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 0.5,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 0.5,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 7
+      },
+      "sha256": "2c1b6c0d2a3b7afa3f8b2e59ec454d79b387b0ab34764b3944b19432bcafc3e4"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "reggae-v1",
+        "root": 7,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 1,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 1,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 6
+      },
+      "sha256": "b603bade728cef582bc06ce80d9c9bbb8a8986fafcd1dbd93daa448068b652a3"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "reggae-v1",
+        "root": 7,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 1,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 1,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 7
+      },
+      "sha256": "b25862dc267e4af712b7239fe58921662eba72dad2f1fdcf8c95d2b41594282d"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "soul-v1",
+        "root": 0,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 0.5,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 0.5,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 6
+      },
+      "sha256": "d64d8bccf9533e015b7994c6e6f9f9894792fd8da15b2ff882233565431aef4b"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "soul-v1",
+        "root": 0,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 0.5,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 0.5,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 7
+      },
+      "sha256": "969c743a34b01394dd08f6872b22a745601f015de18039a715fe2340eefc4d76"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "soul-v1",
+        "root": 7,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 1,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 1,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 6
+      },
+      "sha256": "1ffc4482fb2813529567051e5351a00512c6aefe44dab31d305d26f5bc7ff2ee"
+    },
+    {
+      "context": {
+        "version": 1,
+        "sceneId": "soul-v1",
+        "root": 7,
+        "harmony": {
+          "version": 1,
+          "bars": [
+            [
+              0,
+              4,
+              7
+            ],
+            [
+              0,
+              4,
+              9
+            ],
+            [
+              0,
+              5,
+              9
+            ],
+            [
+              2,
+              7,
+              11
+            ]
+          ],
+          "ending": 7
+        },
+        "bpm": 100,
+        "swing": 1,
+        "stepsPerBar": 16,
+        "totalSteps": 64,
+        "source": {
+          "song_id": "fixed",
+          "bpm": 100,
+          "swing": 1,
+          "total_steps": 64,
+          "steps_per_bar": 16,
+          "events": [
+            {
+              "id": "n0",
+              "role": "lead",
+              "step": 0,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 60
+              }
+            },
+            {
+              "id": "n1",
+              "role": "lead",
+              "step": 16,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 64
+              }
+            },
+            {
+              "id": "n2",
+              "role": "lead",
+              "step": 32,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 67
+              }
+            },
+            {
+              "id": "n3",
+              "role": "lead",
+              "step": 48,
+              "duration_steps": 3,
+              "velocity": 0.6,
+              "patch_id": "electric_piano",
+              "provenance": "jam_generated",
+              "concrete": {
+                "midi_pitch": 72
+              }
+            }
+          ]
+        },
+        "patch": "electric_piano",
+        "register": [
+          55,
+          79
+        ],
+        "centre": 67,
+        "inspiration": null,
+        "vocabularyVersion": "openscore-v1-70ba8cdc6c82fe22",
+        "composerVersion": 7
+      },
+      "sha256": "4ef669af94643bab8e052185176b6ba686e56b4d77805d22a95d6e8541fd74e9"
+    }
+  ]
+}

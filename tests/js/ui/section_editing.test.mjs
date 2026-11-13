@@ -496,7 +496,7 @@ test("journey bar names one route and Make my song lands on the tune with music 
   assert.equal(flow.stage, "song");
 });
 
-test("Make my song is a primary control on the circle, not hidden in More", () => {
+test("Make my tune is a primary control on the circle, not hidden in More", () => {
   const flow = setup();
   flow.stage = "jam";
   flow._acceptJamDoc(startJam(flow.doc, { kind: "pitched", patchId: "warm_keys" }));
@@ -506,6 +506,6 @@ test("Make my song is a primary control on the circle, not hidden in More", () =
   flow._jamParticipationHtml = () => "";
   const html = flow._renderListeningJam();
   const more = html.slice(html.indexOf('class="pf-demo-tools"'));
-  assert.match(html.slice(0, html.indexOf('class="pf-demo-tools"')), /data-key="capture-direction"[^>]*>Make my song/);
-  assert.doesNotMatch(more, /capture-direction/);
+  assert.match(html.slice(0, html.indexOf('class="pf-demo-tools"')), /data-key="melody-field-enter"[^>]*>Make my tune/);
+  assert.doesNotMatch(more, /melody-field-enter/);
 });

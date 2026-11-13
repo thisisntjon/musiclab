@@ -4,11 +4,13 @@ Thank you for helping. MusicLab is early, and the most useful thing you can give
 
 ## Feedback
 
-There is no feedback address for this first release. If you are reading this somewhere with an issue tracker, open an issue there and tell us:
+Open an issue in this repository's **Issues** tab on GitHub and tell us:
 
 - who was playing (no names or diagnoses needed, just what kind of access they use: touch, mouse, keyboard, switch, screen reader);
 - what they were trying to do;
 - what worked, and where they got stuck.
+
+If you are building your own fork or remix, see [`CUSTOMIZING.md`](CUSTOMIZING.md) for a guide to the style circle, melody composers, SoundFonts, synths and UI modules.
 
 ## Code
 
@@ -25,4 +27,23 @@ python -m pytest -q
 node --test "tests/js/**/*.test.mjs"
 ```
 
+```bash
+python app.py --smoke-test
+```
+
 By contributing you agree your work is released under the MIT licence.
+
+
+## Adding a style without changing saved songs
+
+Style behavior and instrument sound are separate. A style defines rhythm, harmony, phrasing and development; a patch realizes those notes. Preserve personal notes, performed timing, held durations and provenance.
+
+1. Inspect `static/js/theory/scene_catalogue.js` and the relevant scene implementation. Add a stable id; do not reorder or rename existing catalogue entries.
+2. Describe the actual backing harmony in `static/js/theory/phrase_harmony.js`. Long forms need the correct harmony for each four-bar block. Do not change an existing band's chords simply to satisfy the melody composer.
+3. Add a versioned rhythm/profile definition. Existing `GENRE_PROFILES` in `melody_composer_v5.js` and admitted launch profiles in `melody_genre_profiles_launch.js` define saved behavior. Changes to shared composer functions, source phrases or old profiles require an explicit compatibility strategy, not silent regeneration.
+4. Prove the new style reaches the real Jam-to-Melody route, fits the backing, offers distinct coherent choices and keeps the backing unchanged during comparison. Scale membership alone is not musical acceptance. Use matched listening examples as well as event tests.
+5. Verify Original, Undo, Keep, personal holds, save/reopen, export and a fallback when a route is unsupported. Retain the exact candidate and sound-bank fingerprints.
+
+`tests/js/theory/composer-v5-saved-songs-stable.test.mjs` pins the earlier supported wheels. Never refresh its golden file merely to pass a failing test. New launch profiles need the same compatibility care even where that particular fixture does not cover them. See `tests/js/theory/genre-fit-composer-v5.test.mjs` for harmony, form-block and output checks.
+
+Do not add external assets without checking their redistribution terms and updating the shipped notices. Put model, timing or range constraints in implementation and tests; keep the user-facing language simple.

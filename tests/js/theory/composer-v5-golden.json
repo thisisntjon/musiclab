@@ -1,0 +1,170 @@
+{
+ "ska-v1": {
+  "C major": "0d940911f09990d4b0b3be325c103fa8f9b9d0c2b2447cf074271655686e4441",
+  "A minor": "7ecc761839737e1ee89dd6bc84478130102852c7937b6ffa178d648702d4f0ad"
+ },
+ "rocksteady-v1": {
+  "C major": "0783fabae90a29cc219a8d968b72a894c8209803ced5ae579a0c4b6f6c1408e3",
+  "A minor": "d4fb219f443dfb4eb30ea76ad5ba59051703e4c50d87f12cdad7824fe551fb19"
+ },
+ "reggae-v1": {
+  "C major": "a2bf97d35f9acf7191467ad7c441928bd30f8b99a2d357f2ad5166891aa8ad17",
+  "A minor": "693c209114c504a9a2c45945abbcacdad7f83aa69f81f146f5506340f0946211"
+ },
+ "house-v1": {
+  "C major": "dcad21cec9c67a42f82da7883562cc33124c8dfeeecacc98f10f605a5e1da831",
+  "A minor": "e0f30d781871bc55529ed494dbf9cdaef3ac41c5d1740ee5662389ebbb8683ee"
+ },
+ "doo-wop-v1": {
+  "C major": "05f891bd6c3f70960447f41ce8248f8eb302570d36b0740049895d92710f07b7",
+  "A minor": "7538925ad09b25c8a89299045e7972db501e6ba1f40223539b92ca5a6cc4b55b"
+ },
+ "electro-v1": {
+  "C major": "bad27a6c943f407ff16770bc85a2363fe6a836185a033de88e94575199ca2205",
+  "A minor": "b42cdad752e779587fab9c49d45fabeb86af96070b501670df9d5477e6da141d"
+ },
+ "grime-v1": {
+  "C major": "5314a608fd66809ba916e7876be83093755f478641a623d5801092da03a38d29",
+  "A minor": "ad5f3f5663811876f9a2cf24ae93956ee3a3a7dcd480cb0d67f9877e0d802328"
+ },
+ "footwork-v1": {
+  "C major": "2989288d48a5f89dfbf6e6fbee98546a82492ac873cb045e17781adcb0e28a3c",
+  "A minor": "f850ca814f73f69883432b8e918a8bc96e0403a17052f78b92cf684ce93c5c91"
+ },
+ "baltimore-club-v1": {
+  "C major": "b9a1206b5a5d21ff6e88100e3bb5f4c7500a01f39c442a4f4450e903b1e86438",
+  "A minor": "43a74975454943e1fc60ac1ba40469094896d41226a49796582c8d9fffb4fb7e"
+ },
+ "outlaw-country-v1": {
+  "C major": "b01a7fab22145e1dc246129648c6dbd550ef48aca93f16d3b2cc938d29511881",
+  "A minor": "50e2ef3683da5577bac5c69a650cc6a3ceb80972bc11a6f6c2882037157207ba"
+ },
+ "progressive-bluegrass-v1": {
+  "C major": "9094d2472639f817b37df3a4727388e0f1455817fb0a28e9175c4863a9c33c92",
+  "A minor": "bc05e806aa331099427d2f1cc0ed367dcc79ae307ce3b8cd844228e276509186"
+ },
+ "delta-blues-v1": {
+  "C major": "4845095a5f8d7922e9814a6765f036fa3b955b7a5c3a394977aab83b2ec4edba",
+  "A minor": "d89f3bd3d3fe4ce9b22f81c26babc46487fae09eab14f27a53e286f869b13cfc"
+ },
+ "dubstep-v1": {
+  "C major": "4e13f5dc73f2d8d8d7285226fad4cfeb7ae7354b5395442f1f0860c9f025b712",
+  "A minor": "da3d2d4947cff9a4fd4c54a224b8e8074ac33463c00af300243d9f0ba88b3f88"
+ },
+ "gospel-piano-v1": {
+  "C major": "2c3eeecb5c1badcc3ea17f8e33c0f6752b7d790bf7fc9c87b5d2247664fcf667",
+  "A minor": "36caead165959d14c4a857cb632d0acd7a218055259b2b042ce3b789bf9d3879"
+ },
+ "deep-house-v1": {
+  "C major": "f3887da8e9cf9a5e968312df8e64fe5440b6e220da20133b4d97b3be763b4bc6",
+  "A minor": "4e9be0cb77ca0b4a873fd37c20d3ec3f5f8a1db739d48ef3430150d22582fda0"
+ },
+ "neo-soul-v1": {
+  "C major": "f3bfaa17f9e17cd5d512bc0f30a8c98d55dba9d23831316ee2e3d2de38fc66ec",
+  "A minor": "f260208ecf56117a4086e3490506b9c6be79578a4beb323863bfc6b53adf254c"
+ },
+ "liquid-dnb-v1": {
+  "C major": "8fdbeb4bb1dfb88c474f566361a18b1e50f6e1ed9e2a716024ad8fe02c1a7c37",
+  "A minor": "c2ba87f69967054e2398f7142e1c8440b559c85724d205caf0b3d0a2478a419b"
+ },
+ "western-swing-v1": {
+  "C major": "0d3f964a673dba23dd680c0a644b67c2dc75ba420d4899e2f0ff3181c2c1132f",
+  "A minor": "7aeb88be024a49e8f1901a976523a32af9eeedec1ea0ae5ee7c85392b95240b7"
+ },
+ "techno-v1": {
+  "C major": "0f4255b09f8b9a235357a576e626ff48bd78c5e9a53780365bff363c6b68d044",
+  "A minor": "651ba2013fe0f279ee73cdd19c24c63e52f95a34963a1b1155710b0cba12ecfd"
+ },
+ "minimal-techno-v1": {
+  "C major": "c7229f3abeaca31d1f8952f061645c4f11949ca4fa8511ae5efd517f53d456d0",
+  "A minor": "c8e0bb717e8f074f5be994491ecc1c847c6ad0938a155851f3ebf86e12ec798f"
+ },
+ "jungle-v1": {
+  "C major": "d9a551bffae704c2afd8305b8920ea7e3a490b83705d2445d31ea8eadff329b5",
+  "A minor": "9aee2d3aba7e1dba7c24d5c0132b19bcc6eb01972c6ec4147f1f55f73fc462e7"
+ },
+ "tech-house-v1": {
+  "C major": "954af40c2c75bc5b8088a666e6fc69c5e8bead5042f74f6de214254c8f12a997",
+  "A minor": "f56a9219add6e53c1d4c35fffef7cb266e1f24e80a623702ec8f64e3c5bccbc0"
+ },
+ "honky-tonk-v1": {
+  "C major": "df3c538b4cc1535b575495be9ce92d6573223700ad9944e86870f222aa4a1354",
+  "A minor": "0a2037adef6b7e37589e4016a38b522709f59d185984377a7a2ff3063cee948c"
+ },
+ "downtempo-v1": {
+  "C major": "dd03e4da66156f0dcc80ee3b109b9abc1f35ddab8a49ba1520d588933c32a67c",
+  "A minor": "9705cd1fa74b861ac9aac899bfbad1e4a1a67837be12ad780958b093cbd3b157"
+ },
+ "uk-garage-v1": {
+  "C major": "efcfcbaf271dea4d8b83fa6e46a304ef6da411bbb3a49741cfd862344c5d9bfd",
+  "A minor": "e75c5d800f46b402eb50529ee7945c46fe938b77cae1430e5446e78445b6ec21"
+ },
+ "two-step-v1": {
+  "C major": "adf139be5912048dd09004a1bcf46eb6c9a01a74652ae3113d09bcaf3810ac12",
+  "A minor": "2b74aa88b01f047d6bd618496fdd731ea3e2e820bd61eb3155369b20c002e252"
+ },
+ "breakbeat-v1": {
+  "C major": "694375fb7632eb8e6cb79d1aa1e26094263ee564aaf91b361b9ed75a4faf245b",
+  "A minor": "e260bdc5fea48ab8225f27b2f89fe33539390ec958263f5df6628b2052553655"
+ },
+ "new-wave-v1": {
+  "C major": "2bbac15f945275336ed2a6d24d530431b936e862c7bb0e6abfd7fecad3aab0e2",
+  "A minor": "d40ba3e74f40d4638b2e8c2de6ffb94b5fc474ae2e92f137e3bd3968abcf93df"
+ },
+ "early-rnb-v1": {
+  "C major": "7e68770cf4e158bf4753ba9a36ec2feac5192c3475c5fadb8fa322910be7c1a7",
+  "A minor": "e2361d2db8a2cd871f499fbaa213f03662329b3dd93ef0c68fdbd822942830a2"
+ },
+ "soul-v1": {
+  "C major": "eeb2e3e9f908d114cd664ca52f1270593397c0ea00b7766a07f290acfcdecccb",
+  "A minor": "fce60737ccae00282ecf11804a8c12720b327b917e927e9d8a5d16b2e1e5e5b6"
+ },
+ "swing-v1": {
+  "C major": "264b679e8f6e157a8f9bd4b5b8c6d0cf9d2b499a2d50e06d66e5da8868deea95",
+  "A minor": "cd27959ad1097fb613b6449cf569c1d657b2b869512a8554aa994aadbb332b3a"
+ },
+ "piedmont-v1": {
+  "C major": "648f55013055cf1396eba493a6c0355aedf2dcd94bfa09ab1a92dc48dfe28343",
+  "A minor": "ac5e18f022c3ee697ddfb1ba549128163619baaff1ebf410360028e08db208d7"
+ },
+ "boom-bap-v1": {
+  "C major": "deb2d213a23293576a5bdc9f0392176ca3216654bf63b0e9227974bdabf06a9d",
+  "A minor": "f63265850e352a58ced1514b59de3197a5ba3d478532a0b7a4dcf1838d65ad35"
+ },
+ "trip-hop-v1": {
+  "C major": "4e427543228328b3dd2e6bfd9ef1f29fa9439c45257ca4133353f08d0084cbb3",
+  "A minor": "b568e814c8fe44b5193def66cde3692cc6992b6486bb0a0aa8417297a5f2be49"
+ },
+ "drum-and-bass-v1": {
+  "C major": "da52e36e7c7669482572b82a7cace04cc091944a5bbc70bd8bcc85db2df862c9",
+  "A minor": "9d4b4676177c254c1c881769c4df8011a1297902999367e98eff54b2931f5982"
+ },
+ "jersey-club-v1": {
+  "C major": "73d23d2b926d306babc0a8f845da2e5b7cedd88876f57a65b2c7c69cf4a2cdb4",
+  "A minor": "c7d12bfc494e4e6f66ff002d7f4b746642ab9980989de8314f036a4d4ffa5464"
+ },
+ "trap-v1": {
+  "C major": "5cc284d970e0d2ad70afb340f22be01803a0e23e949b202c6d82a8c52f3c3ab3",
+  "A minor": "d5a6cb627dc82ba444d1988338643344539a34a9a8a912883a4b695f6bcd8460"
+ },
+ "indie-rock-v1": {
+  "C major": "4a663002ceb8a09c4b4a929ab5e4024b862926f85d38cb7a1babae2ed152a1bd",
+  "A minor": "469d960d927dde0f2cb97fcc188d35a8c28246bb3a54ff87c72ef1259d9ef9c6"
+ },
+ "contrast-0": {
+  "C major": "d74d942a0d1f5ea4c877e1636b5bd8c5b3afbec3ddfd05c66166a58cce8d56a6",
+  "A minor": "2f1a97830d78d784392affda83a6a47a620fad81def5f546eb183a8ab609b4b2"
+ },
+ "contrast-1": {
+  "C major": "75302c95ff85f593411ba873a328e66a23b967bbae747b37476732bdd6987a70",
+  "A minor": "49afbfb1d2d4821881b81c3f77d57a86fecae74b373117b9e092a793f241327c"
+ },
+ "contrast-2": {
+  "C major": "68c5a90bf07738b386f4f5f1ff579bb16b11e67c7a2150e94f547365c4dd4fb2",
+  "A minor": "07468bb679fc7ed58c4efc2a372c3a7ff74ed4bf20952bf0f42c17b528c4d1ad"
+ },
+ "contrast-3": {
+  "C major": "0b57a6f77566857c86c44a25ed4dfa9e564a526f40e95df0a2c9d7a7da5bfb23",
+  "A minor": "bd54b61a63e573aae285e8d527485ec0c4e94d0ad1ad1bb5e3b9bd7c70ea268c"
+ }
+}

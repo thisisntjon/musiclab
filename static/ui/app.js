@@ -65,7 +65,12 @@ class MusicLabStudioApp {
     this.tapSdMs = null;
     this.earAnswer = null;
     this.earTrial = null;
-    this.savedIfThenPlan = localStorage.getItem("tonecanvas_if_then_plan") || "";
+    this.savedIfThenPlan = "";
+    try {
+      this.savedIfThenPlan = localStorage.getItem("tonecanvas_if_then_plan") || "";
+    } catch (_e) {
+      // An optional old preference must not prevent playing or downloading a song.
+    }
     this.savedSongsList = [];
 
     // Phase 4 & 5 Surface States
@@ -1653,7 +1658,7 @@ class MusicLabStudioApp {
     const tick = () => {
       const stepEvt = this.scheduler.drainVisualStep();
       const visualActive = this.scheduler.isPlaying || this.scheduler.isCelebratingPlayback?.();
-      this.playFlow?.onTick(stepEvt, Boolean(visualActive));
+      if (this.playFlow?.doc) this.playFlow.onTick(stepEvt, Boolean(visualActive));
       if (document.body.classList.contains("pf-mode")) {
         // Play mode hides the studio, so its playhead, x-ray and meter canvases are not redrawn.
         window.requestAnimationFrame(tick);
@@ -1705,4 +1710,5 @@ class MusicLabStudioApp {
 
 window.addEventListener("DOMContentLoaded", () => {
   window.musicLabApp = new MusicLabStudioApp();
+  window.musicLabBootReady?.();
 });

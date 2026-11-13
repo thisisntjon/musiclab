@@ -467,20 +467,56 @@
     </div>
   </div>
 
-  <div id="boot-failed" role="alert" style="display: none; position: fixed; inset: 0; z-index: 2147483647; align-items: center; justify-content: center; padding: 2rem; text-align: center; font: 600 1.75rem/1.4 system-ui, sans-serif; background: #111; color: #fff;"></div>
+  <div id="boot-failed" role="alert" style="display: none; position: fixed; inset: 0; z-index: 2147483647; flex-direction: column; gap: 1rem; align-items: center; justify-content: center; padding: 2rem; text-align: center; font: 600 1.75rem/1.4 system-ui, sans-serif; background: #111; color: #fff;">
+    <p id="boot-failed-message"></p>
+    <button id="boot-retry" type="button" style="min-height: 48px; padding: .75rem 1.5rem; border: 2px solid currentColor; border-radius: 1rem; color: #111; background: #fff; font: inherit; cursor: pointer;">Try again</button>
+  </div>
   <script id="boot-check">
-    // One module that fails leaves the page dead and silent, so say so. Only a real failure does this: there is no timer,
-    // because a slow phone must never be told a page did not load while it is still loading.
+    // A slow module is not a failure. Explain a long wait without restarting it.
     (function () {
       var box = document.getElementById("boot-failed");
+      var message = document.getElementById("boot-failed-message");
+      var retry = document.getElementById("boot-retry");
+      var shell = document.querySelector(".app-shell");
+      var hasFailed = false;
+      var waitingTimer = window.setTimeout(function () {
+        if (window.musicLabApp || hasFailed) return;
+        box.setAttribute("role", "status");
+        message.textContent = "Still loading. You can wait or try again.";
+        shell.inert = true;
+        box.style.display = "flex";
+      }, 8000);
+      retry.addEventListener("click", function () {
+        // A stale retry must never reload a working song.
+        if (!window.musicLabApp) window.location.reload();
+      });
+      function ready() {
+        if (!window.musicLabApp) return;
+        window.clearTimeout(waitingTimer);
+        var hadRetryFocus = document.activeElement === retry;
+        box.style.display = "none";
+        shell.inert = false;
+        if (hadRetryFocus) {
+          var entry = document.querySelector('#play-flow button:not([disabled])');
+          if (entry) entry.focus();
+          else retry.blur();
+        }
+      }
       function failed() {
         if (window.musicLabApp) return;
-        box.textContent = "This did not load. Reload the page.";
+        window.clearTimeout(waitingTimer);
+        var firstFailure = !hasFailed;
+        hasFailed = true;
+        box.setAttribute("role", "alert");
+        message.textContent = "This did not load.";
+        shell.inert = true;
         box.style.display = "flex";
+        if (firstFailure) retry.focus();
       }
+      window.musicLabBootReady = ready;
       window.musicLabBootFailed = failed;
       window.addEventListener("error", failed);
-      window.addEventListener("load", function () { if (window.musicLabApp) box.style.display = "none"; });
+      window.addEventListener("load", ready);
     })();
   </script>
   <script type="module" src="./ui/app.js" onerror="musicLabBootFailed()"></script>

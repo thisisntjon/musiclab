@@ -631,6 +631,42 @@ export class LookaheadScheduler {
     return false;
   }
 
+  /** Join a pinned melody on the existing clock; submitted voices and live holds survive. */
+  /** joinSteps: where a new choice may enter. Default is the bar line; the melody screen asks for the beat (4). */
+  queueContinuousPartAudition(compiledSong, {sectionId, requestId, joinSteps = null} = {}) {
+    if(joinSteps!==null&&(!Number.isInteger(joinSteps)||joinSteps<1))return {ok:false};
+    const prior=this.compiledSong;
+    if(!this.isPlaying || !Number.isFinite(this.gridOriginTime) || !sectionId || !requestId || !compiledSong?.events
+      || !Number.isInteger(compiledSong.total_steps) || compiledSong.total_steps<1
+      || compiledSong.bpm!==prior?.bpm
+      || (compiledSong.steps_per_bar||16)!==(prior.steps_per_bar||16))return {ok:false};
+    if(this.partAudition)return this.queuePartAudition(compiledSong,{sectionId,requestId,joinSteps});
+    this.pendingPartHandoff={song:structuredClone(compiledSong),sectionId,requestId,joinSteps};
+    return {ok:true};
+  }
+
+  _commitContinuousPartIfDue() {
+    const h=this.pendingPartHandoff;
+    if(!h || this.currentStep%(this.compiledSong.steps_per_bar||16)!==0)return;
+    this.pendingPartHandoff=null;
+    const reached=this.activeJamBacking();
+    const fallbackSong=structuredClone(reached ? {...this.compiledSong,
+      events:[...this.compiledSong.events.filter(e=>e.provenance!=='jam_generated'),...reached.events]} : this.compiledSong);
+    // Only retire future generators. Never dispose the graph or release a live voice.
+    this.cancelJamAnswer();this.clearJamLead();
+    this.committedJamBacking=null;this.pendingJamBacking=null;
+    this.activeJamForm=null;this.requestedJamFormProgram=null;
+    this.pendingPhraseContext=null;this.jamBridgeStage=null;
+    this.leadAnswer=null;this.energyDrop=null;this.playEnergy=0;
+    this.compiledSong=h.song;
+    const tick=Math.round((this.nextStepAudioTime-this.gridOriginTime)/(15/h.song.bpm));
+    this.currentStep=((tick%h.song.total_steps)+h.song.total_steps)%h.song.total_steps;
+    this.loopStartStep=0;this.loopEndStep=null;this.repeatPlayback=true;
+    this.lastPartAuditionState=null;
+    this.partAudition={sectionId:h.sectionId,requestedId:h.requestId,scheduledId:h.requestId,
+      initial:h.song,fallbackSong,pending:null,timeline:[],loopStart:0,loopEnd:null,joinSteps:h.joinSteps};
+  }
+
   /** Detached compiled-part audition. This is not Jam generation or live-input capture. */
   beginPartAudition(compiledSong, {sectionId, requestId} = {}) {
     if (this.isPlaying || !sectionId || !requestId || !compiledSong?.events) return {ok:false};
@@ -642,20 +678,22 @@ export class LookaheadScheduler {
     return {ok:true};
   }
 
-  queuePartAudition(compiledSong, {sectionId, requestId} = {}) {
+  queuePartAudition(compiledSong, {sectionId, requestId, joinSteps = null} = {}) {
+    if(joinSteps!==null&&(!Number.isInteger(joinSteps)||joinSteps<1))return {ok:false};
     const a=this.partAudition;
     if (!a || !this.isPlaying || !requestId || sectionId!==a.sectionId || !compiledSong?.events
       || this.loopStartStep!==a.loopStart || this.loopEndStep!==a.loopEnd
       || !['bpm','swing','total_steps','steps_per_bar'].every(k=>compiledSong[k]===a.initial[k]))
       return {ok:false,reason:'This band needs a new preview.'};
-    a.requestedId=requestId;
+    a.requestedId=requestId;if(Number.isInteger(joinSteps)&&joinSteps>0)a.joinSteps=joinSteps;
     a.pending=requestId===a.scheduledId ? null : {requestId,song:structuredClone(compiledSong)};
     return {ok:true};
   }
 
   getPartAuditionState() {
     const a=this.partAudition;
-    if (!a) return null;
+    if (!a) return this.pendingPartHandoff ? {sectionId:this.pendingPartHandoff.sectionId,
+      requestedId:this.pendingPartHandoff.requestId,scheduledId:null,realizedId:null,pending:true,scheduledTime:null} : null;
     const realized=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1);
     return {sectionId:a.sectionId, requestedId:a.requestedId, scheduledId:a.scheduledId,
       realizedId:realized?.requestId ?? null, pending:Boolean(a.pending),
@@ -663,9 +701,10 @@ export class LookaheadScheduler {
   }
 
   clearPartAudition() {
+    this.pendingPartHandoff=null;
     const a=this.partAudition;
     if(a) this.lastPartAuditionState=this.getPartAuditionState();
-    if(a) this.compiledSong=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1)?.song || a.initial;
+    if(a) this.compiledSong=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1)?.song || a.fallbackSong || a.initial;
     this.partAudition=null;
   }
 
@@ -673,7 +712,7 @@ export class LookaheadScheduler {
     const a=this.partAudition;
     if (!a) return;
     if (!a.timeline.length) a.timeline.push({requestId:a.scheduledId,song:this.compiledSong,audioTime:this.nextStepAudioTime});
-    if (this.currentStep % (this.compiledSong.steps_per_bar || 16)!==0 || !a.pending) return;
+    if (this.currentStep % (a.joinSteps || this.compiledSong.steps_per_bar || 16)!==0 || !a.pending) return;
     const next=a.pending;
     a.pending=null;a.scheduledId=next.requestId;this.compiledSong=next.song;
     a.timeline.push({requestId:next.requestId,song:next.song,audioTime:this.nextStepAudioTime});
@@ -1266,6 +1305,7 @@ export class LookaheadScheduler {
     this.masterBus.fadeIn();
     this.currentStep = this.loopStartStep || 0;
     this.nextStepAudioTime = ctx.currentTime + 0.04;
+    this.gridOriginTime=this.nextStepAudioTime-this.currentStep*(15/this.compiledSong.bpm);
     this.jamBackingTimeline=[];
     this._rememberJamBacking(this.nextStepAudioTime);
     this.droppedSteps = 0;
@@ -1292,11 +1332,12 @@ export class LookaheadScheduler {
   }
 
   stop() {
+    this.pendingPartHandoff=null;
     // Silence comes first: nothing after this line can leave sound playing.
     this._silenceNow();
     if(this.partAudition) {
       const a=this.partAudition;
-      this.compiledSong=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1)?.song || a.initial;
+      this.compiledSong=a.timeline.filter(t=>t.audioTime<=(this.audioCtx?.currentTime ?? -Infinity)).at(-1)?.song || a.fallbackSong || a.initial;
       this.clearPartAudition();
     }
     this.playEnergy = 0;
@@ -1305,6 +1346,8 @@ export class LookaheadScheduler {
     if(this.isPlaying) {
       try {
         this.lastStoppedPerformance=this.capturePerformance();
+        this.lastStoppedLoadingState=this.loadingSession
+          ?{state:this.loadingSession.state,liveAt:this.loadingSession.liveAt,cutoff:this.audioCtx.currentTime}:null;
         const snapshot=this.activeJamBacking();
         this.lastStoppedJamLead=snapshot?{source_song_id:snapshot.source_song_id,plan:snapshot.leadPlan,formCursor:snapshot.phraseContext?.form}:null;
         if(snapshot?.phraseContext?.form&&this.requestedJamFormProgram&&snapshot.source_song_id===this.compiledSong?.song_id&&snapshot.phraseContext.form.id===this.requestedJamFormProgram.id)
@@ -1362,7 +1405,7 @@ export class LookaheadScheduler {
       }
       return;
     }
-    const totalSteps = this.compiledSong.total_steps || 64;
+    let totalSteps = this.compiledSong.total_steps || 64;
     const bpm = this.compiledSong.bpm || 110;
     const swing = this.compiledSong.swing || 0.53;
     const stepSec = (60.0 / bpm) / 4.0;
@@ -1378,15 +1421,20 @@ export class LookaheadScheduler {
     this.visualNotes = this.visualNotes.filter(note => note.end > this.audioCtx.currentTime - Number(this.audioCtx.outputLatency || this.audioCtx.baseLatency || 0));
     if(!this.partAudition) {this._serviceAutomaticAnswer();this._serviceJamAnswer();}
     while (this.nextStepAudioTime < this.audioCtx.currentTime + SCHEDULE_AHEAD_SEC) {
+      this._commitContinuousPartIfDue();
+      totalSteps=this.compiledSong.total_steps||64;
       this._commitPartAuditionIfDue();
       if(!this.partAudition) {this._commitJamBackingIfDue();this._commitJamFormIfDue();this._commitJamLeadIfDue();}
       // Loaded sounds join at a bar line, for attacks from here on; nothing already sounding changes.
-      if (this.loadingSession?.state === "ready" && this.currentStep % (this.compiledSong.steps_per_bar || 16) === 0) this.loadingSession._set("live");
+      if (this.loadingSession?.state === "ready" && this.currentStep % (this.compiledSong.steps_per_bar || 16) === 0) {
+        this.loadingSession.liveAt=this.nextStepAudioTime;
+        this.loadingSession._set("live");
+      }
       const stepIndex = this.currentStep;
       const swingOffset = (stepIndex % 2 === 1) ? ((swing - 0.50) * 2.0 * stepSec * 0.5) : 0.0;
       const exactStepTime = this.nextStepAudioTime + swingOffset;
 
-      const events = this.committedJamBacking === null ? (this.compiledSong.events || [])
+      const events = (this.partAudition || this.committedJamBacking === null) ? (this.compiledSong.events || [])
         : [...(this.compiledSong.events || []).filter(event => event.provenance !== "jam_generated"), ...this._effectiveJamBacking()];
       const energy = this.partAudition ? 0 : this.energyAt(this.nextStepAudioTime);
       const stepEvents = this.partAudition ? events.filter(e=>e.step===stepIndex) : [...this._applyLeadAnswer(stepIndex, events.filter((e) => e.step === stepIndex), stepSec), ...this._energyOrnaments(stepIndex, stepSec, energy)];

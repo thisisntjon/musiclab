@@ -27,10 +27,42 @@ export function phraseContext(doc) {
   if(['outlaw-country-v1','progressive-bluegrass-v1','delta-blues-v1'].includes(sceneId))return {sceneId,root,minor,harmony:rootsStudyHarmony(sceneId,minor),requiresHarmonicLead:true,leadGrammar:leadGrammarFor(sceneId)};
   if(sceneId==='dubstep-v1')return {sceneId,root,minor,harmony:dubHarmony(minor),requiresHarmonicLead:true,leadGrammar:leadGrammarFor(sceneId)};
   if(sceneId==='gospel-piano-v1')return {sceneId,root,minor,harmony:responseHarmony(minor),requiresHarmonicLead:true};
-  const supported=['rocksteady-v1','reggae-v1','house-v1','electro-v1','doo-wop-v1','grime-v1','footwork-v1','baltimore-club-v1'].includes(sceneId)||(sceneId==='ska-v1'&&doc.jam_session.exploration_map==='catalogue-circle-v2');
-  const third=minor?3:4,sixth=minor?8:9;
-  return {sceneId,root,minor,...(leadGrammarFor(sceneId)?{leadGrammar:leadGrammarFor(sceneId)}:{}),harmony:supported?{version:1,
-    bars:[[0,third,7],[0,third,sixth],[0,5,sixth],[2,7,minor?10:11]],ending:7}:null};
+  return {sceneId,root,minor,...(leadGrammarFor(sceneId)?{leadGrammar:leadGrammarFor(sceneId)}:{}),harmony:sceneHarmonyFor(sceneId,minor)};
+}
+
+const SHARED_TRIAD_SCENES=new Set([
+  'ska-v1','rocksteady-v1','reggae-v1','house-v1','electro-v1','doo-wop-v1','grime-v1','footwork-v1','baltimore-club-v1',
+  'tech-house-v1','honky-tonk-v1','downtempo-v1','uk-garage-v1','two-step-v1','breakbeat-v1','new-wave-v1',
+  'early-rnb-v1','soul-v1','swing-v1','piedmont-v1','boom-bap-v1','trip-hop-v1','drum-and-bass-v1','jersey-club-v1','trap-v1','indie-rock-v1',
+]);
+
+// Chords for the tune wheel only. These three styles have no chord plan for the live band, and giving them one
+// would change how their band plays in Jam, so the wheel reads its chords from here instead.
+export function wheelOnlyHarmonyFor(sceneId,minor=false) {
+  const t=minor?3:4,s=minor?8:9,sev=minor?10:11;
+  if(sceneId==='bluegrass-v1'||sceneId==='hip-hop-v1')return {version:1,bars:[[0,t,7],[0,t,s],[0,5,s],[2,7,sev]],ending:7};
+  // Old-time keeps a fifth sounding through the middle bars; the tune may use it there.
+  if(sceneId==='old-time-v1')return {version:1,bars:[[0,t,7],[0,t,s,7],[0,5,s,7],[2,7,sev]],ending:7};
+  return null;
+}
+
+export function sceneHarmonyFor(sceneId,minor=false) {
+  const t=minor?3:4,s=minor?8:9,sev=minor?10:11;
+  if(sceneId==='deep-house-v1')return {version:1,bars:[[0,t,7,sev],[0,t,s,7],[0,5,s,t],[2,7,sev,5]],ending:7};
+  if(sceneId==='neo-soul-v1')return minor
+    ?{version:1,bars:[[0,3,10,2],[8,0,7,10],[5,8,3,7],[7,10,2,5]],ending:7}
+    :{version:1,bars:[[0,4,11,2],[9,0,7,11],[5,9,4,7],[7,11,5,9]],ending:7};
+  if(sceneId==='liquid-dnb-v1')return minor
+    ?{version:1,bars:[[0,3,10,2],[8,0,7,10,3],[5,8,3,7],[7,10,2,5]],ending:7}
+    :{version:1,bars:[[0,4,11,2],[9,0,7,11,4],[5,9,4,7],[7,11,5,9,2]],ending:7};
+  if(sceneId==='western-swing-v1')return minor
+    ?{version:1,bars:[[0,3,7,10],[0,3,8,5],[0,5,8,3],[2,7,10,5]],ending:7}
+    :{version:1,bars:[[0,4,7,9],[0,4,9,7],[0,5,9,2],[2,7,11,5]],ending:7};
+  if(sceneId==='techno-v1'||sceneId==='minimal-techno-v1')return {version:1,bars:[[0,2,7],[s,(s+7)%12,0],[5,0,7],[7,2,5]],ending:7};
+  if(sceneId==='jungle-v1')return {version:1,bars:[[0,t,7],[0,t,s],[0,5,7],[2,7,sev]],ending:7};
+  if(/^contrast-[0-3]$/.test(sceneId))return {version:1,bars:[[0,t,7,sev],[0,t,7,s],[0,5,s],[2,7,0]],ending:7};
+  if(SHARED_TRIAD_SCENES.has(sceneId))return {version:1,bars:[[0,t,7],[0,t,s],[0,5,s],[2,7,sev]],ending:7};
+  return null;
 }
 
 export function leadGrammarFor(sceneId) {

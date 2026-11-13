@@ -1,6 +1,7 @@
 /** Optional local sampled palette. Patch identity pins bank/program; no silent synth fallback. */
 export const PIANO_PATCH = 'sampled_piano_v1';
 import {SAMPLED_PROGRAMS} from '../theory/sampled_sound_capabilities.js';
+import {fetchSampledBank} from './sampled_bank_delivery.js';
 export {SAMPLED_PROGRAMS};
 export const isSampledPatch = patch => Object.hasOwn(SAMPLED_PROGRAMS, patch);
 // Four MIDI ports keep repeated pitches/programs isolated through their release
@@ -15,13 +16,10 @@ export const isRecordedAnswer = event => event?.provenance==='jam_generated'
 // Characterization is bounded to retained range/gate fixtures, not every controller.
 export const SAMPLE_TAIL = 6;
 const base = new URL('../../vendor/sampled-piano/', import.meta.url);
-let libraryPromise, bankPromise;
+let libraryPromise, bankPromise, bankRetry=false;
 async function assets() {
   libraryPromise ||= import(new URL('engine.js', base)).catch(error => { libraryPromise = null; throw error; });
-  bankPromise ||= fetch(new URL('GeneralUser-GS-2.0.3.sf2', base)).then(response => {
-    if (!response.ok) throw Error('Instrument files could not be loaded. Your song is unchanged.');
-    return response.arrayBuffer();
-  }).catch(error => { bankPromise = null; throw error; });
+  bankPromise ||= fetchSampledBank({retry:bankRetry}).catch(error => { bankPromise = null; bankRetry = true; throw error; });
   const [library, bank] = await Promise.all([libraryPromise, bankPromise]);
   library.SpessaLog.setLogLevel(false, false, false);
   return {library, bank};
