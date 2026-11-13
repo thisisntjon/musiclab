@@ -136,17 +136,20 @@ export function songLibrary(storage, { trash = false } = {}) {
     const removed = trashEntries(storage), saved = readForWrite(storage);
     const working = JSON.parse(storage.getItem(WORKING_KEY) || 'null');
     if (removed === null || saved === null || !validWorkingRecord(working)) return {ok:false,reason:'unreadable',songs:[]};
+    const timestamp = value => Number.isFinite(Date.parse(value)) ? Date.parse(value) : 0;
     const entries = new Map();
     for (const entry of listSaves(storage, {includeTrashed:true})) entries.set(entry.id, {id:entry.id,saved:entry.song,updated:entry.saved_at});
     for (const entry of workingEntries(working)) {
       const row = entries.get(entry.song.id) || {id:entry.song.id};
-      if (!row.draft) { row.draft=entry.song; row.updated=entry.updated_at || row.updated; }
+      if (!row.draft) { row.draft=entry.song; if (timestamp(entry.updated_at) > timestamp(row.updated)) row.updated=entry.updated_at; }
       entries.set(row.id,row);
     }
     const songs=[...entries.values()].filter(row => removed.some(e=>e.id===row.id) === trash).map(row=>({
       ...row, title:(row.draft || row.saved).title || 'My song',
       unfinished:!!row.draft && JSON.stringify(row.draft)!==JSON.stringify(row.saved),
     }));
+    // Display recent work first without rewriting stored songs or checkpoints.
+    songs.sort((a,b) => timestamp(b.updated) - timestamp(a.updated));
     return {ok:true,songs};
   } catch { return {ok:false,reason:'unavailable',songs:[]}; }
 }

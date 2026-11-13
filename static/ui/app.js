@@ -732,7 +732,12 @@ class MusicLabStudioApp {
     };
     document.getElementById("btn-stop-sound").addEventListener("click", stopSound);
     window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") stopSound();
+      if (event.key === "Escape") {
+        // Stopping rerenders the wheel. Keep keyboard users on its replacement.
+        const wheelSelector = ['[data-melody-disk]', '[data-music-circle]', '[data-music-field]'].find(selector => document.activeElement?.matches?.(selector));
+        stopSound();
+        if (wheelSelector) this.playFlow?.root?.querySelector(wheelSelector)?.focus({ preventScroll: true });
+      }
     });
     const togglePlay = () => {
       if (this.scheduler.isPlaying) {

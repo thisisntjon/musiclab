@@ -2972,3 +2972,10 @@ body.pf-bigger #pf-circle-picker { min-height: var(--pf-target); }
   box-shadow: none;
   cursor: default;
 }
+
+/* Reflow at narrow CSS widths (including high browser zoom): no clipped safety controls. */
+@media (max-width: 360px) {
+  body.pf-mode .transport-bar { flex-wrap: wrap; }
+  body.pf-mode .transport-controls { flex-wrap: wrap; max-width: 100%; }
+  body.pf-mode .transport-bar .volume-control { flex-wrap: wrap; max-width: 100%; }
+}

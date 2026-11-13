@@ -192,7 +192,7 @@ export class MelodyFieldSession {
       <div class="pf-row"><button class="pf-btn pf-next" data-key="melody-field-keep">${this.palette?"Keep this melody":"Keep this take"}</button>
       <button class="pf-btn" data-key="melody-field-refine">Refine notes</button>
       <button class="pf-btn" data-key="melody-field-back">${this.palette?"Back to jam":"Back to groove"}</button></div>
-      <p class="pf-sub" data-mf-keep-help>${this.palette?'Keep saves this tune. Your first tune stays safe.':'Keep this take saves your live play up to now. Your first tune stays safe.'}</p>
+      <p class="pf-sub" data-mf-keep-help>${this.palette?'Keep chooses this tune. Next, Save here keeps it in this browser. Your first tune stays safe.':'Keep this take saves your live play up to now. Your first tune stays safe.'}</p>
       <p class="pf-sub" data-mf-focus-help>${this.palette?'Softer band stays when you save. Hear tune clearly is just for now.':'Hear with less band. Your saved mix stays.'}</p>
       <details><summary data-key="melody-field-controls">Move with buttons</summary><div class="pf-row">
       <button class="pf-btn" data-key="melody-field-left">Left</button><button class="pf-btn" data-key="melody-field-right">Right</button>
@@ -276,7 +276,7 @@ export class MelodyFieldSession {
         const more=this.root.querySelector('.pf-melody-keep-more');if(more)more.open=true;
         this.loadingSaveShown=true;
       }
-      if(help)help.textContent=!readiness.ok?readiness.message:pending?`${realized?'Keep saves the last tune you heard.':'Keep saves your first tune.'} ${nextHelp}`:'Keep saves this tune. Your first tune stays safe.';
+      if(help)help.textContent=!readiness.ok?readiness.message:pending?`${realized?'Keep chooses the last tune you heard. Next, Save here keeps it in this browser.':'Keep chooses your first tune. Next, Save here keeps it in this browser.'} ${nextHelp}`:'Keep chooses this tune. Next, Save here keeps it in this browser. Your first tune stays safe.';
     }
     const original=this.root.querySelector('[data-key="melody-field-original"]');if(original)original.textContent=this.comparisonPosition?'New melody':'Original';
     const button=this.root.querySelector('[data-key="melody-field-play"]');if(button)button.textContent=this.scheduler.isPlaying?'Stop':'Play';

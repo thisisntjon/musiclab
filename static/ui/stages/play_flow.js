@@ -5303,7 +5303,7 @@ export class PlayFlow {
     if (key === "hum-door") return this._startFromHum();
     if (key === "resume-working") return this._resumeWorking();
     if (key.startsWith('resume-working:')) return this._resumeWorking(key.slice('resume-working:'.length));
-    if(key==='library-open'){this.libraryOpen=true;this.render();this.root.querySelector('[data-key="library-close"]')?.focus();return;}
+    if(key==='library-open'){this.savePage=0;this.libraryOpen=true;this.render();this.root.querySelector('[data-key="library-close"]')?.focus();return;}
     if(key==='library-close'){this.libraryOpen=false;this.render();this.root.querySelector('[data-key="library-open"]')?.focus();return;}
     if (key.startsWith('library-select:')) { this.librarySelection=key.slice(15); return this.render(); }
     if (key==='library-trash') { this.libraryTrash=!this.libraryTrash;this.librarySelection=null;this.savePage=0;return this.render(); }

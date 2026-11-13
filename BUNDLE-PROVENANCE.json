@@ -121,7 +121,7 @@
     "static/js/theory/roots_study_scenes.js": "4c45572451d30efebc54eca9916e397c86b5bb154dff2c5ac01c16b8f1929ca3",
     "static/js/theory/roots_timing_scenes.js": "45fb4a32336edfecfa08b6d0505ee0d68fa51b916618ad65f8a5641ea293fe95",
     "static/js/theory/sampled_sound_capabilities.js": "2cb71cee157e7d36ec4f463fa6d6720ee4be506bafa6461e9179b8aa23acf966",
-    "static/js/theory/save_store.js": "817146a5f17760eee2147da2db108caaa8d29b1ce970379a5ebdec09efa7cff2",
+    "static/js/theory/save_store.js": "96a12fb38ebf7c57eeb3154509416359f6fcda24a9e6dbfff18b2ae33f872f80",
     "static/js/theory/scan_model.js": "aee2ccee01624692ab97e176dbb2e3e1bfe8d2b00a782fe82c0aa45ef148d04d",
     "static/js/theory/scene_catalogue.js": "7d27847deeb76e1306bd045705f0757c88d3d5f70ef636c2cebe4dcac9df525d",
     "static/js/theory/scene_voice_levels.js": "24a208354e1c4282ff127dd0d630155157b357ab925d9f63d1b1689b39e0ac9c",
@@ -154,7 +154,7 @@
     "static/js/visual/look.js": "fd8b3604bd52a909ceb8c6499b9ffa8f87436fc4eb172b1a1be501d792ae02c8",
     "static/js/visual/particle_canvas.js": "85f35ee0702c653f2b4716aa230a196dbf22007cd416b638f020dfd40fe7bc1c",
     "static/js/visual/particles.js": "0128912524da5266841eb94444495f1db7edee004019246bd83af3a94701f061",
-    "static/ui/app.js": "6f79ea8ff555c2f5ff9f7eb9f502691b0a8e1cdbc92045a9385fa305bf32ee73",
+    "static/ui/app.js": "c17a29dd6b8c0c96240150744c9d90f98b3510f6e25dbacd4382f79813d98a1e",
     "static/ui/arranger.js": "d4c22cf9d53bcc58eef2317b647dd7e3c99afed504b5b1d900bd02a10bce8ec9",
     "static/ui/band_view.js": "8f50bd2b2620d7acea1fb2b024a3d6a88b3709520466c2fc496d67defcb52109",
     "static/ui/big_moment.js": "a95ebdba8a4783026dcf04fe3d51c3215d9e1931b8869b2b56bfcea52c65c17f",
@@ -165,11 +165,11 @@
     "static/ui/live_score_visualizer.js": "55a4f01713e4f6ddc318d4fbc5443320775f372ded3cdffc7244021ccb9d9706",
     "static/ui/melody_composer_worker.js": "15c9d62764cc164e49d8f788647abf39dcf83fd0a492abb11dce3b725917040f",
     "static/ui/melody_explorer.js": "4e4163035aa655e8169bf5e50ed05f85bb7e2af07bf17cb49890c27a43ebf383",
-    "static/ui/melody_field_session.js": "59b93692ba0e91a36d2ed0882202e78eeba8c77526d5cc0ef84d33f3c0feb01f",
+    "static/ui/melody_field_session.js": "5c3c08df51eb36480853f9ccf35b28a35dce453c1134a8c609d1928603f31b8c",
     "static/ui/noise_sculptor.js": "1658084091d29a756214cd6f67ffccb0aebb25b8da3dfe8da8df7a207861984c",
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
-    "static/ui/stages/play_flow.js": "d53f2c505a85b28cbdf61e9b88d00677699fd9d956ebf133b6673c952419c699",
+    "static/ui/stages/play_flow.js": "b63724f35533a295d5617a854851ae6017204e263692eb61ac4b87eadf08d133",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63"
@@ -208,14 +208,14 @@
       "file": "static/ui/stages/play_flow.js"
     }
   ],
-  "original_index_sha256": "67f79c7ab0af54b00a0f4525002ad34ea0b630ff13121cf6627f632a2c9775b2",
-  "index_sha256": "7238fb3f8ae8a73e0e91ad1d22e6d6bb854927a13b26bea1277f0b440e0a3ed0",
+  "original_index_sha256": "0fa91f8bc0ee217ca21b52bd61364d40bde648a522881da9896155cd1c4ae30a",
+  "index_sha256": "15143eb86a4dda62782be0786c97e5c5a25105acdd24405be4d16affe78c5ed1",
   "outputs": [
     {
       "kind": "app",
-      "path": "static/ui/app.72318dc32174fafa8e26be8ed42d2a7d861546542b56a268fdbb869fe9fc529d.bundle.js",
-      "bytes": 1526345,
-      "sha256": "72318dc32174fafa8e26be8ed42d2a7d861546542b56a268fdbb869fe9fc529d"
+      "path": "static/ui/app.f47aa3314b2c4866cc832819a1dfa8d06aa2111683c6bf1b708320bfdb7763c7.bundle.js",
+      "bytes": 1527044,
+      "sha256": "f47aa3314b2c4866cc832819a1dfa8d06aa2111683c6bf1b708320bfdb7763c7"
     },
     {
       "kind": "worker",

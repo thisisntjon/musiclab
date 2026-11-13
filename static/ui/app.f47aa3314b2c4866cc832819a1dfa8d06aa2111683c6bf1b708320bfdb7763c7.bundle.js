@@ -10484,7 +10484,7 @@ var MelodyFieldSession = class {
       <div class="pf-row"><button class="pf-btn pf-next" data-key="melody-field-keep">${this.palette ? "Keep this melody" : "Keep this take"}</button>
       <button class="pf-btn" data-key="melody-field-refine">Refine notes</button>
       <button class="pf-btn" data-key="melody-field-back">${this.palette ? "Back to jam" : "Back to groove"}</button></div>
-      <p class="pf-sub" data-mf-keep-help>${this.palette ? "Keep saves this tune. Your first tune stays safe." : "Keep this take saves your live play up to now. Your first tune stays safe."}</p>
+      <p class="pf-sub" data-mf-keep-help>${this.palette ? "Keep chooses this tune. Next, Save here keeps it in this browser. Your first tune stays safe." : "Keep this take saves your live play up to now. Your first tune stays safe."}</p>
       <p class="pf-sub" data-mf-focus-help>${this.palette ? "Softer band stays when you save. Hear tune clearly is just for now." : "Hear with less band. Your saved mix stays."}</p>
       <details><summary data-key="melody-field-controls">Move with buttons</summary><div class="pf-row">
       <button class="pf-btn" data-key="melody-field-left">Left</button><button class="pf-btn" data-key="melody-field-right">Right</button>
@@ -10608,7 +10608,7 @@ var MelodyFieldSession = class {
         if (more) more.open = true;
         this.loadingSaveShown = true;
       }
-      if (help) help.textContent = !readiness.ok ? readiness.message : pending ? `${realized ? "Keep saves the last tune you heard." : "Keep saves your first tune."} ${nextHelp}` : "Keep saves this tune. Your first tune stays safe.";
+      if (help) help.textContent = !readiness.ok ? readiness.message : pending ? `${realized ? "Keep chooses the last tune you heard. Next, Save here keeps it in this browser." : "Keep chooses your first tune. Next, Save here keeps it in this browser."} ${nextHelp}` : "Keep chooses this tune. Next, Save here keeps it in this browser. Your first tune stays safe.";
     }
     const original = this.root.querySelector('[data-key="melody-field-original"]');
     if (original) original.textContent = this.comparisonPosition ? "New melody" : "Original";
@@ -15223,13 +15223,14 @@ function songLibrary(storage, { trash = false } = {}) {
     const removed = trashEntries(storage), saved = readForWrite(storage);
     const working = JSON.parse(storage.getItem(WORKING_KEY) || "null");
     if (removed === null || saved === null || !validWorkingRecord(working)) return { ok: false, reason: "unreadable", songs: [] };
+    const timestamp = (value) => Number.isFinite(Date.parse(value)) ? Date.parse(value) : 0;
     const entries = /* @__PURE__ */ new Map();
     for (const entry of listSaves(storage, { includeTrashed: true })) entries.set(entry.id, { id: entry.id, saved: entry.song, updated: entry.saved_at });
     for (const entry of workingEntries(working)) {
       const row = entries.get(entry.song.id) || { id: entry.song.id };
       if (!row.draft) {
         row.draft = entry.song;
-        row.updated = entry.updated_at || row.updated;
+        if (timestamp(entry.updated_at) > timestamp(row.updated)) row.updated = entry.updated_at;
       }
       entries.set(row.id, row);
     }
@@ -15238,6 +15239,7 @@ function songLibrary(storage, { trash = false } = {}) {
       title: (row.draft || row.saved).title || "My song",
       unfinished: !!row.draft && JSON.stringify(row.draft) !== JSON.stringify(row.saved)
     }));
+    songs.sort((a, b) => timestamp(b.updated) - timestamp(a.updated));
     return { ok: true, songs };
   } catch {
     return { ok: false, reason: "unavailable", songs: [] };
@@ -22801,6 +22803,7 @@ var PlayFlow = class {
     if (key === "resume-working") return this._resumeWorking();
     if (key.startsWith("resume-working:")) return this._resumeWorking(key.slice("resume-working:".length));
     if (key === "library-open") {
+      this.savePage = 0;
       this.libraryOpen = true;
       this.render();
       this.root.querySelector('[data-key="library-close"]')?.focus();
@@ -25189,7 +25192,11 @@ var MusicLabStudioApp = class _MusicLabStudioApp {
     };
     document.getElementById("btn-stop-sound").addEventListener("click", stopSound);
     window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") stopSound();
+      if (event.key === "Escape") {
+        const wheelSelector = ["[data-melody-disk]", "[data-music-circle]", "[data-music-field]"].find((selector) => document.activeElement?.matches?.(selector));
+        stopSound();
+        if (wheelSelector) this.playFlow?.root?.querySelector(wheelSelector)?.focus({ preventScroll: true });
+      }
     });
     const togglePlay = () => {
       if (this.scheduler.isPlaying) {
