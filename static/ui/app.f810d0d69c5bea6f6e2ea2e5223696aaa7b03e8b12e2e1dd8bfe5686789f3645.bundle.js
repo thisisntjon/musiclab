@@ -21225,7 +21225,7 @@ var PlayFlow = class {
   /** Sampled sounds are fetched in the background whenever the song needs them. */
   _loadSoundsQuietly() {
     const scheduler = this.app.scheduler;
-    if (this.quietLoad || !scheduler?.preparePiano) return;
+    if (this.quietLoad || !scheduler?.preparePiano || scheduler.loadingSession) return;
     const generation = scheduler.stopGeneration, songId = this.doc?.id;
     const current = () => scheduler.stopGeneration === generation && this.doc?.id === songId;
     const load = Promise.resolve().then(() => scheduler.preparePiano()).then(() => {

@@ -2,6 +2,16 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {PlayFlow} from '../../../static/ui/stages/play_flow.js';
 
+test('managed loading sessions own bank attempts, including failed and ready states',async()=>{
+ for(const state of ['loading','failed','ready','live']){
+  let calls=0;const flow=Object.create(PlayFlow.prototype);
+  Object.assign(flow,{app:{scheduler:{loadingSession:{state},preparePiano:async()=>{calls++;}}},doc:{id:'one'}});
+  flow._loadSoundsQuietly();await Promise.resolve();
+  assert.equal(calls,0,`${state} must not start a competing quiet load`);
+  assert.equal(flow.quietLoad,undefined);
+ }
+});
+
 function fixture(){
  let resolve,reject;
  const pending=new Promise((yes,no)=>{resolve=yes;reject=no;});

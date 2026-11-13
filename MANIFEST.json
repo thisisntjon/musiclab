@@ -1,12 +1,12 @@
 {
   "version": 1,
   "publication_approved": false,
-  "commit": "fef320857da15a564607d850275883cdf78c54b7",
+  "commit": "c9392aab394fa1421289c0998d6f624665ba4c74",
   "files": {
     ".gitattributes": "23183e8a3fa56753e1f294404b2c462a2b0ce981a0e3aa4990409cd4b527bbc9",
     ".gitignore": "3efd6627d227d452e6d8d1aaf28e164a78364cfb36c03924e47154bad0898e1c",
     "app.py": "761a56f1aaeab9dd1742e90be1b665d4dd3ac80678793f327d74708b5f8dd0aa",
-    "BUNDLE-PROVENANCE.json": "0ecfe5482ade7bc16482f88c884be70a2ebf29ed5205a5a8e11d5704b5b91bfa",
+    "BUNDLE-PROVENANCE.json": "074a9c4259ec8d58f0ca468b9617a76cac9ef22d68478b07e52f4c904a854c51",
     "CONTRIBUTING.md": "f7dc916691c99c541b1c602c84c3c9ca0f878b603e760db6886047d32c9e5286",
     "examples/three-beat-song.musiclab.json": "c375954b476e205a2a1307b8b2b799a8d64e83c3a6d4865ae41d4e4fbd8bf41f",
     "index.html": "8849c79a30a7ee503e783ceba018e74d816d5dca8348d71bf599838948b17a4a",
@@ -53,7 +53,7 @@
     "static/assets/instruments/synth.svg": "c983bc6214ad2ff64e4fe3293071f3e1d6ef97317f845393f9317c1d70a2f389",
     "static/assets/instruments/trumpet.svg": "08d2bf88cd290130ba7272acbc6f0864fef4f28bfab53da2f975eb3004a76b38",
     "static/css/studio.css": "fa703ded10adf8b8559f94793b5523eec44700e792bf2e7c44e85d8a69613aa4",
-    "static/index.html": "5e3e2b5343ddd1ce53ddea2c92603fdd5fe9bef11b5b52f76058eedf3063b405",
+    "static/index.html": "f66946f21ea7d592e9a91add7c2f844cc8f67e5bb394274668bf95842122259d",
     "static/js/audio/hum_keying.js": "5c6bb0579b6510eb857ec6eb3a8d38f2ea115584c6e02a67fe91327807b2a2c1",
     "static/js/audio/master_bus.js": "89880340f3d66a41a0b04b39cb3cf4de7c424af1cda4781e37ad7c0fec0426dc",
     "static/js/audio/melody_field_view.js": "117f5093bf8b32326041fb495b300665a3ddf6ce5c6b3c3d4052c49e43bc7016",
@@ -206,7 +206,7 @@
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
     "static/ui/selftest.js": "5015d80cd61c28b9bc80c86aac6b21300e415cd275a4f555bdbef252b29ef607",
-    "static/ui/stages/play_flow.js": "47d282866607d54730bce2adf6bf84ce6d65d7944f5f3016ef547e0cb18c1b9c",
+    "static/ui/stages/play_flow.js": "4af80330b2dac08c54763cc81c3329d24e928e8bcfc47df5ae774a296b4f99b1",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63",
@@ -423,7 +423,7 @@
     "tests/js/ui/optimize_ui.test.mjs": "f93c37866d520d630e01524f051e1ae87055b166907b5754ae663889ea61a8c3",
     "tests/js/ui/parents_page.test.mjs": "1837fc798a170f9cee5e4872e386e4caa382d5e7f97a863c83e4ceb9ff6a62ec",
     "tests/js/ui/project_validation.test.mjs": "5ff1c68846d475995ee452a7daace898fdfbcbf79be10e62943c92f6c1bd6f5b",
-    "tests/js/ui/quiet-load-lifecycle.test.mjs": "b0bb01bb72d746f265a1f86e087230735a4d0f86b24d9d300f1a416b74571e44",
+    "tests/js/ui/quiet-load-lifecycle.test.mjs": "b94c10a728d8449b3bd778c573604c82f717b64cf56814be08df28f09a852b98",
     "tests/js/ui/retain_melodic_state.test.mjs": "5fa5f462a161f583a74627d7c662d740c673c83a0c06d1604f613ff72f3a7bc2",
     "tests/js/ui/returning_songs.test.mjs": "76bddb0c686633e3fe9fd1e9e2491ba41b70e18a4fa258ab3626faa003c44d5c",
     "tests/js/ui/scan_and_saves.test.mjs": "ba78522dbed1da6ae71fd487f9ed04d370b5a8f13fdcd296a9173385db4b3e02",
@@ -474,7 +474,7 @@
     "hosting/stage-musiclab-cloudflare.mjs": "3510cd6718fa638cfc1fd10214430026f9444a5407398e44af7f6926717cb988",
     "SECURITY.md": "98b2675659712f04c9a6b9dc7717514f7f07384cec676ce1c01b5824f5e4a923",
     "START_HERE.md": "740044fb97ddb05008adf1b3ac561b36f7ed7c54e511fedd72d022fe430b2dd9",
-    "static/ui/app.267b3058419260218d31edce4c7fe9e0dfcbf2f5cf7d80d25b93305c27277762.bundle.js": "267b3058419260218d31edce4c7fe9e0dfcbf2f5cf7d80d25b93305c27277762",
-    "tests/js/ui/melody-entry-readiness.test.mjs": "0d7cdf63a583a7d16d5c52cb5e3411c65f967b00ad1326d985e1a5627b7c5427"
+    "tests/js/ui/melody-entry-readiness.test.mjs": "0d7cdf63a583a7d16d5c52cb5e3411c65f967b00ad1326d985e1a5627b7c5427",
+    "static/ui/app.f810d0d69c5bea6f6e2ea2e5223696aaa7b03e8b12e2e1dd8bfe5686789f3645.bundle.js": "f810d0d69c5bea6f6e2ea2e5223696aaa7b03e8b12e2e1dd8bfe5686789f3645"
   }
 }
