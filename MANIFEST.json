@@ -1,12 +1,12 @@
 {
   "version": 1,
   "publication_approved": false,
-  "commit": "f595f490d2523c821d1681a688a6242acf89f42c",
+  "commit": "fef320857da15a564607d850275883cdf78c54b7",
   "files": {
     ".gitattributes": "23183e8a3fa56753e1f294404b2c462a2b0ce981a0e3aa4990409cd4b527bbc9",
     ".gitignore": "3efd6627d227d452e6d8d1aaf28e164a78364cfb36c03924e47154bad0898e1c",
     "app.py": "761a56f1aaeab9dd1742e90be1b665d4dd3ac80678793f327d74708b5f8dd0aa",
-    "BUNDLE-PROVENANCE.json": "891fb0b9db94e53af833ff708f2051ef04e30f5f48667cbfa3e613cd43545b00",
+    "BUNDLE-PROVENANCE.json": "0ecfe5482ade7bc16482f88c884be70a2ebf29ed5205a5a8e11d5704b5b91bfa",
     "CONTRIBUTING.md": "f7dc916691c99c541b1c602c84c3c9ca0f878b603e760db6886047d32c9e5286",
     "examples/three-beat-song.musiclab.json": "c375954b476e205a2a1307b8b2b799a8d64e83c3a6d4865ae41d4e4fbd8bf41f",
     "index.html": "8849c79a30a7ee503e783ceba018e74d816d5dca8348d71bf599838948b17a4a",
@@ -53,7 +53,7 @@
     "static/assets/instruments/synth.svg": "c983bc6214ad2ff64e4fe3293071f3e1d6ef97317f845393f9317c1d70a2f389",
     "static/assets/instruments/trumpet.svg": "08d2bf88cd290130ba7272acbc6f0864fef4f28bfab53da2f975eb3004a76b38",
     "static/css/studio.css": "fa703ded10adf8b8559f94793b5523eec44700e792bf2e7c44e85d8a69613aa4",
-    "static/index.html": "15143eb86a4dda62782be0786c97e5c5a25105acdd24405be4d16affe78c5ed1",
+    "static/index.html": "5e3e2b5343ddd1ce53ddea2c92603fdd5fe9bef11b5b52f76058eedf3063b405",
     "static/js/audio/hum_keying.js": "5c6bb0579b6510eb857ec6eb3a8d38f2ea115584c6e02a67fe91327807b2a2c1",
     "static/js/audio/master_bus.js": "89880340f3d66a41a0b04b39cb3cf4de7c424af1cda4781e37ad7c0fec0426dc",
     "static/js/audio/melody_field_view.js": "117f5093bf8b32326041fb495b300665a3ddf6ce5c6b3c3d4052c49e43bc7016",
@@ -188,7 +188,6 @@
     "static/js/visual/particle_canvas.js": "85f35ee0702c653f2b4716aa230a196dbf22007cd416b638f020dfd40fe7bc1c",
     "static/js/visual/particles.js": "0128912524da5266841eb94444495f1db7edee004019246bd83af3a94701f061",
     "static/parents.html": "6048a5afb197005e91f5685bdb7567b84715504c98c55c052f7ae9d52cddbdd9",
-    "static/ui/app.f47aa3314b2c4866cc832819a1dfa8d06aa2111683c6bf1b708320bfdb7763c7.bundle.js": "f47aa3314b2c4866cc832819a1dfa8d06aa2111683c6bf1b708320bfdb7763c7",
     "static/ui/app.js": "c17a29dd6b8c0c96240150744c9d90f98b3510f6e25dbacd4382f79813d98a1e",
     "static/ui/arranger.js": "d4c22cf9d53bcc58eef2317b647dd7e3c99afed504b5b1d900bd02a10bce8ec9",
     "static/ui/band_view.js": "8f50bd2b2620d7acea1fb2b024a3d6a88b3709520466c2fc496d67defcb52109",
@@ -207,7 +206,7 @@
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
     "static/ui/selftest.js": "5015d80cd61c28b9bc80c86aac6b21300e415cd275a4f555bdbef252b29ef607",
-    "static/ui/stages/play_flow.js": "b63724f35533a295d5617a854851ae6017204e263692eb61ac4b87eadf08d133",
+    "static/ui/stages/play_flow.js": "47d282866607d54730bce2adf6bf84ce6d65d7944f5f3016ef547e0cb18c1b9c",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63",
@@ -474,6 +473,8 @@
     "hosting/musiclab-worker.mjs": "1465c9a88546aae3bde69d87f3d302e0fd8d1213bb8791275b4b5cc6dda9bab2",
     "hosting/stage-musiclab-cloudflare.mjs": "3510cd6718fa638cfc1fd10214430026f9444a5407398e44af7f6926717cb988",
     "SECURITY.md": "98b2675659712f04c9a6b9dc7717514f7f07384cec676ce1c01b5824f5e4a923",
-    "START_HERE.md": "740044fb97ddb05008adf1b3ac561b36f7ed7c54e511fedd72d022fe430b2dd9"
+    "START_HERE.md": "740044fb97ddb05008adf1b3ac561b36f7ed7c54e511fedd72d022fe430b2dd9",
+    "static/ui/app.267b3058419260218d31edce4c7fe9e0dfcbf2f5cf7d80d25b93305c27277762.bundle.js": "267b3058419260218d31edce4c7fe9e0dfcbf2f5cf7d80d25b93305c27277762",
+    "tests/js/ui/melody-entry-readiness.test.mjs": "0d7cdf63a583a7d16d5c52cb5e3411c65f967b00ad1326d985e1a5627b7c5427"
   }
 }

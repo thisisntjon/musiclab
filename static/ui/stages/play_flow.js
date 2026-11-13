@@ -810,17 +810,17 @@ export class PlayFlow {
     if(this.stage!=='jam'||this.melodyField||this.melodyPreparing)return;
     this._flushMusicField?.();
     const scheduler=this.app.scheduler;
+    const token=this._intentToken();
     this.melodyPreparing=true;
     try {
       if(!scheduler.isPlaying) {
-        const token=this._intentToken();
         if(!await this._keepMusicGoing(token))return;
-        await new Promise(resolve=>setTimeout(resolve,150));
         if(!this._intentValid(token))return;
       }
       // A picked band joins at its next boundary. Build the tune on it, not on the band it replaces.
       if(!await this._awaitPickedBand())return;
-      const capture=scheduler.capturePerformance();
+      const capture=await this._awaitMelodyCapture(token);
+      if(!this._intentValid(token))return;
       if(!capture?.events?.length)return this.app._announce('Listen a little, then try your tune.');
       const source=materializePerformance(this._canonicalDoc(),capture);
       // Keep the actual Jam as the source archive, but explore the complete
@@ -841,6 +841,18 @@ export class PlayFlow {
       this.cancelFieldGesture();this.exploreTour=null;this.answerOnRelease=false;clearTimeout(this.answerTimer);this.melodyField=session;
       this.render();this.root.querySelector('[data-melody-disk]')?.focus();
     }catch(error){this.app._announce(`Your tune stays. ${error.message}`);}finally{this.melodyPreparing=false;}
+  }
+
+  /** Wait for heard attacks, not a guessed startup delay or future scheduled notes. */
+  async _awaitMelodyCapture(token) {
+    for(let i=0;i<160;i++) {
+      if(!this._intentValid(token)||this.stage!=='jam'||!this.app.scheduler.isPlaying)return null;
+      const capture=this.app.scheduler.capturePerformance();
+      if(!capture)return null; // No active take is different from a take awaiting its first attack.
+      if(capture?.events?.length)return capture;
+      await new Promise(resolve=>setTimeout(resolve,25));
+    }
+    return null;
   }
 
   /** True while the chosen band has not yet replaced the one the audio clock is playing. */

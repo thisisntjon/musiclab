@@ -18003,16 +18003,16 @@ var PlayFlow = class {
     if (this.stage !== "jam" || this.melodyField || this.melodyPreparing) return;
     this._flushMusicField?.();
     const scheduler = this.app.scheduler;
+    const token = this._intentToken();
     this.melodyPreparing = true;
     try {
       if (!scheduler.isPlaying) {
-        const token = this._intentToken();
         if (!await this._keepMusicGoing(token)) return;
-        await new Promise((resolve) => setTimeout(resolve, 150));
         if (!this._intentValid(token)) return;
       }
       if (!await this._awaitPickedBand()) return;
-      const capture = scheduler.capturePerformance();
+      const capture = await this._awaitMelodyCapture(token);
+      if (!this._intentValid(token)) return;
       if (!capture?.events?.length) return this.app._announce("Listen a little, then try your tune.");
       const source = materializePerformance(this._canonicalDoc(), capture);
       const reached = scheduler.activeJamBacking();
@@ -18045,6 +18045,17 @@ var PlayFlow = class {
     } finally {
       this.melodyPreparing = false;
     }
+  }
+  /** Wait for heard attacks, not a guessed startup delay or future scheduled notes. */
+  async _awaitMelodyCapture(token) {
+    for (let i = 0; i < 160; i++) {
+      if (!this._intentValid(token) || this.stage !== "jam" || !this.app.scheduler.isPlaying) return null;
+      const capture = this.app.scheduler.capturePerformance();
+      if (!capture) return null;
+      if (capture?.events?.length) return capture;
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    return null;
   }
   /** True while the chosen band has not yet replaced the one the audio clock is playing. */
   _pickedBandPending() {

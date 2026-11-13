@@ -169,7 +169,7 @@
     "static/ui/noise_sculptor.js": "1658084091d29a756214cd6f67ffccb0aebb25b8da3dfe8da8df7a207861984c",
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
-    "static/ui/stages/play_flow.js": "b63724f35533a295d5617a854851ae6017204e263692eb61ac4b87eadf08d133",
+    "static/ui/stages/play_flow.js": "47d282866607d54730bce2adf6bf84ce6d65d7944f5f3016ef547e0cb18c1b9c",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63"
@@ -209,13 +209,13 @@
     }
   ],
   "original_index_sha256": "0fa91f8bc0ee217ca21b52bd61364d40bde648a522881da9896155cd1c4ae30a",
-  "index_sha256": "15143eb86a4dda62782be0786c97e5c5a25105acdd24405be4d16affe78c5ed1",
+  "index_sha256": "5e3e2b5343ddd1ce53ddea2c92603fdd5fe9bef11b5b52f76058eedf3063b405",
   "outputs": [
     {
       "kind": "app",
-      "path": "static/ui/app.f47aa3314b2c4866cc832819a1dfa8d06aa2111683c6bf1b708320bfdb7763c7.bundle.js",
-      "bytes": 1527044,
-      "sha256": "f47aa3314b2c4866cc832819a1dfa8d06aa2111683c6bf1b708320bfdb7763c7"
+      "path": "static/ui/app.267b3058419260218d31edce4c7fe9e0dfcbf2f5cf7d80d25b93305c27277762.bundle.js",
+      "bytes": 1527531,
+      "sha256": "267b3058419260218d31edce4c7fe9e0dfcbf2f5cf7d80d25b93305c27277762"
     },
     {
       "kind": "worker",
