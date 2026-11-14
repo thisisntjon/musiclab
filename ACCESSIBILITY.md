@@ -49,6 +49,9 @@ Most USB switch interfaces (such as Hitch, JoyCable, Xbox Adaptive Controller vi
 | **Listen and explore — octave** | `Z` / `X` | Move the eight pads lower (`Z`) or higher (`X`). |
 | **Style circle (`[data-music-circle]`)** | `Arrow Left` / `Arrow Right` | Step to the previous or next connected musical style. |
 | **Style circle (`[data-music-circle]`)** | `Arrow Up` / `Arrow Down` | Step to another style family. |
+| **Sound wheel ("Change the sound"), groups** | Arrow keys | Hear each group in turn (**Own sound** sits between Synths and Keys). `Enter` opens the focused group. |
+| **Sound wheel, inside a group** | `Arrow Left` / `Arrow Right`, `Arrow Up` / `Arrow Down`, `Backspace` | Change the sound, change the group, or show all groups again. |
+| **Sound wheel** | `Home` | Go back to the tune's own sound (**Own sound**). |
 | **Refine notes (single-note editor)** | `Arrow Up` / `Arrow Down` | Move the selected note higher or lower in pitch. |
 | **Refine notes (single-note editor)** | `Arrow Left` / `Arrow Right` | Move the selected note earlier or later in time. |
 | **Refine notes (single-note editor)** | `Shift + Arrow Left` / `Right` | Make the selected note shorter or longer. |
@@ -58,6 +61,7 @@ Most USB switch interfaces (such as Hitch, JoyCable, Xbox Adaptive Controller vi
 
 - **On the Style Circle:** Open **Choose without dragging** to pick any style by name from a standard dropdown or step through styles and families with buttons.
 - **On the Tune Wheel ("Make my tune"):** Open **Move with buttons** to nudge toward **Bright hook**, **Smooth flow**, **Crisp bounce**, or **Wide space**, step outward (**Light**, **Theme**, **Breathe**, **Return**), compare with **Original**, or **Undo move** using ordinary buttons.
+- **On the Sound wheel ("Change the sound"):** Every group, every sound and the middle (**Own sound**, or **All groups** inside a group) is an ordinary button and its own `Tab` stop, so `Tab` and `Enter`, or two-switch scanning, can pick any of the 33 sounds without dragging. A polite status line says when the wheel switches between the groups and a group's sounds. These names and announcements pass automated checks in Chrome and Edge; spoken screen-reader output has not been tested.
 - **Optional Humming ("Hum an idea"):** Completely optional (records up to 8 seconds locally on your device only after you press **Hum**). If microphone permission is off or skipped, every part of MusicLab still works with pads, buttons, or switches.
 
 ---
@@ -102,6 +106,7 @@ If you are adapting MusicLab for a specific person, classroom, clinic, or assist
 | Local-only spoken prompts (`localService` speech synthesis) | [`static/js/audio/speech.js`](static/js/audio/speech.js) |
 | Plain-language reading-grade checker | [`static/js/theory/plain_language.js`](static/js/theory/plain_language.js) |
 | Keyboard handling, pad keys (`A`–`K`, `Z`/`X`), non-drag pickers & volume lock | [`static/ui/stages/play_flow.js`](static/ui/stages/play_flow.js) |
+| Sound wheel buttons, arrow keys and status line (`soundKeyMove`, `MELODY_SOUNDS`) | [`static/ui/melody_field_session.js`](static/ui/melody_field_session.js) |
 | Focus outlines, `.pf-bigger` sizing, `.pf-less-motion` & High Contrast styles | [`static/css/studio.css`](static/css/studio.css) |
 | Plain-HTML guide for parents and supporters | [`static/parents.html`](static/parents.html) |
 | Hard `−3 dBFS` audio ceiling | [`static/js/audio/master_bus.js`](static/js/audio/master_bus.js), [`src/audio_engine/dsp.py`](src/audio_engine/dsp.py) |

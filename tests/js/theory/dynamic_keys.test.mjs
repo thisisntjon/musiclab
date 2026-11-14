@@ -36,3 +36,10 @@ test('favorites persist explicit IDs and increase compatible visits without trap
  assert.deepEqual(loadStyleFavorites(()=>{throw Error('denied');},['a']),[]);
  raw='bad';assert.deepEqual(loadStyleFavorites(storage,['a']),[]);
 });
+test('the bass flute keeps the lead key row; real bass sounds keep the low row',()=>{
+ const rows=patch=>dynamicJamPads(doc(),{bpm:100,position:1,backing:{events:chord(0,[60,64,67],patch)}}).map(p=>p.midi);
+ const lead=rows('sampled_guitar_v1');
+ assert.deepEqual(rows('sampled_bass_flute_v1'),lead,'the bass flute sounds an octave down already; its keys are not moved to the bass row');
+ assert.ok(rows('sampled_bass_v1').every(m=>m<60),'a bass guitar still plays the low row');
+ assert.ok(rows('sampled_upright_bass_v1').every(m=>m<60));
+});

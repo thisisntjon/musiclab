@@ -34,9 +34,9 @@ Many adaptive switches, foot pedals, head arrays, and Makey Makey boards send sp
 
 ### C. Unlock any of the 128 General MIDI instruments already in the repo
 
-For fast web loading, [`static/js/audio/sampled_bank_delivery.js`](static/js/audio/sampled_bank_delivery.js) loads `GeneralUser-GS-2.0.3-MusicLab17-v1.sf2` (`8,970,282` bytes), which holds 17 instruments. However, the **complete 128-instrument SoundFont** is already sitting right next to it at `static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2` (`32,319,396` bytes, SHA-256 `9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe`)!
+For fast web loading, [`static/js/audio/sampled_bank_delivery.js`](static/js/audio/sampled_bank_delivery.js) loads `GeneralUser-GS-2.0.3-MusicLab36-v1.sf2` (`11,699,936` bytes, about 11.7 MB), which holds the 36 programs the app uses (33 of them on the Sound wheel). However, the **complete 128-instrument SoundFont** is already sitting right next to it at `static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2` (`32,319,396` bytes, SHA-256 `9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe`)!
 
-To unlock instruments like Vibraphone (`11`), Marimba (`12`), Accordion (`21`), Cello (`42`), Orchestral Harp (`46`), Flute (`73`), or Kalimba (`108`):
+To unlock instruments like Celesta (`8`), Xylophone (`13`), Cello (`42`), Sitar (`104`) or Bagpipe (`109`):
 
 1. **Switch to the full SoundFont** in [`static/js/audio/sampled_bank_delivery.js`](static/js/audio/sampled_bank_delivery.js):
    ```js
@@ -44,8 +44,8 @@ To unlock instruments like Vibraphone (`11`), Marimba (`12`), Accordion (`21`), 
    sha256: '9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe',
    bytes: 32319396,
    ```
-2. **Add a new versioned patch ID** (for example `sampled_kalimba_v1: 108`) to `programs` in [`static/js/theory/sampled_sound_capabilities.js`](static/js/theory/sampled_sound_capabilities.js). Keep existing `sampled_*_v1` IDs unchanged so previously saved songs still sound the same.
-3. **Add a visible card** in `INSTRUMENTS` inside [`static/js/theory/instrument_catalogue.js`](static/js/theory/instrument_catalogue.js) (instrument icons live in `static/assets/instruments/`).
+2. **Add a new versioned patch ID** (for example `sampled_celesta_v1: 8`) to `programs` in [`static/js/theory/sampled_sound_capabilities.js`](static/js/theory/sampled_sound_capabilities.js). Keep existing `sampled_*_v1` IDs unchanged so previously saved songs still sound the same. To make a sound play lower or higher than the written notes, add it to `transpose` in the same file, as **Bass flute** does (`-12`, one octave lower).
+3. **Put it on the Sound wheel** by adding an entry to `MELODY_SOUNDS` in [`static/ui/melody_field_session.js`](static/ui/melody_field_session.js) (its label, short label, patch ID, group and loudness `level`), and give it a plain name in [`static/js/theory/sampled_sound_labels.js`](static/js/theory/sampled_sound_labels.js). Or, to offer it as a jam instrument, **add a visible card** in `INSTRUMENTS` inside [`static/js/theory/instrument_catalogue.js`](static/js/theory/instrument_catalogue.js) (instrument icons live in `static/assets/instruments/`). Run the JS tests afterwards; the Sound wheel tests pin the current list.
 
 > Check [`NOTICES.md`](NOTICES.md) and `static/vendor/sampled-piano/GeneralUser-GS-LICENSE.txt` if you redistribute modified or replacement SoundFonts.
 

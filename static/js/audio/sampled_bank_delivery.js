@@ -1,13 +1,13 @@
 ﻿/** Delivery packaging only: sound identity remains the original GeneralUser presets. */
 import {SAMPLED_BANK,SAMPLED_PROGRAMS} from '../theory/sampled_sound_capabilities.js';
 export const SAMPLED_DELIVERY=Object.freeze({
- version:1,
- file:'GeneralUser-GS-2.0.3-MusicLab17-v1.sf2',
- sha256:'0d4e4d241e4d9c060f941eb9f7857c66bce0e5bfaef48beeebea8aaf98ad254b',
- bytes:8970282,
+ version:3,
+ file:'GeneralUser-GS-2.0.3-MusicLab36-v1.sf2',
+ sha256:'a3a9e330a46f04ece40769cec5d1ea8b469242cb5123ed5136399fc386d09fc7',
+ bytes:11699936,
  sourceBankId:'generaluser-gs-2.0.3',
  sourceSha256:'9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe',
- programs:Object.freeze([0,4,16,22,24,25,27,28,29,32,33,48,53,56,66,71,105]),
+ programs:Object.freeze([0,4,10,11,12,16,21,22,24,25,27,28,29,32,33,45,46,48,53,54,56,57,62,66,71,73,74,75,79,80,81,85,105,107,108,114]),
 });
 const bankUrl=new URL('../../vendor/sampled-piano/'+SAMPLED_DELIVERY.file,import.meta.url);
 export async function fetchSampledBank({retry=false,fetcher=globalThis.fetch}={}) {

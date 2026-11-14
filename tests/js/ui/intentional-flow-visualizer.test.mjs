@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PlayFlow } from "../../../static/ui/stages/play_flow.js";
-import { MelodyFieldSession } from "../../../static/ui/melody_field_session.js";
+import { MelodyFieldSession, MELODY_SOUNDS, MELODY_SOUND_FAMILIES } from "../../../static/ui/melody_field_session.js";
 import { startJam, setJamDirection } from "../../../static/js/theory/jam_session.js";
 import { buildLiveScoreModel, computeLiveScoreFrame } from "../../../static/js/theory/live_score_model.js";
 import { syncLiveScoreSvg, renderLiveScoreInnerSvg } from "../../../static/ui/live_score_visualizer.js";
@@ -239,6 +239,32 @@ test("Melody wheel session renders Original ghost, beat-handoff preview, backing
   assert.ok(countTopScanStops(html) <= 35, `Melody wheel scan stops <= 35 (got ${countTopScanStops(html)})`);
   assert.match(html, /Back to jam/, "Melody return button uses 3-word Back to jam label");
   assert.match(html, /Refine notes/, "Melody wheel offers direct Refine notes bridge");
+
+  // Sound wheel: the group ring (with each possible chosen sound's second line) and every group's sound ring.
+  session.setSoundMode(true);
+  const soundStops = [];
+  for (const sound of MELODY_SOUNDS) {
+    session.soundPatch = sound.patch;
+    const ringHtml = session.html();
+    for (const label of visibleButtonLabels(ringHtml)) {
+      assert.ok(label.split(/\s+/).length <= 3, `Sound wheel group ring button <= 3 words: "${label}"`);
+    }
+    soundStops.push(countTopScanStops(ringHtml));
+    assert.ok(countTopScanStops(ringHtml) <= 35, `Sound wheel group ring scan stops <= 35 (got ${countTopScanStops(ringHtml)})`);
+  }
+  for (const family of MELODY_SOUND_FAMILIES) {
+    session.soundView = family.name;
+    session.soundPatch = MELODY_SOUNDS.find((s) => s.family === family.name).patch;
+    const ringHtml = session.html();
+    for (const label of visibleButtonLabels(ringHtml)) {
+      assert.ok(label.split(/\s+/).length <= 3, `${family.name} sound ring button <= 3 words: "${label}"`);
+    }
+    soundStops.push(countTopScanStops(ringHtml));
+    assert.ok(countTopScanStops(ringHtml) <= 35, `${family.name} sound ring scan stops <= 35 (got ${countTopScanStops(ringHtml)})`);
+  }
+  assert.ok(Math.max(...soundStops) <= 35);
+  session.setSoundMode(false);
+  session.soundPatch = null;
 
   // Create minimal DOM mock for session.paint()
   const makeFakeSvg = () => {

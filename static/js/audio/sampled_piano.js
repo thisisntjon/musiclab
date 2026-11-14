@@ -1,8 +1,8 @@
 /** Optional local sampled palette. Patch identity pins bank/program; no silent synth fallback. */
 export const PIANO_PATCH = 'sampled_piano_v1';
-import {SAMPLED_PROGRAMS} from '../theory/sampled_sound_capabilities.js';
+import {SAMPLED_PROGRAMS,SAMPLED_TRANSPOSE} from '../theory/sampled_sound_capabilities.js';
 import {fetchSampledBank} from './sampled_bank_delivery.js';
-export {SAMPLED_PROGRAMS};
+export {SAMPLED_PROGRAMS,SAMPLED_TRANSPOSE};
 export const isSampledPatch = patch => Object.hasOwn(SAMPLED_PROGRAMS, patch);
 // Four MIDI ports keep repeated pitches/programs isolated through their release
 // tails. A single port exhausted during ordinary four-part arrangement changes.
@@ -24,13 +24,18 @@ async function assets() {
   library.SpessaLog.setLogLevel(false, false, false);
   return {library, bank};
 }
+/** The one place a sampled event becomes MIDI program and pitch, for live play, previews,
+ * jam answers and renderPiano (WAV export). A patch's transpose (bass flute: -12) moves only
+ * the sounding pitch here; the event, its saved note and its pitch data keep the written pitch.
+ */
 export function pianoNotes(event) {
   if (!isSampledPatch(event.patch_id)) return [];
   const velocity = Math.max(0, Math.min(127, Math.round(Number(event.velocity ?? .85) * 127)));
   if (!velocity) return [];
+  const transpose = Object.hasOwn(SAMPLED_TRANSPOSE, event.patch_id) ? SAMPLED_TRANSPOSE[event.patch_id] : 0;
   return (event.voiced_freqs || [event.concrete?.freq_hz || 440]).map(freq => ({
     program: SAMPLED_PROGRAMS[event.patch_id],
-    pitch: Math.max(0, Math.min(127, Math.round(69 + 12 * Math.log2(freq / 440)))), velocity,
+    pitch: Math.max(0, Math.min(127, Math.round(69 + 12 * Math.log2(freq / 440)) + transpose)), velocity,
     duration: Math.max(.001, Number(event.duration_sec) || .25),
     pan: Math.max(0, Math.min(127, Math.round(64 + 63 * Number(event.pan || 0)))),
   }));

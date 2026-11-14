@@ -1,3 +1,5 @@
+import {restoreMelodicPhrase} from './melodic_evolution.js';
+
 /** Commit a complete editable score. This is not an audio-clock recording. */
 export function selectedMelody(source,song,{context,choice,performanceArchive=null}={}) {
   const doc=structuredClone(source),stepSec=15/song.bpm;
@@ -14,8 +16,18 @@ export function selectedMelody(source,song,{context,choice,performanceArchive=nu
     const position=note.step+offset;
     note.step=Math.floor(position);
     note.performance={version:1,offset_steps:position-note.step};
+    // Every pitched note of the chosen score was heard at its concrete pitch. A note that names no
+    // pitch rule (a jam's developed phrase, a played key) would be re-placed on chord tones by the
+    // compiler, so it is kept as heard. A note with its own rule (relational) keeps that rule.
+    if(note.role!=='drums'&&note.pitch_lock_mode==null&&Number.isFinite(note.concrete?.midi_pitch))note.pitch_lock_mode='concrete';
     return note;
   });
+  // Back to jam resumes the jam's saved phrase over this score's lead. Keep it only while the kept
+  // generated lead is that phrase as the jam played it (same phrase, own sound); a melody in another
+  // sound or with other notes is what the jam continues from instead. The archives keep it as it was.
+  const evolution=doc.jam_session?.melodic_evolution,phrase=evolution?restoreMelodicPhrase(evolution):null;
+  if(phrase&&doc.notes.some(n=>n.role==='lead'&&n.provenance==='jam_generated'&&!n.edited_from_generator
+    &&(n.evolution?.phraseOrdinal!==evolution.phraseOrdinal||n.patch_id!==phrase.patch||n.sound_base)))delete doc.jam_session.melodic_evolution;
   doc.global_context={...doc.global_context,bpm:song.bpm,bars:song.total_steps/(song.steps_per_bar||16),
     steps_per_bar:song.steps_per_bar||16,root_pc:context.root};
   doc.auto_harmony_stabs=false;

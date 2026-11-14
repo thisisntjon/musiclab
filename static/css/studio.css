@@ -2979,3 +2979,83 @@ body.pf-bigger #pf-circle-picker { min-height: var(--pf-target); }
   body.pf-mode .transport-controls { flex-wrap: wrap; max-width: 100%; }
   body.pf-mode .transport-bar .volume-control { flex-wrap: wrap; max-width: 100%; }
 }
+
+/* Wheels as the main things to try (13 Nov): pictured cards on the jam, tabs on the tune screen. */
+.pf-wheel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .7rem; margin: .7rem 0 .3rem; }
+.pf-btn.pf-wheel-card { position: relative; display: flex; width: 100%; align-items: center; justify-content: flex-start; text-align: left; min-height: 4.2rem; padding: .7rem 1rem .7rem 4.3rem; border-radius: 20px; font-size: 1.08rem; line-height: 1.2; white-space: normal; }
+.pf-wheel-caption { margin: .3rem .4rem 0; font-size: .85rem; opacity: .85; }
+.pf-wheel-card::before { content: ""; position: absolute; left: .85rem; top: 50%; width: 2.7rem; height: 2.7rem; margin-top: -1.35rem; border-radius: 50%; border: 1px solid #7592a8; box-shadow: 0 0 14px rgba(47, 227, 244, .25); }
+.pf-wheel-card-tune::before { background: radial-gradient(circle, #f0f4ff 0 12%, #0b0e18 13% 30%, transparent 62%), conic-gradient(#456a77, #674367, #687a4a, #3e7682, #456a77); }
+.pf-wheel-card-sound::before { background: radial-gradient(circle, #f0f4ff 0 12%, #0b0e18 13% 30%, transparent 62%), conic-gradient(from -20deg, #5aa9e6 0 40deg, #f2d04b 0 80deg, #4fd1c5 0 120deg, #e6a34f 0 160deg, #7fcf8a 0 200deg, #b59cf0 0 240deg, #d86fae 0 280deg, #f07a5a 0 320deg, #b8e04f 0); }
+.pf-wheel-card::after { content: ""; position: absolute; left: .85rem; top: 50%; width: 2.7rem; height: 2.7rem; margin-top: -1.35rem; border-radius: 50%; border: 2px solid rgba(47, 227, 244, .55); animation: pf-wheel-invite 2.8s ease-out infinite; pointer-events: none; }
+.pf-wheel-card-sound::after { animation-delay: 1.4s; border-color: rgba(230, 163, 79, .6); }
+@keyframes pf-wheel-invite { 0% { transform: scale(1); opacity: .9; } 70%, 100% { transform: scale(1.55); opacity: 0; } }
+.pf-btn.pf-wheel-card:hover::before, .pf-btn.pf-wheel-card:focus-visible::before { transform: rotate(40deg); transition: transform .5s ease; }
+@media (prefers-reduced-motion: reduce) { .pf-wheel-card::after { animation: none; opacity: 0; } .pf-btn.pf-wheel-card:hover::before { transform: none; } }
+body.pf-less-motion .pf-wheel-card::after { animation: none; opacity: 0; }
+
+.pf-wheel-tabs { display: flex; flex-wrap: wrap; gap: .6rem; margin: .7rem 0 .2rem; }
+.pf-btn.pf-wheel-tab { min-width: 9rem; padding: .55rem 1.1rem; border-radius: 16px; font-size: 1.05rem; line-height: 1.2; }
+.pf-btn.pf-wheel-tab[aria-pressed="true"] { border-color: #2fe3f4; box-shadow: 0 0 0 1px #2fe3f4, 0 0 18px rgba(47, 227, 244, .35); }
+
+/* Sound wheel, two steps (13 Nov): nine groups on one ring, then the chosen group's sounds. The disk owns
+   pointer input, so the buttons on it take no pointer events; keys, switches and assistive technology still
+   press them. States sit on the labels: chosen is filled in the group colour, heard carries a small playing mark
+   (not an outline, which is the focus ring). */
+/* Nothing moves the disk while a finger is on it: both prompts share one cell (only this view's shows), and the
+   wheel column is exactly the disk wide and top-aligned, so a longer status line never slides it sideways or down. */
+.pf-sound-prompt { display: grid; }
+.pf-sound-prompt > span { grid-area: 1 / 1; }
+.pf-sound-prompt[data-view="groups"] > [data-prompt="sounds"], .pf-sound-prompt[data-view="sounds"] > [data-prompt="groups"] { visibility: hidden; }
+.pf-mf-main.pf-sound-main { align-items: start; }
+.pf-mf-wheel.pf-sound-wheel { width: min-content; max-width: 100%; justify-self: center; }
+.pf-melody-disk.pf-sound-disk { background: #090c16; border-color: #7592a8; container-type: inline-size; }
+.pf-sound-ring { position: absolute; inset: 0; border-radius: 50%; }
+.pf-sound-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(circle closest-side, rgba(9, 12, 22, .9) 0 30%, rgba(9, 12, 22, .35) 52%, rgba(9, 12, 22, 0) 78%); }
+.pf-sound-rim { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 6px), #000 calc(100% - 5px)); mask: radial-gradient(closest-side, transparent calc(100% - 6px), #000 calc(100% - 5px)); }
+.pf-sound-sector { position: absolute; transform: translate(-50%, -50%); width: max-content; margin: 0; padding: .16rem .42rem .26rem; border: 0; border-radius: 999px; pointer-events: none; cursor: inherit; color: #fff; font-family: inherit; font-size: .85rem; font-weight: 700; line-height: 1.15; text-align: center; white-space: nowrap; text-shadow: 0 1px 5px #05070c, 0 0 2px #05070c; background: linear-gradient(var(--hue, #8a93a6), var(--hue, #8a93a6)) no-repeat 50% calc(100% - 2px) / calc(100% - .7rem) 3px; }
+.pf-sound-choice { max-width: 7.5em; white-space: normal; }
+.pf-sound-now { position: absolute; left: 50%; transform: translateX(-50%); width: max-content; padding: .04rem .32rem; border-radius: 999px; font-size: .7rem; font-weight: 800; line-height: 1.1; }
+.pf-sound-group[data-out="up"] .pf-sound-now { bottom: calc(100% + 1px); }
+.pf-sound-group[data-out="down"] .pf-sound-now { top: calc(100% + 1px); }
+.pf-sound-group[data-chosen="true"] .pf-sound-now { background: var(--hue); }
+.pf-sound-now:empty { display: none; }
+.pf-sound-hub { left: 50%; top: 50%; width: 30%; height: 30%; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; padding: .2rem; border-radius: 50%; white-space: normal; background: #141a2b; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .3); }
+.pf-sound-sector[data-chosen="true"] { background: var(--hue, #e8edf7); color: #05070c; text-shadow: none; }
+.pf-sound-hub[data-chosen="true"] { background: #e8edf7; }
+.pf-sound-sector:focus { outline: none; }
+.pf-sound-sector:focus-visible { outline: 3px solid var(--pf-focus, #ffffff); outline-offset: 2px; }
+.pf-sound-sector[data-heard="true"]::after { content: "\266A"; content: "\266A" / ""; position: absolute; left: 50%; top: -4px; transform: translate(-50%, -100%); color: #fff; font-size: .85rem; font-weight: 400; line-height: 1; text-shadow: 0 0 4px #05070c, 0 0 2px #05070c; }
+.pf-sound-group[data-out="up"][data-heard="true"]::after { top: calc(100% + 4px); transform: translate(-50%, 0); }
+.pf-sound-hub[data-heard="true"]::after { top: 14%; transform: translate(-50%, -50%); }
+.pf-sound-hub[data-heard="true"][data-chosen="true"]::after { color: #05070c; text-shadow: none; }
+.pf-sound-sector:disabled { opacity: .55; }
+.pf-sound-disk[data-sound-zoom="in"] > .pf-sound-ring { animation: pf-sound-zoom-in 220ms ease-out; }
+.pf-sound-disk[data-sound-zoom="out"] > .pf-sound-ring { animation: pf-sound-zoom-out 220ms ease-out; }
+@keyframes pf-sound-zoom-in { from { opacity: .3; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes pf-sound-zoom-out { from { opacity: .3; transform: scale(1.06); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pf-sound-disk[data-sound-zoom] > .pf-sound-ring { animation: none; } }
+body.pf-less-motion .pf-sound-disk[data-sound-zoom] > .pf-sound-ring, body[data-calm="true"] .pf-sound-disk[data-sound-zoom] > .pf-sound-ring { animation: none; }
+@media (max-width: 480px) { .pf-sound-sector { font-size: .78rem; padding-inline: .34rem; } .pf-sound-now { font-size: .68rem; } .pf-btn.pf-wheel-card { min-height: 4rem; } }
+/* Bigger buttons never makes the Sound wheel smaller: the Tune wheel's 59vw phone rule (above) does not apply to it. */
+@media (max-width: 480px) { body.pf-bigger .pf-melody-disk.pf-sound-disk { width: min(76vw, 470px, max(230px, calc(100svh - 370px))); } }
+/* Label sizes follow the disk itself: a short laptop screen makes it small at any width. */
+@container (max-width: 299px) { .pf-sound-sector { font-size: .78rem; padding-inline: .34rem; } .pf-sound-now { font-size: .68rem; } }
+@container (min-width: 400px) { .pf-sound-sector { font-size: .92rem; } body.pf-bigger .pf-sound-sector { font-size: 1rem; } }
+/* Below a 400 px disk each word of a two-word sound takes its own line, so a side label, its filled pill and its focus ring
+   stay inside the round edge (labels sit at 32.5% of the disk, see soundRingHtml); the smallest disks also trim the padding. */
+@container (max-width: 399px) { .pf-sound-choice { width: min-content; } }
+@container (max-width: 299px) { .pf-sound-choice { padding-inline: .28rem; } }
+/* Bigger buttons enlarges the wheel's words where the disk has room (the 296 px disk on a 390 px phone and up). */
+@container (min-width: 280px) and (max-width: 399px) { body.pf-bigger .pf-sound-sector { font-size: .9rem; } body.pf-bigger .pf-sound-now { font-size: .76rem; } }
+@media (prefers-reduced-motion: reduce) { .pf-btn.pf-wheel-card:focus-visible::before { transform: none; transition: none; } }
+body.pf-less-motion .pf-btn.pf-wheel-card:hover::before, body.pf-less-motion .pf-btn.pf-wheel-card:focus-visible::before { transform: none; transition: none; }
+@media (forced-colors: active) {
+  .pf-melody-disk.pf-sound-disk, .pf-sound-ring { background: Canvas; border-color: CanvasText; }
+  .pf-sound-ring::before, .pf-sound-rim { display: none; }
+  .pf-sound-sector { background: none; color: ButtonText; }
+  .pf-sound-hub { border: 2px solid ButtonText; }
+  .pf-sound-sector[data-chosen="true"], .pf-sound-group[data-chosen="true"] .pf-sound-now { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+  .pf-sound-sector[data-heard="true"]::after { color: CanvasText; }
+  .pf-sound-sector:focus-visible { outline-color: CanvasText; }
+}

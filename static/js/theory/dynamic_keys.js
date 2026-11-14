@@ -2,6 +2,9 @@ import {jamPads} from './jam_session.js';
 import {isSampledPatch} from '../audio/sampled_piano.js';
 import {validFormMode} from './jam_form.js';
 const pitched=p=>isSampledPatch(p)||['warm_keys','pluck_lead','supersaw_stab','clean_bass'].includes(p);
+// Bass sounds get the low key row. The bass flute is a lead whose patch already sounds an octave down,
+// so it keeps the lead row (a name match on 'bass' alone would put it two octaves under the other leads).
+const lowKeys=p=>/bass/.test(p||'')&&!/flute/.test(p||'');
 const midi=e=>Number.isFinite(e.concrete?.midi_pitch)?e.concrete.midi_pitch:69+12*Math.log2((e.concrete?.freq_hz||440)/440);
 /** Resolve only NEW presses from the score active on the audio clock. */
 export function dynamicJamPads(doc,context){
@@ -15,7 +18,7 @@ export function dynamicJamPads(doc,context){
   const lead=context.backing.events.find(e=>e.role==='lead'&&pitched(e.patch_id));
   const declared=context.backing.phraseContext?.form_lead_patch;
   const patch=doc.jam_session?.follow_band_sound===false?fallback[0].patchId:lead?.patch_id||(pitched(declared)?declared:fallback[0].patchId);
-  const octave=/bass/.test(patch)?36:60;
+  const octave=lowKeys(patch)?36:60;
   return fallback.map((pad,i)=>({...pad,midi:octave+pcs[i],role:'lead',patchId:patch}));
  }
  const cycle=doc.global_context?.steps_per_bar||16,bar=Math.floor(context.position/cycle),position=context.position;
@@ -32,7 +35,7 @@ export function dynamicJamPads(doc,context){
  const counts=new Map();for(const e of pool)counts.set(e.patch_id,(counts.get(e.patch_id)||0)+1);
  const patch=[...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0][0];
  const selectedPatch=doc.jam_session?.follow_band_sound===false?fallback[0].patchId:patch;
- const notes=[];for(let octave=/bass/.test(selectedPatch)?36:60;notes.length<4;octave+=12)for(const pc of pcs){notes.push(octave+pc);if(notes.length===4)break;}
+ const notes=[];for(let octave=lowKeys(selectedPatch)?36:60;notes.length<4;octave+=12)for(const pc of pcs){notes.push(octave+pc);if(notes.length===4)break;}
  return fallback.map((pad,i)=>({...pad,midi:notes[i],role:'lead',patchId:selectedPatch}));
 }
 export const MELODY_KEYS = ["a", "s", "d", "f", "g", "h", "j", "k"];

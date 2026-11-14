@@ -157,3 +157,99 @@ test('preloaded restart requires an actual realization in this melody section',(
   scheduler.state={sectionId:field.sectionId,realizedId:field.requestId};
   assert.equal(melodyKeepReadiness(field).ok,true);
 });
+
+
+test('sound choice changes generated tune only, keeps heard sound, and survives Keep/resume',async()=>{
+  const {field,scheduler,flow,north,south}=fixture();
+  for(const v of Object.values(field.palette))for(const e of v.notes)if(e.provenance==='generated')e.provenance='jam_generated';
+  const personal=structuredClone(field.palette.original.notes[0]);
+  const edited={...personal,id:'edited',provenance:'jam_generated',edited_from_generator:true};
+  const backing={...personal,id:'bass',role:'bass',provenance:'jam_generated'};
+  for(const v of Object.values(field.palette))v.notes.push(structuredClone(personal),structuredClone(backing),structuredClone(edited));
+  field.candidates.clear();
+  const first=field._candidate(north);field.realizedId=first.id;field.requestId=first.id;scheduler.state.realizedId=first.id;
+  const snapshot=structuredClone(field.palette);
+  field.selectSound('sampled_guitar_v1');
+  const requested=field.candidates.get(field.requestId);
+  assert.equal(requested.song.events[0].patch_id,'sampled_guitar_v1');
+  assert.deepEqual(requested.song.events.slice(1),first.song.events.slice(1));
+  assert.deepEqual(field.palette,snapshot);
+  assert.equal(field.candidates.get(field.realizedId).song.events[0].patch_id,'sampled_piano_v1');
+  scheduler.state.realizedId=field.requestId;field.paint();
+  field.selectSound('sampled_organ_v1');
+  await flow._melodyFieldAction('melody-field-keep');
+  assert.equal(flow.doc.capture_notes.melody_field.context.melodySound,'sampled_guitar_v1');
+  assert.equal(flow.doc.notes[0].patch_id,'sampled_guitar_v1');
+  const reopened=JSON.parse(JSON.stringify(flow.doc));
+  const resumed=new MelodyFieldSession({...field.source,events:reopened.notes},{scheduler,captureOrigin:0,sourceDoc:reopened,phraseContext:reopened.capture_notes.melody_field.context});
+  resumed.palette=field.palette;resumed.candidates.clear();
+  assert.equal(resumed._candidate(south).song.events[0].patch_id,'sampled_guitar_v1');
+});
+
+test('sound Original and Undo restore sound with tune; no personal-only rewrite',()=>{
+  const {field,north}=fixture();
+  for(const v of Object.values(field.palette))for(const e of v.notes)if(e.provenance==='generated')e.provenance='jam_generated';
+  field.candidates.clear();field.requestId=field._candidate(north).id;
+  field.selectSound('sampled_organ_v1');assert.equal(field.soundPatch,'sampled_organ_v1');
+  field.toggleOriginal();assert.equal(field.soundPatch,null);
+  field.toggleOriginal();assert.equal(field.soundPatch,'sampled_organ_v1');
+  field.undo();assert.equal(field.soundPatch,null);
+  field.request({x:0,y:0});
+  field.selectSound('sampled_guitar_v1');
+  assert.equal(field.soundPatch,null);
+  assert.match(field.requestError,/Your notes keep their sound/);
+});
+
+
+function guideFixture(){
+ const f=fixture();
+ const bass={id:'band',role:'bass',step:0,duration_steps:4,velocity:.7,patch_id:'sampled_bass_v1',provenance:'jam_generated',concrete:{midi_pitch:48}};
+ for(const v of Object.values(f.field.palette))v.notes.push(bass);f.field.bandBasis={band:.7};
+ f.field.candidates.clear();
+ const c=f.field._candidate(f.north);f.field.requestId=c.id;f.field.realizedId=c.id;f.scheduler.state.realizedId=c.id;
+ return f;
+}
+test('Show me requires heard context and a genuine backing change',()=>{
+ const {field}=fixture();assert.equal(field.startGuide(),false);assert.match(field.requestError,/no band notes/);
+ const f=guideFixture();f.field.request(f.south);assert.equal(f.field.startGuide(),false);
+});
+test('Show me accepts heard mix only, adds one Undo and preserves source',()=>{
+ const {field,scheduler,north,south}=guideFixture();const original=structuredClone(field.sourceDoc);
+ assert.equal(field.startGuide(),true);assert.equal(field.finishGuide(true),false);
+ assert.equal(field.request(south),false);assert.deepEqual(field.position,north);
+ scheduler.state.realizedId=field.requestId;field.paint();
+ assert.equal(field.finishGuide(true),true);assert.equal(field.history.length,1);assert.equal(field.bandBalance,true);
+ field.undo();assert.equal(field.bandBalance,false);assert.deepEqual(field.sourceDoc,original);
+});
+test('Put back waits for actual restoration; Stop does not accept preview',async()=>{
+ const {field,scheduler,flow}=guideFixture();
+ field.startGuide();scheduler.state.realizedId=field.requestId;field.paint();
+ const doc=structuredClone(flow.doc);await flow._melodyFieldAction('melody-field-keep');assert.deepEqual(flow.doc,doc);
+ scheduler.stop();assert.equal(field.finishGuide(false),true);assert.equal(field.guide.restoring,true);
+ assert.equal(field.finishGuide(true),false);
+ scheduler.isPlaying=true;Object.assign(scheduler.state,{realizedId:field.requestId,scheduledId:field.requestId,pending:false,scheduledTime:0});field.paint();
+ assert.equal(field.guide,null);assert.equal(field.history.length,0);assert.equal(field.bandBalance,false);
+});
+test('failed guide request or failed restoration leaves recoverable state',()=>{
+ const {field,scheduler}=guideFixture();
+ scheduler.queueContinuousPartAudition=()=>({ok:false});
+ assert.equal(field.startGuide(),false);assert.equal(field.guide,undefined);assert.equal(field.bandBalance,false);
+ scheduler.queueContinuousPartAudition=()=>({ok:true});field.startGuide();
+ scheduler.state.realizedId=field.requestId;field.paint();
+ scheduler.queueContinuousPartAudition=()=>({ok:false});
+ assert.equal(field.finishGuide(false),false);assert.ok(field.guide);assert.equal(field.bandBalance,true);
+});
+
+test('Show me cannot use original fallback as proof it played',()=>{
+ const {field,scheduler}=guideFixture();
+ field.realizedId=null;scheduler.state.realizedId=null;field.position={x:0,y:0};field.requestId=field._candidate(field.position).id;
+ assert.equal(field.startGuide(),false);
+});
+test('Put back stays unresolved while an intervening preview is already scheduled',()=>{
+ const {field,scheduler}=guideFixture();const old=field.requestId;
+ field.startGuide();const preview=field.requestId;
+ Object.assign(scheduler.state,{realizedId:old,scheduledId:preview,pending:false,scheduledTime:2});
+ field.finishGuide(false);assert.ok(field.guide);
+ Object.assign(scheduler.state,{realizedId:old,scheduledId:old,pending:false,scheduledTime:3});field.paint();assert.ok(field.guide);
+ scheduler.audioCtx.currentTime=3;field.paint();assert.equal(field.guide,null);
+});

@@ -6,6 +6,7 @@ import {OOH_SCENE_LEVEL,GRIME_SCENE_LEVEL,OUTLAW_STUDY_LEVEL,PROGRESSIVE_STUDY_L
 // Original descendants of the listening motif. This planner only emits supplied
 // MusicLab material; performed notes never enter its transformation path.
 import {SCENE_CATALOGUE} from './scene_catalogue.js';
+import {SAMPLED_PROGRAMS} from './sampled_sound_capabilities.js';
 const PALETTES = [
   [/delta-blues/, ['sampled_guitar_v1','sampled_guitar_v1']],
   [/outlaw-country/, ['sampled_clean_guitar_v1','sampled_guitar_v1']],
@@ -23,12 +24,15 @@ export function leadPalette(sceneId) {
 }
 
 export function restoreMelodicPhrase(state) {
-  const patches=new Set(PALETTES.flatMap(([,p])=>p).concat('sampled_electric_piano_v1'));
+  // The last phrase's sound may be any sampled patch: a kept melody can carry a Sound wheel
+  // sound into the jam. It only marks a handoff (v1) and is never looked up in a palette.
+  // Every palette patch is sampled, so earlier saves stay valid; unknown names stay refused.
+  const knownPatch=patch=>typeof patch==='string'&&Object.hasOwn(SAMPLED_PROGRAMS,patch);
   if(![1,2,3].includes(state?.version)||!Number.isInteger(state.phraseOrdinal)||state.phraseOrdinal<0||state.phraseOrdinal>1000000
     ||!SCENE_CATALOGUE.some(s=>s.id===state.sceneId)||!Number.isInteger(state.root)||state.root<0||state.root>11
     ||typeof state.minor!=='boolean'||!Number.isFinite(state.bpm)||state.bpm<20||state.bpm>400
     ||!Number.isInteger(state.seed)||state.seed<0||state.seed>0xffffffff
-    ||(state.previousPatch!==null&&!patches.has(state.previousPatch)))return null;
+    ||(state.previousPatch!==null&&!knownPatch(state.previousPatch)))return null;
   if(state.version>=2&&(!Array.isArray(state.recentOpenings)||state.recentOpenings.length>4
     ||state.recentOpenings.some(n=>!Number.isInteger(n)||n<0||n>7)))return null;
   if(state.version>=2&&state.roomFor!==undefined&&(!Array.isArray(state.roomFor)||state.roomFor.length>16

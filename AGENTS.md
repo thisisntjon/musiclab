@@ -42,11 +42,12 @@ Never break these principles unless the user explicitly asks in their private fo
 - **Default comfort switches (`Calm`, `Bigger buttons`, `Sound on Play`, `Read out loud`):** [`static/js/theory/comfort.js`](static/js/theory/comfort.js) (`COMFORT_DEFAULTS`).
 - **Keyboard shortcuts, USB switch keys (`Space`/`Enter`), 8 live pads (`A–K`), octave (`Z`/`X`), and main UI stages:** [`static/ui/stages/play_flow.js`](static/ui/stages/play_flow.js) (see `_onKey(ev)` for key handling and `_liveJamPads()` for pad notes).
 - **Unlocking any of the 128 General MIDI instruments:**
-  1. [`static/js/audio/sampled_bank_delivery.js`](static/js/audio/sampled_bank_delivery.js) — switch `SAMPLED_DELIVERY` from the 9 MB 17-preset bank (`GeneralUser-GS-2.0.3-MusicLab17-v1.sf2`) to the bundled full 32.3 MB 128-preset bank (`GeneralUser-GS-2.0.3.sf2`, `32319396` bytes, SHA-256 `9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe`), or recompute `bytes` + `sha256` for a custom `.sf2`.
+  1. [`static/js/audio/sampled_bank_delivery.js`](static/js/audio/sampled_bank_delivery.js) — switch `SAMPLED_DELIVERY` from the 36-preset web bank (`GeneralUser-GS-2.0.3-MusicLab36-v1.sf2`, `11699936` bytes, about 11.7 MB) to the bundled full 32.3 MB 128-preset bank (`GeneralUser-GS-2.0.3.sf2`, `32319396` bytes, SHA-256 `9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe`), or recompute `bytes` + `sha256` for a custom `.sf2`.
   2. [`static/js/theory/sampled_sound_capabilities.js`](static/js/theory/sampled_sound_capabilities.js) — add `sampled_<instrument>_v1: <gmProgram0to127>`.
-  3. [`static/js/theory/instrument_catalogue.js`](static/js/theory/instrument_catalogue.js) — add a `pitched(...)` instrument card.
+  3. [`static/ui/melody_field_session.js`](static/ui/melody_field_session.js) — add an entry to `MELODY_SOUNDS` to put it on the Sound wheel and name it in [`static/js/theory/sampled_sound_labels.js`](static/js/theory/sampled_sound_labels.js); or add a `pitched(...)` instrument card in [`static/js/theory/instrument_catalogue.js`](static/js/theory/instrument_catalogue.js) for a jam instrument.
 - **78 connected styles & backing harmony:** [`static/js/theory/scene_catalogue.js`](static/js/theory/scene_catalogue.js), [`static/js/theory/music_circle.js`](static/js/theory/music_circle.js), [`static/js/theory/phrase_harmony.js`](static/js/theory/phrase_harmony.js), and `*_scene.js` / `*_form_score*.js` in `static/js/theory/`. (Follow the 5-step checklist in [`CONTRIBUTING.md`](CONTRIBUTING.md).)
 - **Tune Wheel ("Make my tune") composers:** [`static/js/theory/melody_composer_v5.js`](static/js/theory/melody_composer_v5.js) through [`static/js/theory/melody_composer_v9.js`](static/js/theory/melody_composer_v9.js), [`static/js/theory/melody_genre_profiles_launch.js`](static/js/theory/melody_genre_profiles_launch.js), [`static/js/theory/melody_phrase_library_v1.js`](static/js/theory/melody_phrase_library_v1.js), and [`static/ui/melody_field_session.js`](static/ui/melody_field_session.js).
+- **Sound wheel ("Change the sound"):** `MELODY_SOUNDS` and `MELODY_SOUND_FAMILIES` in [`static/ui/melody_field_session.js`](static/ui/melody_field_session.js) (33 sounds in 9 groups). Per-patch transposition is `SAMPLED_TRANSPOSE` in [`static/js/theory/sampled_sound_capabilities.js`](static/js/theory/sampled_sound_capabilities.js): **Bass flute** sounds an octave below the written notes, which saved songs keep.
 - **Web Audio & Python synths:** [`static/js/audio/voices.js`](static/js/audio/voices.js), [`src/audio_engine/synth.py`](src/audio_engine/synth.py), [`src/audio_engine/dsp.py`](src/audio_engine/dsp.py), [`presets/patches.json`](presets/patches.json).
 - **Visual styling, focus rings, `.pf-bigger`, `.pf-less-motion`:** [`static/css/studio.css`](static/css/studio.css).
 - **Optional production bundling & Cloudflare Workers hosting:** [`hosting/BUNDLING.md`](hosting/BUNDLING.md). If you change files in a fork and use `hosting/stage-musiclab-cloudflare.mjs`, regenerate `MANIFEST.json` SHA-256 entries first so package verification passes.
@@ -59,12 +60,14 @@ Never break these principles unless the user explicitly asks in their private fo
 # Fast end-to-end render + -3 dBFS ceiling smoke check (~3 seconds)
 python -B app.py --smoke-test
 
-# Targeted JS test (fast) or full JS suite (1,234 tests)
+# Targeted JS test (fast) or full JS suite (1,312 tests)
 node --test "tests/js/**/*.test.mjs"
 
 # Full Python suite (167 tests)
 python -B -m pytest -q
 ```
+
+With the released bundle entry, the two entry checks in `tests/js/ui/boot_check.test.mjs` (and the Python test that runs the JS suite) fail until `static/index.html` loads `./ui/app.js`, as described below.
 
 
 ## Released bundle and local edits

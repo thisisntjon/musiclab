@@ -10,7 +10,11 @@ import { MasterBus } from "./master_bus.js";
 import { triggerScheduledEvent } from "./voices.js";
 import { isSampledPatch, SAMPLE_TAIL, createPiano, renderPiano } from './sampled_piano.js';
 import { liveVelocity, dimmedVelocity, ENERGY_ROLL_LEVEL } from "../theory/scene_voice_levels.js";
-/** Native voices that stand in for sampled ones while the bank loads (phase 14.1), by role. */
+/** Native voices that stand in for sampled ones while the bank loads (phase 14.1), by role.
+ * A stand-in plays the written pitch for every patch, including a transposed one (the bass
+ * flute sounds an octave down only once the bank is live). A take records the stand-in as heard,
+ * at the written pitch it replays on, so no pitch data is ever shifted.
+ */
 export const LOADING_VOICES = Object.freeze({ bass: "clean_bass", lead: "pluck_lead", harmony: "warm_keys", hocket: "warm_keys" });
 import { hzToMidiFloat, keyPhraseRelative, rmsToExpression } from "./hum_keying.js";
 

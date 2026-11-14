@@ -3236,6 +3236,74 @@ function unmixedBacking(doc, session, preserved) {
   return finish();
 }
 
+// static/js/theory/sampled_sound_capabilities.js
+var SAMPLED_BANK = Object.freeze({
+  id: "generaluser-gs-2.0.3",
+  bank: 0,
+  sha256: "9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe",
+  renderer: "spessasynth-browser",
+  releasePolicySeconds: 6
+});
+var programs = {
+  sampled_overdrive_guitar_v1: 29,
+  sampled_organ_v1: 16,
+  sampled_harmonica_v1: 22,
+  sampled_trumpet_v1: 56,
+  sampled_tenor_sax_v1: 66,
+  sampled_clarinet_v1: 71,
+  sampled_piano_v1: 0,
+  sampled_electric_piano_v1: 4,
+  sampled_ooh_v1: 53,
+  sampled_strings_v1: 48,
+  sampled_steel_guitar_v1: 25,
+  sampled_guitar_v1: 24,
+  sampled_clean_guitar_v1: 27,
+  sampled_bass_v1: 33,
+  sampled_banjo_v1: 105,
+  sampled_muted_guitar_v1: 28,
+  sampled_upright_bass_v1: 32,
+  // Sound wheel additions (13 Nov 2026): melodic presets measured in
+  // workflow/evidence/sound-wheel-more-2026-11-13/candidate-metrics.json.
+  sampled_accordion_v1: 21,
+  sampled_music_box_v1: 10,
+  sampled_marimba_v1: 12,
+  sampled_vibraphone_v1: 11,
+  sampled_steel_drums_v1: 114,
+  sampled_kalimba_v1: 108,
+  sampled_koto_v1: 107,
+  sampled_harp_v1: 46,
+  sampled_pizzicato_v1: 45,
+  sampled_solo_vox_v1: 85,
+  sampled_synth_voice_v1: 54,
+  sampled_recorder_v1: 74,
+  sampled_pan_flute_v1: 75,
+  sampled_ocarina_v1: 79,
+  sampled_trombone_v1: 57,
+  sampled_square_lead_v1: 80,
+  sampled_saw_lead_v1: 81,
+  sampled_synth_brass_v1: 62,
+  // Bass flute (13 Nov 2026): the bank's Flute preset, sounded an octave down (see transpose).
+  sampled_bass_flute_v1: 73
+};
+var transpose = { sampled_bass_flute_v1: -12 };
+var probes = Object.freeze({ pitches: Object.freeze([36, 48, 60, 72, 84]), velocities: Object.freeze([48, 96, 127]), gatesSeconds: Object.freeze([0.08, 0.6, 3]), sampleRate: 44100, reverb: 0, chorus: 0 });
+var SAMPLED_SOUND_CAPABILITIES = Object.freeze(Object.fromEntries(Object.entries(programs).map(([id, program]) => [id, Object.freeze({
+  id,
+  version: 1,
+  bankId: SAMPLED_BANK.id,
+  bank: 0,
+  program,
+  pitchResolution: "semitone",
+  release: "independent-note-off",
+  articulation: "preset",
+  pythonAudio: false,
+  browserAudio: true,
+  ...program === 28 || program === 32 ? { probe: probes, observedReleaseUpperBoundSeconds: program === 28 ? 0.25 : 1.25 } : {},
+  ...Object.hasOwn(transpose, id) ? { transposeSemitones: transpose[id] } : {}
+})])));
+var SAMPLED_PROGRAMS = Object.freeze({ ...programs });
+var SAMPLED_TRANSPOSE = Object.freeze({ ...transpose });
+
 // static/js/theory/melodic_evolution.js
 var PALETTES = [
   [/delta-blues/, ["sampled_guitar_v1", "sampled_guitar_v1"]],
@@ -3251,8 +3319,8 @@ function leadPalette(sceneId) {
   return [...PALETTES.find(([match]) => match.test(sceneId))?.[1] || ["sampled_electric_piano_v1", "sampled_piano_v1"]];
 }
 function restoreMelodicPhrase(state) {
-  const patches = new Set(PALETTES.flatMap(([, p]) => p).concat("sampled_electric_piano_v1"));
-  if (![1, 2, 3].includes(state?.version) || !Number.isInteger(state.phraseOrdinal) || state.phraseOrdinal < 0 || state.phraseOrdinal > 1e6 || !SCENE_CATALOGUE.some((s) => s.id === state.sceneId) || !Number.isInteger(state.root) || state.root < 0 || state.root > 11 || typeof state.minor !== "boolean" || !Number.isFinite(state.bpm) || state.bpm < 20 || state.bpm > 400 || !Number.isInteger(state.seed) || state.seed < 0 || state.seed > 4294967295 || state.previousPatch !== null && !patches.has(state.previousPatch)) return null;
+  const knownPatch = (patch) => typeof patch === "string" && Object.hasOwn(SAMPLED_PROGRAMS, patch);
+  if (![1, 2, 3].includes(state?.version) || !Number.isInteger(state.phraseOrdinal) || state.phraseOrdinal < 0 || state.phraseOrdinal > 1e6 || !SCENE_CATALOGUE.some((s) => s.id === state.sceneId) || !Number.isInteger(state.root) || state.root < 0 || state.root > 11 || typeof state.minor !== "boolean" || !Number.isFinite(state.bpm) || state.bpm < 20 || state.bpm > 400 || !Number.isInteger(state.seed) || state.seed < 0 || state.seed > 4294967295 || state.previousPatch !== null && !knownPatch(state.previousPatch)) return null;
   if (state.version >= 2 && (!Array.isArray(state.recentOpenings) || state.recentOpenings.length > 4 || state.recentOpenings.some((n) => !Number.isInteger(n) || n < 0 || n > 7))) return null;
   if (state.version >= 2 && state.roomFor !== void 0 && (!Array.isArray(state.roomFor) || state.roomFor.length > 16 || state.roomFor.some((id) => typeof id !== "string" || !id.startsWith("jam-live-") || id.length > 160))) return null;
   if (state.version === 3 && !validPhraseHarmony(state.harmony)) return null;
@@ -3729,58 +3797,15 @@ var MasterBus = class {
   }
 };
 
-// static/js/theory/sampled_sound_capabilities.js
-var SAMPLED_BANK = Object.freeze({
-  id: "generaluser-gs-2.0.3",
-  bank: 0,
-  sha256: "9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe",
-  renderer: "spessasynth-browser",
-  releasePolicySeconds: 6
-});
-var programs = {
-  sampled_overdrive_guitar_v1: 29,
-  sampled_organ_v1: 16,
-  sampled_harmonica_v1: 22,
-  sampled_trumpet_v1: 56,
-  sampled_tenor_sax_v1: 66,
-  sampled_clarinet_v1: 71,
-  sampled_piano_v1: 0,
-  sampled_electric_piano_v1: 4,
-  sampled_ooh_v1: 53,
-  sampled_strings_v1: 48,
-  sampled_steel_guitar_v1: 25,
-  sampled_guitar_v1: 24,
-  sampled_clean_guitar_v1: 27,
-  sampled_bass_v1: 33,
-  sampled_banjo_v1: 105,
-  sampled_muted_guitar_v1: 28,
-  sampled_upright_bass_v1: 32
-};
-var probes = Object.freeze({ pitches: Object.freeze([36, 48, 60, 72, 84]), velocities: Object.freeze([48, 96, 127]), gatesSeconds: Object.freeze([0.08, 0.6, 3]), sampleRate: 44100, reverb: 0, chorus: 0 });
-var SAMPLED_SOUND_CAPABILITIES = Object.freeze(Object.fromEntries(Object.entries(programs).map(([id, program]) => [id, Object.freeze({
-  id,
-  version: 1,
-  bankId: SAMPLED_BANK.id,
-  bank: 0,
-  program,
-  pitchResolution: "semitone",
-  release: "independent-note-off",
-  articulation: "preset",
-  pythonAudio: false,
-  browserAudio: true,
-  ...program === 28 || program === 32 ? { probe: probes, observedReleaseUpperBoundSeconds: program === 28 ? 0.25 : 1.25 } : {}
-})])));
-var SAMPLED_PROGRAMS = Object.freeze({ ...programs });
-
 // static/js/audio/sampled_bank_delivery.js
 var SAMPLED_DELIVERY = Object.freeze({
-  version: 1,
-  file: "GeneralUser-GS-2.0.3-MusicLab17-v1.sf2",
-  sha256: "0d4e4d241e4d9c060f941eb9f7857c66bce0e5bfaef48beeebea8aaf98ad254b",
-  bytes: 8970282,
+  version: 3,
+  file: "GeneralUser-GS-2.0.3-MusicLab36-v1.sf2",
+  sha256: "a3a9e330a46f04ece40769cec5d1ea8b469242cb5123ed5136399fc386d09fc7",
+  bytes: 11699936,
   sourceBankId: "generaluser-gs-2.0.3",
   sourceSha256: "9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe",
-  programs: Object.freeze([0, 4, 16, 22, 24, 25, 27, 28, 29, 32, 33, 48, 53, 56, 66, 71, 105])
+  programs: Object.freeze([0, 4, 10, 11, 12, 16, 21, 22, 24, 25, 27, 28, 29, 32, 33, 45, 46, 48, 53, 54, 56, 57, 62, 66, 71, 73, 74, 75, 79, 80, 81, 85, 105, 107, 108, 114])
 });
 var bankUrl = new URL("../../vendor/sampled-piano/" + SAMPLED_DELIVERY.file, new URL("../js/audio/sampled_bank_delivery.js", import.meta.url).href);
 async function fetchSampledBank({ retry = false, fetcher = globalThis.fetch } = {}) {
@@ -3822,9 +3847,10 @@ function pianoNotes(event) {
   if (!isSampledPatch(event.patch_id)) return [];
   const velocity = Math.max(0, Math.min(127, Math.round(Number(event.velocity ?? 0.85) * 127)));
   if (!velocity) return [];
+  const transpose2 = Object.hasOwn(SAMPLED_TRANSPOSE, event.patch_id) ? SAMPLED_TRANSPOSE[event.patch_id] : 0;
   return (event.voiced_freqs || [event.concrete?.freq_hz || 440]).map((freq) => ({
     program: SAMPLED_PROGRAMS[event.patch_id],
-    pitch: Math.max(0, Math.min(127, Math.round(69 + 12 * Math.log2(freq / 440)))),
+    pitch: Math.max(0, Math.min(127, Math.round(69 + 12 * Math.log2(freq / 440)) + transpose2)),
     velocity,
     duration: Math.max(1e-3, Number(event.duration_sec) || 0.25),
     pan: Math.max(0, Math.min(127, Math.round(64 + 63 * Number(event.pan || 0))))
@@ -8472,8 +8498,11 @@ function selectedMelody(source, song, { context, choice, performanceArchive = nu
     const position = note.step + offset;
     note.step = Math.floor(position);
     note.performance = { version: 1, offset_steps: position - note.step };
+    if (note.role !== "drums" && note.pitch_lock_mode == null && Number.isFinite(note.concrete?.midi_pitch)) note.pitch_lock_mode = "concrete";
     return note;
   });
+  const evolution = doc.jam_session?.melodic_evolution, phrase = evolution ? restoreMelodicPhrase(evolution) : null;
+  if (phrase && doc.notes.some((n) => n.role === "lead" && n.provenance === "jam_generated" && !n.edited_from_generator && (n.evolution?.phraseOrdinal !== evolution.phraseOrdinal || n.patch_id !== phrase.patch || n.sound_base))) delete doc.jam_session.melodic_evolution;
   doc.global_context = {
     ...doc.global_context,
     bpm: song.bpm,
@@ -10293,13 +10322,156 @@ function syncLiveScoreSvg(svg, {
 }
 
 // static/ui/melody_field_session.js
+var MELODY_SOUND_FAMILIES = Object.freeze([
+  { name: "Keys", hue: "#5aa9e6" },
+  { name: "Bells", hue: "#f2d04b" },
+  { name: "World", hue: "#4fd1c5" },
+  { name: "Guitars", hue: "#e6a34f" },
+  { name: "Strings", hue: "#7fcf8a" },
+  { name: "Voices", hue: "#b59cf0" },
+  { name: "Wind", hue: "#d86fae" },
+  { name: "Horns", hue: "#f07a5a" },
+  { name: "Synths", hue: "#b8e04f" }
+].map(Object.freeze));
+var MELODY_SOUNDS = Object.freeze([
+  { label: "Own sound", short: "Own", patch: null, family: null },
+  { label: "Piano", short: "Piano", patch: "sampled_piano_v1", level: 1, family: "Keys" },
+  { label: "Electric piano", short: "E-piano", patch: "sampled_electric_piano_v1", level: 1.02, family: "Keys" },
+  { label: "Organ", short: "Organ", patch: "sampled_organ_v1", level: 1, family: "Keys" },
+  { label: "Accordion", short: "Accordion", patch: "sampled_accordion_v1", level: 1.23, family: "Keys" },
+  { label: "Music box", short: "Music box", patch: "sampled_music_box_v1", level: 1.59, family: "Bells" },
+  { label: "Marimba", short: "Marimba", patch: "sampled_marimba_v1", level: 1.04, family: "Bells" },
+  { label: "Vibes", short: "Vibes", patch: "sampled_vibraphone_v1", level: 0.85, family: "Bells" },
+  { label: "Steel pan", short: "Steel pan", patch: "sampled_steel_drums_v1", level: 1.2, family: "World" },
+  { label: "Kalimba", short: "Kalimba", patch: "sampled_kalimba_v1", level: 1.09, family: "World" },
+  { label: "Koto", short: "Koto", patch: "sampled_koto_v1", level: 1.23, family: "World" },
+  { label: "Guitar", short: "Guitar", patch: "sampled_guitar_v1", level: 1.16, family: "Guitars" },
+  { label: "Steel guitar", short: "Steel", patch: "sampled_steel_guitar_v1", level: 1.4, family: "Guitars" },
+  { label: "Electric guitar", short: "Electric", patch: "sampled_clean_guitar_v1", level: 1.2, family: "Guitars" },
+  { label: "Rock guitar", short: "Rock", patch: "sampled_overdrive_guitar_v1", level: 0.9, family: "Guitars" },
+  { label: "Banjo", short: "Banjo", patch: "sampled_banjo_v1", level: 1.3, family: "Guitars" },
+  { label: "Violins", short: "Violins", patch: "sampled_strings_v1", level: 1.1, family: "Strings" },
+  { label: "Harp", short: "Harp", patch: "sampled_harp_v1", level: 0.83, family: "Strings" },
+  { label: "Plucked", short: "Plucked", patch: "sampled_pizzicato_v1", level: 1.25, family: "Strings" },
+  { label: "Choir", short: "Choir", patch: "sampled_ooh_v1", level: 0.9, family: "Voices" },
+  { label: "Solo voice", short: "Solo", patch: "sampled_solo_vox_v1", level: 0.76, family: "Voices" },
+  { label: "Space voice", short: "Space", patch: "sampled_synth_voice_v1", level: 1.2, family: "Voices" },
+  { label: "Recorder", short: "Recorder", patch: "sampled_recorder_v1", level: 0.89, family: "Wind" },
+  { label: "Clarinet", short: "Clarinet", patch: "sampled_clarinet_v1", level: 0.84, family: "Wind" },
+  { label: "Harmonica", short: "Harmonica", patch: "sampled_harmonica_v1", level: 1.2, family: "Wind" },
+  { label: "Pan flute", short: "Pan flute", patch: "sampled_pan_flute_v1", level: 1, family: "Wind" },
+  // Flute (GM 73) an octave below the written tune; level from bank-36/bass-flute-level.json.
+  { label: "Bass flute", short: "Bass flute", patch: "sampled_bass_flute_v1", level: 1.04, family: "Wind" },
+  { label: "Ocarina", short: "Ocarina", patch: "sampled_ocarina_v1", level: 0.66, family: "Wind" },
+  { label: "Trumpet", short: "Trumpet", patch: "sampled_trumpet_v1", level: 0.93, family: "Horns" },
+  { label: "Saxophone", short: "Sax", patch: "sampled_tenor_sax_v1", level: 0.97, family: "Horns" },
+  { label: "Trombone", short: "Trombone", patch: "sampled_trombone_v1", level: 0.88, family: "Horns" },
+  { label: "Game", short: "Game", patch: "sampled_square_lead_v1", level: 0.96, family: "Synths" },
+  { label: "Buzzy", short: "Buzzy", patch: "sampled_saw_lead_v1", level: 0.95, family: "Synths" },
+  { label: "Brassy", short: "Brassy", patch: "sampled_synth_brass_v1", level: 1.01, family: "Synths" }
+].map(Object.freeze));
+var OWN_SOUND = MELODY_SOUNDS[0].label;
+var soundLabel = (patch) => MELODY_SOUNDS.find((s) => s.patch === patch)?.label || OWN_SOUND;
+function familyOf(patch) {
+  return patch ? MELODY_SOUNDS.find((s) => s.patch === patch)?.family ?? null : null;
+}
+function familySounds(name) {
+  return name ? MELODY_SOUNDS.filter((s) => s.family === name) : [];
+}
+var familyIndex = (name) => MELODY_SOUND_FAMILIES.findIndex((f) => f.name === name);
+var soundIndex = (patch) => MELODY_SOUNDS.findIndex((s) => s.patch === patch);
+var SOUND_HUB_RADIUS = 0.3;
+var SOUND_HYSTERESIS_DEG = 4;
+var SOUND_HUB_MARGIN = 0.05;
+function soundSector(view, x, y, prev = null) {
+  const r = Math.hypot(x, y);
+  if (r < SOUND_HUB_RADIUS + (prev === "hub" ? SOUND_HUB_MARGIN : prev == null ? 0 : -SOUND_HUB_MARGIN)) return "hub";
+  if (r > 1 && prev == null) return null;
+  const n = view ? familySounds(view).length : MELODY_SOUND_FAMILIES.length;
+  if (!n) return null;
+  const width = 360 / n, angle = (Math.atan2(x, y) * 180 / Math.PI + 360) % 360;
+  if (Number.isInteger(prev) && prev >= 0 && prev < n) {
+    const off = Math.abs(((angle - prev * width) % 360 + 540) % 360 - 180);
+    if (off <= width / 2 + SOUND_HYSTERESIS_DEG) return prev;
+  }
+  return Math.round(angle / width) % n;
+}
+function soundKeyMove(view, patch, key, kept = {}) {
+  const groups = MELODY_SOUND_FAMILIES.length, soundKey = (p) => `melody-field-sound-${soundIndex(p)}`;
+  const openGroup = (i) => {
+    const name = MELODY_SOUND_FAMILIES[i].name, lead2 = familySounds(name)[0].patch;
+    return { view: name, patch: lead2, focus: soundKey(lead2) };
+  };
+  if (key === "Home") return { view: null, patch: null, focus: soundKey(null) };
+  const at = familyIndex(familyOf(patch));
+  if (!view) {
+    const step2 = key === "ArrowRight" || key === "ArrowDown" ? 1 : key === "ArrowLeft" || key === "ArrowUp" ? -1 : 0;
+    if (!step2) return null;
+    const i = at < 0 ? step2 > 0 ? 0 : groups - 1 : at + step2;
+    if (i < 0 || i >= groups) return { view: null, patch: null, focus: soundKey(null) };
+    const name = MELODY_SOUND_FAMILIES[i].name, back = kept?.[name];
+    return { view: null, patch: familyOf(back) === name ? back : familySounds(name)[0].patch, focus: `melody-field-family-${i}` };
+  }
+  const open = familyIndex(view);
+  if (open < 0) return null;
+  if (key === "Backspace") return { view: null, patch: void 0, focus: `melody-field-family-${open}` };
+  if (key === "ArrowUp" || key === "ArrowDown") return openGroup((open + (key === "ArrowDown" ? 1 : -1) + groups) % groups);
+  if (key !== "ArrowLeft" && key !== "ArrowRight") return null;
+  const sounds = familySounds(view), j = sounds.findIndex((s) => s.patch === patch), n = sounds.length;
+  const next = j < 0 ? key === "ArrowRight" ? 0 : n - 1 : (j + (key === "ArrowRight" ? 1 : -1) + n) % n;
+  return { view, patch: sounds[next].patch, focus: soundKey(sounds[next].patch) };
+}
+var soundGroupLabel = (name, patch) => familyOf(patch) === name ? `${name} ${MELODY_SOUNDS[soundIndex(patch)].short}, ${name} sounds` : `${name} sounds`;
+function soundRingHtml(view, patch) {
+  const chosenFamily = familyOf(patch), place = (a, r) => `left:${(50 + Math.sin(a) * r).toFixed(3)}%;top:${(50 - Math.cos(a) * r).toFixed(3)}%`;
+  const sector = (hue, i, n2, alpha) => `${hue}${alpha} ${i * 360 / n2}deg ${(i + 1) * 360 / n2}deg`;
+  const dividers = (n2) => `repeating-conic-gradient(from ${-180 / n2 - 0.45}deg, #090c16 0deg .9deg, transparent .9deg ${360 / n2}deg)`;
+  if (!view) {
+    const n2 = MELODY_SOUND_FAMILIES.length;
+    const fill2 = MELODY_SOUND_FAMILIES.map((f2, i) => sector(f2.hue, i, n2, i % 2 ? "40" : "70")).join(",");
+    const groups = MELODY_SOUND_FAMILIES.map((f2, i) => {
+      const on = f2.name === chosenFamily, now = on ? MELODY_SOUNDS[soundIndex(patch)].short : "", a = i * Math.PI * 2 / n2, c = Math.cos(a);
+      return `<button type="button" class="pf-sound-sector pf-sound-group" data-key="melody-field-family-${i}" data-sound-family="${i}" data-out="${c > 0.9 || c < 0 && c > -0.9 ? "up" : "down"}" aria-label="${soundGroupLabel(f2.name, patch)}"${on ? ' data-chosen="true"' : ""} style="${place(a, 36)};--hue:${f2.hue}">${f2.name} <span class="pf-sound-now" data-sound-now>${now}</span></button>`;
+    }).join("");
+    const own4 = !patch;
+    return `<div class="pf-sound-ring" data-ring="groups" style="background:${dividers(n2)},conic-gradient(from ${-180 / n2}deg, ${fill2})"><button type="button" class="pf-sound-sector pf-sound-hub" data-key="melody-field-sound-0" data-sound-choice="0" aria-pressed="${own4}"${own4 ? ' data-chosen="true"' : ""}>${OWN_SOUND}</button>${groups}</div>`;
+  }
+  const f = MELODY_SOUND_FAMILIES[familyIndex(view)], sounds = familySounds(view), n = sounds.length;
+  const fill = sounds.map((s, i) => sector(f.hue, i, n, n % 2 ? ["80", "4c", "66"][i % 3] : ["80", "4c"][i % 2])).join(",");
+  const rim = MELODY_SOUND_FAMILIES.map((g, i) => `${g.hue}${g.name === view ? "" : "59"} ${i * 40}deg ${(i + 1) * 40}deg`).join(",");
+  const buttons = sounds.map((s, i) => {
+    const on = s.patch === patch, index = soundIndex(s.patch);
+    return `<button type="button" class="pf-sound-sector pf-sound-choice" data-key="melody-field-sound-${index}" data-sound-choice="${index}" aria-pressed="${on}"${on ? ' data-chosen="true"' : ""} style="${place(i * Math.PI * 2 / n, 32.5)};--hue:${f.hue}">${s.label}</button>`;
+  }).join("");
+  return `<div class="pf-sound-ring" data-ring="sounds" style="background:${dividers(n)},conic-gradient(from ${-180 / n}deg, ${fill});--hue:${f.hue}"><span class="pf-sound-rim" aria-hidden="true" style="background:conic-gradient(from -20deg, ${rim})"></span>${buttons}<button type="button" class="pf-sound-sector pf-sound-hub" data-key="melody-field-families" style="--hue:${f.hue}">All groups</button></div>`;
+}
+var soundPrompt = (view) => view ? "Turn to hear each sound. The middle shows all groups." : "Turn to hear each group. Let go to see its sounds. Your notes stay.";
+var soundDiskLabel = (view) => view ? `${view} sounds. Press a sound to pick it. All groups goes back. Left and right change the sound. Up and down change the group. Home picks Own sound.` : "Sound groups. Press a group to see its sounds. Arrows hear each group. Home picks Own sound.";
+var soundViewSay = (view) => view ? `${view} sounds.` : "All groups.";
+function melodySoundEvents(events, patch) {
+  if (!MELODY_SOUNDS.some((s) => s.patch === patch)) throw new Error("Unknown melody sound");
+  const level2 = MELODY_SOUNDS.find((s) => s.patch === patch)?.level ?? 1;
+  return events.map((e) => {
+    if (e.role !== "lead" || e.provenance !== "jam_generated" || e.edited_from_generator) return e;
+    if (!patch) {
+      if (!e.sound_base) return e;
+      const { sound_base: base3, ...rest } = e, restored = { ...rest, patch_id: base3.patch_id };
+      if (Object.hasOwn(base3, "velocity")) restored.velocity = base3.velocity;
+      else delete restored.velocity;
+      return restored;
+    }
+    if (!e.sound_base && e.patch_id === patch) return e;
+    const base2 = e.sound_base || { patch_id: e.patch_id, ...Object.hasOwn(e, "velocity") ? { velocity: e.velocity } : {} };
+    return { ...e, patch_id: patch, velocity: Math.min(1, Number(base2.velocity ?? 0.85) * level2), sound_base: base2 };
+  });
+}
 var sequence = 0;
 var MELODY_JOIN_STEPS = 4;
 var copy9 = (value) => structuredClone(value);
 function heardMelodyCandidate(field, scheduler = field.scheduler) {
   const state = scheduler.getPartAuditionState?.() || scheduler.lastPartAuditionState;
   if (state?.sectionId === field.sectionId && state?.realizedId) field.realizedId = state.realizedId;
-  return field.realizedId ? field.candidates.get(field.realizedId) : field._candidate({ x: 0, y: 0 }, field.initialBandBalance);
+  return field.realizedId ? field.candidates.get(field.realizedId) : field._candidate({ x: 0, y: 0 }, field.initialBandBalance, field.initialSoundPatch);
 }
 function melodyKeepReadiness(field, scheduler = field.scheduler) {
   const candidate = heardMelodyCandidate(field, scheduler);
@@ -10333,6 +10505,10 @@ var MelodyFieldSession = class {
     this.bandBalance = phraseContext2?.bandBalance === 1;
     this.initialBandBalance = this.bandBalance;
     this.bandBasis = balanceBasis(this.source.events, phraseContext2?.bandBasis);
+    this.soundPatch = MELODY_SOUNDS.some((s) => s.patch === phraseContext2?.melodySound) ? phraseContext2.melodySound : null;
+    this.initialSoundPatch = this.soundPatch;
+    this.soundKept = {};
+    this._keepSound(this.soundPatch);
     this.captureOrigin = captureOrigin;
     this.sectionId = `melody-field-${++sequence}`;
     this.position = { x: 0, y: 0 };
@@ -10362,14 +10538,16 @@ var MelodyFieldSession = class {
   toggleOriginal() {
     if (this.comparisonPosition) {
       const p = this.comparisonPosition;
-      if (this.request({ ...p, bandBalance: this.comparisonBandBalance }, { comparison: true })) this.comparisonPosition = null;
+      if (this.request({ ...p, bandBalance: this.comparisonBandBalance, soundPatch: this.comparisonSoundPatch }, { comparison: true })) this.comparisonPosition = null;
     } else {
-      const p = { ...this.position }, balance = this.bandBalance;
-      if (this.request({ x: 0, y: 0, bandBalance: this.initialBandBalance }, { comparison: true })) {
+      const p = { ...this.position }, balance = this.bandBalance, sound = this.soundPatch;
+      if (this.request({ x: 0, y: 0, bandBalance: this.initialBandBalance, soundPatch: this.initialSoundPatch }, { comparison: true })) {
         this.comparisonPosition = p;
         this.comparisonBandBalance = balance;
+        this.comparisonSoundPatch = sound;
       }
     }
+    this.followSoundView();
     this.paint();
   }
   melodyLabel(position) {
@@ -10377,11 +10555,11 @@ var MelodyFieldSession = class {
     const development = this.palette?.[choice.key]?.development;
     return development?.applied === false ? "Theme kept. This change does not fit." : choice.label;
   }
-  _candidate(position, balance = this.bandBalance) {
-    const p = melodyFieldPosition(position), choice = this.palette ? this.chooseMelody(p) : null, id = `${this.sectionId}:${choice ? choice.key : `${p.x}:${p.y}`}${balance ? ":soft" : ""}`;
+  _candidate(position, balance = this.bandBalance, sound = this.soundPatch) {
+    const p = melodyFieldPosition(position), choice = this.palette ? this.chooseMelody(p) : null, id = `${this.sectionId}:${choice ? choice.key : `${p.x}:${p.y}`}${balance ? ":soft" : ""}${sound ? ":sound:" + sound : ""}`;
     if (!this.candidates.has(id)) {
       const variant = this.palette ? this.palette[choice.key] : melodyFieldVariant(this.field, p);
-      this.candidates.set(id, { id, position: variant.choice?.position || p, song: { ...this.source, events: balancedEvents(variant.notes, this.bandBasis, balance) }, bandBalance: balance, changed: variant.changed });
+      this.candidates.set(id, { id, position: variant.choice?.position || p, song: { ...this.source, events: melodySoundEvents(balancedEvents(variant.notes, this.bandBasis, balance), sound) }, soundPatch: sound, bandBalance: balance, changed: variant.changed });
       const state = this.scheduler.getPartAuditionState?.();
       const protectedIds = /* @__PURE__ */ new Set([id, this.requestId, this.realizedId, state?.scheduledId]);
       for (const key of this.candidates.keys()) if (this.candidates.size > 32 && !protectedIds.has(key)) this.candidates.delete(key);
@@ -10401,11 +10579,13 @@ var MelodyFieldSession = class {
     if (ok) this.hasPlayed = true;
     return ok;
   }
-  request(position, { automatic = false, comparison = false } = {}) {
+  request(position, { automatic = false, comparison = false, guide = false } = {}) {
+    if (this.guide && !guide) return false;
     if (!comparison) this.comparisonPosition = null;
     if (!automatic) this.exploring = null;
     const balance = position.bandBalance ?? this.bandBalance;
-    const candidate = this._candidate(position, balance);
+    const sound = Object.hasOwn(position, "soundPatch") ? position.soundPatch : this.soundPatch;
+    const candidate = this._candidate(position, balance, sound);
     if (candidate.id !== this.requestId && this.scheduler.isPlaying) {
       const result = this.scheduler.queueContinuousPartAudition(
         this.view(candidate),
@@ -10421,28 +10601,150 @@ var MelodyFieldSession = class {
     this.requestError = null;
     this.position = melodyFieldPosition(position);
     this.bandBalance = balance;
+    this.soundPatch = sound;
+    this._keepSound(sound);
     this.requestId = candidate.id;
     this.paint();
     return true;
   }
+  /** The sound last chosen in each group (UI memory only): group-ring arrows come back to it. */
+  _keepSound(patch) {
+    const family = familyOf(patch);
+    if (family) this.soundKept[family] = patch;
+  }
   remember(position) {
-    if (JSON.stringify(position) !== JSON.stringify(this.position)) {
-      this.history.push({ ...copy9(position), bandBalance: this.bandBalance });
+    if (position.x !== this.position.x || position.y !== this.position.y) {
+      this.history.push({ ...copy9(position), bandBalance: this.bandBalance, soundPatch: this.soundPatch });
       this.history = this.history.slice(-32);
     }
   }
+  startGuide() {
+    if (this.guide) return false;
+    const heard = heardMelodyCandidate(this);
+    if (!this.scheduler.isPlaying || !this.realizedId || heard?.id !== this.requestId || !melodyKeepReadiness(this).ok) {
+      this.requestError = "Play this tune first. Then try Show me.";
+      this.paint();
+      return false;
+    }
+    const before = { ...this.position, bandBalance: this.bandBalance, soundPatch: this.soundPatch };
+    const alternate = this._candidate(this.position, !this.bandBalance);
+    if (JSON.stringify(alternate.song.events) === JSON.stringify(heard.song.events)) {
+      this.requestError = "This tune has no band notes to change.";
+      this.paint();
+      return false;
+    }
+    const comparison = this.comparisonPosition ? { position: copy9(this.comparisonPosition), balance: this.comparisonBandBalance, sound: this.comparisonSoundPatch } : null;
+    if (!this.request({ ...before, bandBalance: !before.bandBalance })) return false;
+    this.guide = { before, comparison, previewId: this.requestId, restoring: false };
+    return true;
+  }
+  finishGuide(use) {
+    if (!this.guide) return false;
+    const g = this.guide;
+    if (use) {
+      if (g.restoring || heardMelodyCandidate(this)?.id !== g.previewId || !melodyKeepReadiness(this).ok) return false;
+      this.history.push(g.before);
+      this.history = this.history.slice(-32);
+      this.guide = null;
+      this.paint();
+      return true;
+    }
+    if (!this.request(g.before, { guide: true })) return false;
+    g.restoring = true;
+    g.restoreId = this.requestId;
+    this.paint();
+    return true;
+  }
   toggleBandBalance() {
-    const before = { ...this.position, bandBalance: this.bandBalance };
+    const before = { ...this.position, bandBalance: this.bandBalance, soundPatch: this.soundPatch };
     if (this.request({ ...this.position, bandBalance: !this.bandBalance })) {
+      this.history.push(before);
+      this.history = this.history.slice(-32);
+    }
+  }
+  selectSound(patch) {
+    const before = { ...this.position, bandBalance: this.bandBalance, soundPatch: this.soundPatch };
+    if (patch === this.soundPatch) return;
+    if (patch && !this._candidate(this.position).song.events.some((e) => e.role === "lead" && e.provenance === "jam_generated" && !e.edited_from_generator)) {
+      this.requestError = "Your notes keep their sound. Try a new tune first.";
+      this.paint();
+      return;
+    }
+    if (this.request({ ...this.position, soundPatch: patch }) && !this.dragging) {
       this.history.push(before);
       this.history = this.history.slice(-32);
     }
   }
   undo() {
     const p = this.history.at(-1);
-    if (p && this.request(p)) this.history.pop();
+    if (p && this.request(p)) {
+      this.history.pop();
+      if (this.followSoundView()) this.paint();
+    }
+  }
+  /** Sound wheel view (UI only): null shows the group ring, a group name shows that group's sounds.
+   * It never enters history, candidates, candidate ids, comparison state or the saved sound. */
+  setSoundMode(on) {
+    this.soundMode = Boolean(on);
+    this.soundView = null;
+    this.soundZoom = null;
+    if (this.soundMode) this.exploring = null;
+  }
+  _showSoundView(view, zoom) {
+    if ((this.soundView || null) === (view || null)) return false;
+    this.soundView = view || null;
+    this.soundZoom = zoom || (view ? "in" : "out");
+    return true;
+  }
+  /** Open a group. Its first sound plays unless the chosen sound is already in it. */
+  openSoundFamily(name) {
+    const sounds = familySounds(name);
+    if (!this.soundMode || !sounds.length) return false;
+    this._showSoundView(name, "in");
+    if (familyOf(this.soundPatch) !== name) this.selectSound(sounds[0].patch);
+    this.paint();
+    return true;
+  }
+  /** Back to the group ring. This changes only what the wheel shows. */
+  closeSoundFamily() {
+    if (!this.soundMode) return false;
+    const changed = this._showSoundView(null, "out");
+    this.paint();
+    return changed;
+  }
+  /** After Undo, Original or Home: an open sound ring follows the requested sound to its group,
+   * and the tune's own sound returns to the group ring. The group ring stays as it is. */
+  followSoundView() {
+    if (!this.soundMode || !this.soundView) return false;
+    const family = familyOf(this.soundPatch);
+    return family === this.soundView ? false : this._showSoundView(family, family ? "in" : "out");
+  }
+  /** The data-key of the element that holds the chosen state on the ring now shown. */
+  chosenSoundKey() {
+    if (!this.soundView) return this.soundPatch ? `melody-field-family-${familyIndex(familyOf(this.soundPatch))}` : "melody-field-sound-0";
+    const sounds = familySounds(this.soundView), patch = sounds.some((s) => s.patch === this.soundPatch) ? this.soundPatch : sounds[0]?.patch;
+    return `melody-field-sound-${soundIndex(patch)}`;
+  }
+  /** Every view change sets focus explicitly, so keyboard and switch users stay on the wheel. */
+  focusSoundChoice(key = this.chosenSoundKey()) {
+    const disk = this.root?.querySelector?.("[data-melody-disk]");
+    if (!disk) return false;
+    const el = disk.querySelector(`[data-key="${key}"]`) || disk.querySelector('[data-key][data-chosen="true"]') || disk.querySelector("[data-key]");
+    if (!el || el.disabled) return false;
+    el.focus({ preventScroll: true });
+    return true;
+  }
+  /** Apply one soundKeyMove result: the view, then the sound (one Undo entry), then focus. */
+  applySoundMove(move) {
+    if (!move || this.guide) return false;
+    this._showSoundView(move.view, move.view ? "in" : "out");
+    if (move.patch !== void 0) this.selectSound(move.patch);
+    this.paint();
+    this.focusSoundChoice(move.focus);
+    return true;
   }
   toggleExploration() {
+    if (this.soundMode || this.guide) return;
     if (this.exploring) {
       this.exploring = null;
       const reached = this.candidates.get(this.realizedId);
@@ -10466,6 +10768,16 @@ var MelodyFieldSession = class {
       mode: this.composerVersion >= 5 ? "dynamic" : "orbit"
     }), { automatic: true });
   }
+  _wheelTabsHtml() {
+    const tab = (key, on, title) => `<button class="pf-btn pf-wheel-tab" data-key="${key}" aria-pressed="${on}">${title}</button>`;
+    return `<div class="pf-wheel-tabs" role="group" aria-label="Wheels">${tab("melody-field-tune-mode", !this.soundMode, "Tune wheel")}${tab("melody-field-sound-mode", Boolean(this.soundMode), "Sound wheel")}</div>`;
+  }
+  /** The Sound wheel disk (its prompt holds both views' words in one cell, so a view change never
+   * moves the disk). The disk owns pointer input; its buttons serve keys, switches and
+   * assistive technology, and each is a Tab stop (the disk itself is not a Tab stop here). */
+  _soundDiskHtml() {
+    return `<div class="pf-melody-disk pf-sound-disk" data-melody-disk data-sound-view="${this.soundView || ""}" tabindex="-1" role="group" aria-label="${soundDiskLabel(this.soundView)}">${soundRingHtml(this.soundView, this.soundPatch)}</div>`;
+  }
   html() {
     const families = this.palette ? this.melodyFamilies : MELODY_FIELD_V3_REGIONS;
     return `<section class="pf-stage pf-melody-field" data-melody-mode="${this.palette ? "phrase-composer" : "note-variation"}" data-composer-version="${this.composerVersion}"><h1 class="pf-heading">${this.palette ? "Make your tune" : "Try note changes"}</h1>
@@ -10474,59 +10786,116 @@ var MelodyFieldSession = class {
       ${this.palette ? "" : this.canUpgrade ? '<p class="pf-sub" data-mf-coverage>Your saved take is open as it was. Try new tunes when ready.</p><div class="pf-row"><button class="pf-btn" data-key="melody-field-upgrade">Try new tunes</button></div>' : '<p class="pf-sub" data-mf-coverage>New melody choices are not ready for this groove. Your groove stays. Use Back to groove to keep playing.</p>'}
       <div class="pf-row"><button class="pf-btn pf-play" data-key="melody-field-play">${this.scheduler.isPlaying ? "Stop" : "Play"}</button>
       <button class="pf-btn" data-key="melody-field-original">Original</button><button class="pf-btn" data-key="melody-field-undo">Undo move</button>
-      <button class="pf-btn" data-key="melody-field-explore">Explore</button>
+      <button class="pf-btn" data-key="melody-field-explore" ${this.soundMode ? "disabled" : ""}>Explore</button>
       ${this.palette ? `<button class="pf-btn" data-key="melody-field-balance" aria-pressed="${this.bandBalance}">${this.bandBalance ? "Restore band" : "Softer band"}</button>` : ""}<button class="pf-btn" data-key="melody-field-focus" aria-pressed="${this.scheduler.spotlightRole === "tune"}">Hear tune clearly</button></div>
-      <div class="pf-mf-main"><div class="pf-mf-wheel"><div class="pf-melody-disk" data-melody-disk tabindex="0" role="group" aria-label="${this.composerVersion >= 7 ? "Tune choices. Band notes stay" : this.palette ? "Whole melody choices" : "Note changes"}. ${"Move between " + families.join(", ") + "."} Centre is your original.">
+      ${this.palette ? this._wheelTabsHtml() : ""}
+      ${this.soundMode ? `<p class="pf-sound-prompt" data-mf-sound-prompt data-view="${this.soundView ? "sounds" : "groups"}"><span data-prompt="groups">${soundPrompt(null)}</span><span data-prompt="sounds">${soundPrompt("sounds")}</span></p><p class="sr-only" data-mf-sound-say aria-live="polite" aria-atomic="true"></p>` : ""}
+      <div data-mf-guide ${this.guide ? "" : "hidden"} role="region" aria-label="Hear one change"><p data-mf-guide-text></p><div class="pf-row"><button class="pf-btn" data-key="melody-field-guide-use">Use this</button><button class="pf-btn" data-key="melody-field-guide-back">Put back</button></div></div>
+      <div class="pf-mf-main${this.soundMode ? " pf-sound-main" : ""}"><div class="pf-mf-wheel${this.soundMode ? " pf-sound-wheel" : ""}">${this.soundMode ? this._soundDiskHtml() : `<div class="pf-melody-disk" data-melody-disk tabindex="0" role="group" aria-label="${this.composerVersion >= 7 ? "Tune choices. Band notes stay" : this.palette ? "Whole melody choices" : "Note changes"}. ${"Move between " + families.join(", ") + "."} Centre is your original.">
         ${families.map((name, i) => `<span class="pf-mf-label pf-mf-region" style="left:${50 + Math.sin(i * Math.PI * 2 / families.length) * 36}%;top:${50 - Math.cos(i * Math.PI * 2 / families.length) * 36}%">${name}</span>`).join("")}
         <span class="pf-mf-centre">Your tune</span><span class="pf-mf-request" data-mf-request></span><span class="pf-mf-reached" data-mf-reached></span>
-      </div><p class="pf-sub" data-mf-status role="status" aria-live="polite"></p></div>
+      </div>`}<p class="pf-sub" data-mf-status role="status" aria-live="polite"></p></div>
       <div class="pf-mf-band"><div class="pf-live-score-head"><span class="pf-live-score-caption" data-mf-score-caption>Showing your first tune.</span></div><svg class="pf-mf-score pf-live-score" data-mf-score viewBox="0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}" role="img" aria-label="The band playing now. Tune above; chords, bass and beat below. Time goes left to right."></svg></div></div>
       <div class="pf-row"><button class="pf-btn pf-next" data-key="melody-field-keep">${this.palette ? "Keep this melody" : "Keep this take"}</button>
       <button class="pf-btn" data-key="melody-field-refine">Refine notes</button>
       <button class="pf-btn" data-key="melody-field-back">${this.palette ? "Back to jam" : "Back to groove"}</button></div>
       <p class="pf-sub" data-mf-keep-help>${this.palette ? "Keep chooses this tune. Next, Save here keeps it in this browser. Your first tune stays safe." : "Keep this take saves your live play up to now. Your first tune stays safe."}</p>
       <p class="pf-sub" data-mf-focus-help>${this.palette ? "Softer band stays when you save. Hear tune clearly is just for now." : "Hear with less band. Your saved mix stays."}</p>
-      <details><summary data-key="melody-field-controls">Move with buttons</summary><div class="pf-row">
+      ${this.soundMode ? "" : `<details><summary data-key="melody-field-controls">Move with buttons</summary><div class="pf-row">
       <button class="pf-btn" data-key="melody-field-left">Left</button><button class="pf-btn" data-key="melody-field-right">Right</button>
       <button class="pf-btn" data-key="melody-field-up">Up</button><button class="pf-btn" data-key="melody-field-down">Down</button></div>
       <label>Across <input data-mf-axis="x" type="range" min="-100" max="100" value="${this.position.x * 100}" aria-label="Across the melody map"></label>
-      <label>Up or down <input data-mf-axis="y" type="range" min="-100" max="100" value="${this.position.y * 100}" aria-label="Up or down the melody map"></label></details>
-      ${this.palette ? `<details class="pf-melody-keep-more" ${this.moreOpen ? "open" : ""}><summary data-key="melody-keep-more">More ways</summary><div class="pf-row"><button class="pf-btn" data-key="melody-field-take">Save played take</button></div>${this.composerVersion === 9 ? '<p class="pf-sub">Move round for new ideas. Move out: Light has fewer notes. Theme is the full idea. Breathe adds a gap near the end. Return brings the first rhythm back.</p>' : ""}<p class="pf-sub">Save played take keeps your live play too.</p></details>` : ""}</section>`;
+      <label>Up or down <input data-mf-axis="y" type="range" min="-100" max="100" value="${this.position.y * 100}" aria-label="Up or down the melody map"></label></details>`}
+      ${this.palette ? `<details class="pf-melody-keep-more" ${this.moreOpen ? "open" : ""}><summary data-key="melody-keep-more">More ways</summary><div class="pf-row"><button class="pf-btn" data-key="melody-field-guide">Show me</button><button class="pf-btn" data-key="melody-field-take">Save played take</button></div>${this.composerVersion === 9 ? '<p class="pf-sub">Move round for new ideas. Move out: Light has fewer notes. Theme is the full idea. Breathe adds a gap near the end. Return brings the first rhythm back.</p>' : ""}<p class="pf-sub">Save played take keeps your live play too.</p></details>` : ""}</section>`;
   }
   bind(root) {
     this.root = root;
     const disk = root.querySelector("[data-melody-disk]");
     if (!disk) return;
-    const move = (e) => {
+    const point = (e) => {
       const r = disk.getBoundingClientRect();
-      this.request({ x: 2 * (e.clientX - r.left) / r.width - 1, y: 1 - 2 * (e.clientY - r.top) / r.height });
+      return { x: 2 * (e.clientX - r.left) / r.width - 1, y: 1 - 2 * (e.clientY - r.top) / r.height };
+    };
+    let g = null;
+    const soundAt = (sector) => {
+      if (!g.view) {
+        if (sector === "hub") return this.selectSound(null);
+        const name = MELODY_SOUND_FAMILIES[sector].name;
+        return this.selectSound(familyOf(g.start) === name ? g.start : familySounds(name)[0].patch);
+      }
+      if (sector === "hub") return;
+      g.hubPress = false;
+      this.selectSound(familySounds(g.view)[sector].patch);
+    };
+    const move = (e) => {
+      const { x, y } = point(e);
+      if (this.soundMode) {
+        if (!g) return;
+        const sector = soundSector(g.view, x, y, g.sector);
+        if (sector == null || sector === g.sector) return;
+        g.sector = sector;
+        if (sector === "hub" && !g.view) return;
+        soundAt(sector);
+      } else this.request({ x, y });
     };
     let pointer = null, origin = null;
     disk.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || pointer != null) return;
+      if (this.soundMode) {
+        const { x, y } = point(e), sector = soundSector(this.soundView, x, y);
+        if (sector == null || this.guide) return;
+        g = { view: this.soundView, sector, start: this.soundPatch, hubPress: sector === "hub" };
+      }
       e.preventDefault();
-      disk.focus({ preventScroll: true });
+      if (!this.soundMode) disk.focus({ preventScroll: true });
       pointer = e.pointerId;
-      origin = copy9(this.position);
+      origin = { ...copy9(this.position), bandBalance: this.bandBalance, soundPatch: this.soundPatch };
       this.dragging = true;
       disk.setPointerCapture(e.pointerId);
-      move(e);
+      if (this.soundMode) soundAt(g.sector);
+      else move(e);
     });
     disk.addEventListener("pointermove", (e) => {
       if (e.pointerId === pointer) move(e);
     });
     const end = (e) => {
       if (e.pointerId === pointer) {
-        this.remember(origin);
+        const gesture = g;
+        g = null;
+        if (this.soundMode && gesture && e.type === "pointerup" && !gesture.view && gesture.sector === "hub") this.selectSound(null);
+        if (this.soundMode) {
+          if (origin.soundPatch !== this.soundPatch) {
+            this.history.push(origin);
+            this.history = this.history.slice(-32);
+          }
+        } else this.remember(origin);
         pointer = null;
         this.dragging = false;
+        if (this.soundMode && gesture) {
+          if (e.type === "pointerup" && !gesture.view && Number.isInteger(gesture.sector)) this._showSoundView(MELODY_SOUND_FAMILIES[gesture.sector].name, "in");
+          else if (e.type === "pointerup" && gesture.view && gesture.hubPress && gesture.sector === "hub") this._showSoundView(null, "out");
+          this.paint();
+          this.focusSoundChoice();
+        }
         this.onGestureEnd?.();
       }
     };
     disk.addEventListener("pointerup", end);
     disk.addEventListener("pointercancel", end);
     disk.addEventListener("lostpointercapture", end);
+    disk.addEventListener("focus", () => {
+      if (this.soundMode) this.focusSoundChoice();
+    });
     disk.addEventListener("keydown", (e) => {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      if (this.soundMode) {
+        const move2 = soundKeyMove(this.soundView, this.soundPatch, e.key, this.soundKept);
+        if (!move2) return;
+        e.preventDefault();
+        e.stopPropagation();
+        this.applySoundMove(move2);
+        return;
+      }
       const vectors = { ArrowLeft: [-0.1, 0], ArrowRight: [0.1, 0], ArrowUp: [0, 0.1], ArrowDown: [0, -0.1], Home: [-this.position.x, -this.position.y] };
       if (!vectors[e.key]) return;
       e.preventDefault();
@@ -10547,28 +10916,103 @@ var MelodyFieldSession = class {
     this.paint();
   }
   nudge(x, y) {
+    if (this.soundMode) {
+      this.applySoundMove(soundKeyMove(this.soundView, this.soundPatch, x + y >= 0 ? "ArrowRight" : "ArrowLeft", this.soundKept));
+      return;
+    }
     const before = copy9(this.position);
     this.request({ x: before.x + x, y: before.y + y });
     this.remember(before);
+  }
+  /** Sound wheel states are drawn on the labels, never as dots over names: chosen is filled (and
+   * aria-pressed on the hub and sounds; a group's name says its chosen sound); heard (only while the
+   * tune plays its real sound, not the loading stand-in) carries data-heard and a small playing mark.
+   * A view change rebuilds only the ring inside the disk, which keeps its pointer capture. */
+  _paintSoundWheel(heardPatch) {
+    const disk = this.root.querySelector("[data-melody-disk]");
+    if (!disk?.classList?.contains("pf-sound-disk")) return;
+    const view = this.soundView || "";
+    if (disk.dataset.soundView !== view) {
+      const hadFocus = disk.contains(globalThis.document?.activeElement);
+      disk.dataset.soundView = view;
+      if (this.soundZoom) disk.dataset.soundZoom = this.soundZoom;
+      disk.setAttribute("aria-label", soundDiskLabel(this.soundView));
+      disk.innerHTML = soundRingHtml(this.soundView, this.soundPatch);
+      const prompt = this.root.querySelector("[data-mf-sound-prompt]");
+      if (prompt) prompt.dataset.view = this.soundView ? "sounds" : "groups";
+      const say = this.root.querySelector("[data-mf-sound-say]");
+      if (say) say.textContent = soundViewSay(this.soundView);
+      if (hadFocus) this.focusSoundChoice();
+    }
+    this.soundZoom = null;
+    const set = (el, name, value) => {
+      if (el.getAttribute(name) !== value) el.setAttribute(name, value);
+    };
+    const flag = (el, name, on) => {
+      if (on) set(el, name, "true");
+      else if (el.hasAttribute(name)) el.removeAttribute(name);
+    };
+    const off = Boolean(this.guide);
+    disk.querySelectorAll("[data-key]").forEach((el) => {
+      if (el.disabled !== off) el.disabled = off;
+    });
+    disk.querySelectorAll("[data-sound-choice]").forEach((el) => {
+      const patch = MELODY_SOUNDS[Number(el.dataset.soundChoice)]?.patch ?? null, on = patch === this.soundPatch;
+      set(el, "aria-pressed", String(on));
+      flag(el, "data-chosen", on);
+      flag(el, "data-heard", patch === heardPatch);
+    });
+    const chosenFamily = familyOf(this.soundPatch), heardFamily = heardPatch === void 0 ? void 0 : familyOf(heardPatch);
+    disk.querySelectorAll("[data-sound-family]").forEach((el) => {
+      const name = MELODY_SOUND_FAMILIES[Number(el.dataset.soundFamily)]?.name, on = name === chosenFamily;
+      set(el, "aria-label", soundGroupLabel(name, this.soundPatch));
+      flag(el, "data-chosen", on);
+      flag(el, "data-heard", name === heardFamily);
+      const now = el.querySelector("[data-sound-now]"), text = on ? MELODY_SOUNDS[soundIndex(this.soundPatch)].short : "";
+      if (now && now.textContent !== text) now.textContent = text;
+    });
   }
   paint() {
     if (!this.root) return;
     const state = this.scheduler.getPartAuditionState?.() || this.scheduler.lastPartAuditionState;
     const heard = heardMelodyCandidate(this);
-    const realized = this.candidates.get(this.realizedId), current = heard || this._candidate({ x: 0, y: 0 }, this.initialBandBalance);
-    const place = (selector, p) => {
-      const el = this.root.querySelector(selector);
-      if (el) {
-        el.style.left = `${(p.x + 1) * 50}%`;
-        el.style.top = `${(1 - p.y) * 50}%`;
-      }
-    };
-    place("[data-mf-request]", this.position);
-    place("[data-mf-reached]", current.position);
+    if (this.guide?.restoring && heard?.id === this.guide.restoreId && state?.scheduledId === this.guide.restoreId && !state.pending && Number.isFinite(state.scheduledTime) && state.scheduledTime <= this.scheduler.audioCtx?.currentTime) {
+      const c = this.guide.comparison;
+      this.comparisonPosition = c?.position || null;
+      this.comparisonBandBalance = c?.balance;
+      this.comparisonSoundPatch = c?.sound;
+      this.guide = null;
+    }
+    const panel = this.root.querySelector("[data-mf-guide]");
+    if (panel) panel.hidden = !this.guide;
+    const guideText = this.root.querySelector("[data-mf-guide-text]");
+    if (guideText && this.guide) guideText.textContent = this.guide.restoring ? "Putting your mix back. Press Play if stopped." : heard?.id !== this.guide.previewId ? "This mix is next. Press Play if stopped." : this.bandBalance ? "The band is softer. Your tune notes stay." : "The full band is back. Your tune notes stay.";
+    const use = this.root.querySelector('[data-key="melody-field-guide-use"]');
+    if (use) use.disabled = !this.guide || this.guide.restoring || heard?.id !== this.guide.previewId || !melodyKeepReadiness(this).ok;
+    for (const key of ["original", "undo", "explore", "balance", "sound-mode", "tune-mode", "keep", "refine", "back", "take"]) {
+      const el = this.root.querySelector('[data-key="melody-field-' + key + '"]');
+      if (el) el.disabled = Boolean(this.guide);
+    }
+    const realized = this.candidates.get(this.realizedId), current = heard || this._candidate({ x: 0, y: 0 }, this.initialBandBalance, this.initialSoundPatch);
+    const loading = this.scheduler.loadingSession;
+    const standIn = Boolean(this.scheduler.isPlaying && loading && loading.state !== "live" && current.song?.events?.some((e) => e.role === "lead" && isSampledPatch(e.patch_id)));
+    const heardSound = standIn ? null : current.soundPatch;
+    if (this.soundMode) this._paintSoundWheel(this.scheduler.isPlaying && realized && !standIn ? current.soundPatch ?? null : void 0);
+    else {
+      const place = (selector, p) => {
+        const el = this.root.querySelector(selector);
+        if (el) {
+          el.style.left = `${(p.x + 1) * 50}%`;
+          el.style.top = `${(1 - p.y) * 50}%`;
+        }
+      };
+      place("[data-mf-request]", this.position);
+      place("[data-mf-reached]", current.position);
+    }
     const regions = this.root.querySelectorAll(".pf-mf-region");
     regions.forEach((el, i) => {
       const a = i * Math.PI * 2 / regions.length, lx = Math.sin(a) * 0.72, ly = Math.cos(a) * 0.72;
-      el.dataset.near = String([this.position, current.position].some((q2) => Math.hypot(q2.x - lx, (q2.y - ly) * 2.2) < 0.42));
+      el.dataset.near = String(!this.soundMode && [this.position, current.position].some((q2) => Math.hypot(q2.x - lx, (q2.y - ly) * 2.2) < 0.42));
     });
     this.root.querySelectorAll("[data-mf-axis]").forEach((input) => {
       input.value = String(this.position[input.dataset.mfAxis] * 100);
@@ -10588,9 +11032,9 @@ var MelodyFieldSession = class {
       focus.setAttribute("aria-pressed", String(on));
       focus.textContent = on ? "Hear full band" : "Hear tune clearly";
     }
-    const label = (p, soft = false) => this.melodyLabel(p) + (soft ? " with softer band" : "");
+    const label = (p, soft = false, sound = null) => this.melodyLabel(p) + (soft ? " with softer band" : "") + (sound ? " / " + soundLabel(sound) : "");
     const pending = current.id !== this.requestId;
-    const text = this.requestError || (!this.scheduler.isPlaying ? pending ? "Stopped. Press Play to hear your next tune." : "Stopped. Press Play to hear this tune." : !realized ? state?.scheduledId == null ? `Next: ${label(this.position, this.bandBalance)}. Your tune will join soon.` : `Starting: ${label(this.position, this.bandBalance)}.` : pending ? `Playing: ${label(current.position, current.bandBalance)}. Next: ${label(this.position, this.bandBalance)}.` : `Playing: ${label(current.position, current.bandBalance)}.`);
+    const text = this.requestError || (!this.scheduler.isPlaying ? pending ? "Stopped. Press Play to hear your next tune." : "Stopped. Press Play to hear this tune." : !realized ? state?.scheduledId == null ? `Next: ${label(this.position, this.bandBalance, this.soundPatch)}. Your tune will join soon.` : `Starting: ${label(this.position, this.bandBalance, this.soundPatch)}.` : (pending ? `Playing: ${label(current.position, current.bandBalance, heardSound)}. Next: ${label(this.position, this.bandBalance, this.soundPatch)}.` : `Playing: ${label(current.position, current.bandBalance, heardSound)}.`) + (standIn && (this.soundMode || current.soundPatch) ? loading.state === "failed" ? " Full sounds did not load." : " Full sounds are on the way." : ""));
     if (status && status.textContent !== text) status.textContent = text;
     if (this.palette) {
       const keep = this.root.querySelector('[data-key="melody-field-keep"]');
@@ -10602,7 +11046,7 @@ var MelodyFieldSession = class {
       const readiness = melodyKeepReadiness(this);
       if (keep && !readiness.ok) keep.textContent = "Keep when ready";
       for (const key of ["melody-field-keep", "melody-field-refine", "melody-field-back"])
-        this.root.querySelector(`[data-key="${key}"]`)?.setAttribute("aria-disabled", String(!readiness.ok));
+        this.root.querySelector(`[data-key="${key}"]`)?.setAttribute("aria-disabled", String(Boolean(this.guide) || !readiness.ok));
       if (!readiness.ok && !this.loadingSaveShown) {
         const more = this.root.querySelector(".pf-melody-keep-more");
         if (more) more.open = true;
@@ -10618,12 +11062,12 @@ var MelodyFieldSession = class {
     const explore = this.root.querySelector('[data-key="melody-field-explore"]');
     if (explore) {
       explore.textContent = this.exploring ? "Stay here" : "Explore";
-      explore.disabled = !this.scheduler.isPlaying;
+      explore.disabled = Boolean(this.guide) || this.soundMode || !this.scheduler.isPlaying;
       explore.setAttribute("aria-pressed", String(Boolean(this.exploring)));
     }
     const svg = this.root.querySelector("[data-mf-score]");
     if (!svg) return;
-    const originCandidate = this._candidate({ x: 0, y: 0 }, this.initialBandBalance);
+    const originCandidate = this._candidate({ x: 0, y: 0 }, this.initialBandBalance, this.initialSoundPatch);
     const requestedCandidate = this.candidates.get(this.requestId) || current;
     const playing = Boolean(this.scheduler.isPlaying);
     svg.setAttribute("aria-label", `${playing ? "The band playing now" : this.palette ? "The tune Keep will save" : "Your tune preview"}. Tune above; chords, bass and beat below. Time goes left to right.`);
@@ -13957,6 +14401,7 @@ function createJamFormBuilder() {
 
 // static/js/theory/dynamic_keys.js
 var pitched = (p) => isSampledPatch(p) || ["warm_keys", "pluck_lead", "supersaw_stab", "clean_bass"].includes(p);
+var lowKeys = (p) => /bass/.test(p || "") && !/flute/.test(p || "");
 var midi = (e) => Number.isFinite(e.concrete?.midi_pitch) ? e.concrete.midi_pitch : 69 + 12 * Math.log2((e.concrete?.freq_hz || 440) / 440);
 function dynamicJamPads(doc, context) {
   const fallback = jamPads(doc);
@@ -13967,7 +14412,7 @@ function dynamicJamPads(doc, context) {
     const lead2 = context.backing.events.find((e) => e.role === "lead" && pitched(e.patch_id));
     const declared = context.backing.phraseContext?.form_lead_patch;
     const patch2 = doc.jam_session?.follow_band_sound === false ? fallback[0].patchId : lead2?.patch_id || (pitched(declared) ? declared : fallback[0].patchId);
-    const octave = /bass/.test(patch2) ? 36 : 60;
+    const octave = lowKeys(patch2) ? 36 : 60;
     return fallback.map((pad, i) => ({ ...pad, midi: octave + pcs2[i], role: "lead", patchId: patch2 }));
   }
   const cycle = doc.global_context?.steps_per_bar || 16, bar2 = Math.floor(context.position / cycle), position = context.position;
@@ -13985,7 +14430,7 @@ function dynamicJamPads(doc, context) {
   const patch = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0];
   const selectedPatch = doc.jam_session?.follow_band_sound === false ? fallback[0].patchId : patch;
   const notes = [];
-  for (let octave = /bass/.test(selectedPatch) ? 36 : 60; notes.length < 4; octave += 12) for (const pc4 of pcs) {
+  for (let octave = lowKeys(selectedPatch) ? 36 : 60; notes.length < 4; octave += 12) for (const pc4 of pcs) {
     notes.push(octave + pc4);
     if (notes.length === 4) break;
   }
@@ -17351,6 +17796,59 @@ function drumLaneTop(note, doc, lanes) {
   return 12 + Math.max(0, lanes.findIndex((lane) => lane.key === drumLaneKey(note, doc))) * 56;
 }
 
+// static/js/theory/sampled_sound_labels.js
+var SAMPLED_SOUND_LABELS = Object.freeze({
+  // Keys
+  sampled_piano_v1: "Piano",
+  sampled_electric_piano_v1: "Electric piano",
+  sampled_organ_v1: "Organ",
+  sampled_accordion_v1: "Accordion",
+  // Bells
+  sampled_music_box_v1: "Music box",
+  sampled_marimba_v1: "Marimba",
+  sampled_vibraphone_v1: "Vibraphone",
+  // World
+  sampled_steel_drums_v1: "Steel pan",
+  sampled_kalimba_v1: "Kalimba",
+  sampled_koto_v1: "Koto",
+  // Guitars
+  sampled_guitar_v1: "Guitar",
+  sampled_steel_guitar_v1: "Steel guitar",
+  sampled_clean_guitar_v1: "Electric guitar",
+  sampled_overdrive_guitar_v1: "Rock guitar",
+  sampled_banjo_v1: "Banjo",
+  // Strings
+  sampled_strings_v1: "Violins",
+  sampled_harp_v1: "Harp",
+  sampled_pizzicato_v1: "Plucked strings",
+  // Voices
+  sampled_ooh_v1: "Choir",
+  sampled_solo_vox_v1: "Solo voice",
+  sampled_synth_voice_v1: "Space voice",
+  // Wind
+  sampled_recorder_v1: "Recorder",
+  sampled_clarinet_v1: "Clarinet",
+  sampled_harmonica_v1: "Harmonica",
+  sampled_pan_flute_v1: "Pan flute",
+  sampled_ocarina_v1: "Ocarina",
+  sampled_bass_flute_v1: "Bass flute",
+  // Horns
+  sampled_trumpet_v1: "Trumpet",
+  sampled_tenor_sax_v1: "Saxophone",
+  sampled_trombone_v1: "Trombone",
+  // Synths
+  sampled_square_lead_v1: "Game synth",
+  sampled_saw_lead_v1: "Buzzy synth",
+  sampled_synth_brass_v1: "Brassy synth",
+  // Not on the wheel
+  sampled_bass_v1: "Finger bass",
+  sampled_upright_bass_v1: "Upright bass",
+  sampled_muted_guitar_v1: "Muted guitar"
+});
+function sampledSoundLabel(patch) {
+  return typeof patch === "string" && Object.hasOwn(SAMPLED_SOUND_LABELS, patch) ? SAMPLED_SOUND_LABELS[patch] : null;
+}
+
 // static/ui/stages/play_flow.js
 var LOADING_WORDS = Object.freeze({
   loading: "Sound is on. Full sounds are on the way.",
@@ -17999,7 +18497,7 @@ var PlayFlow = class {
     }
   }
   /** Keep the current musical state, not a newly generated approximation of it. */
-  async _enterMelodyField() {
+  async _enterMelodyField({ sound = false } = {}) {
     if (this.stage !== "jam" || this.melodyField || this.melodyPreparing) return;
     this._flushMusicField?.();
     const scheduler = this.app.scheduler;
@@ -18038,6 +18536,7 @@ var PlayFlow = class {
       this.answerOnRelease = false;
       clearTimeout(this.answerTimer);
       this.melodyField = session;
+      if (sound && session.palette) session.setSoundMode(true);
       this.render();
       this.root.querySelector("[data-melody-disk]")?.focus();
     } catch (error) {
@@ -18127,6 +18626,47 @@ var PlayFlow = class {
   }
   async _melodyFieldAction(key) {
     const field = this.melodyField, scheduler = this.app.scheduler;
+    if (key === "melody-field-guide") {
+      if (field.startGuide()) {
+        this.render();
+        this.root.querySelector('[data-key="melody-field-guide-back"]')?.focus();
+      }
+      return;
+    }
+    if (key === "melody-field-guide-use" || key === "melody-field-guide-back") {
+      const ok = field.finishGuide(key.endsWith("-use"));
+      if (ok) {
+        this.render();
+        this.root.querySelector(field.guide ? '[data-key="melody-field-play"]' : "[data-melody-disk]")?.focus();
+      }
+      return;
+    }
+    if (field.guide && key !== "melody-field-play") return;
+    if (key === "melody-field-sound-mode" || key === "melody-field-tune-mode") {
+      const sound = key === "melody-field-sound-mode";
+      if (field.soundMode !== sound) {
+        field.setSoundMode(sound);
+        this.render();
+      }
+      this.root.querySelector("[data-melody-disk]")?.focus();
+      return;
+    }
+    if (/^melody-field-sound-\d+$/.test(key)) {
+      const sound = MELODY_SOUNDS[Number(key.split("-").at(-1))];
+      if (sound) field.selectSound(sound.patch);
+      return;
+    }
+    if (/^melody-field-family-\d+$/.test(key)) {
+      const family = MELODY_SOUND_FAMILIES[Number(key.split("-").at(-1))];
+      if (family && field.openSoundFamily(family.name)) field.focusSoundChoice();
+      return;
+    }
+    if (key === "melody-field-families") {
+      const left = field.soundView;
+      field.closeSoundFamily();
+      field.focusSoundChoice(left ? `melody-field-family-${MELODY_SOUND_FAMILIES.findIndex((f) => f.name === left)}` : void 0);
+      return;
+    }
     const moves = {
       "melody-field-left": [-0.1, 0],
       "melody-field-right": [0.1, 0],
@@ -18214,10 +18754,11 @@ var PlayFlow = class {
       const archive = capture?.events?.length && (!field.fromSaved || hasNewPersonal) ? materializePerformance(field.sourceDoc, capture, { keepWholeSource: Boolean(field.fromSaved) }) : null;
       const choice = { position: candidate.position, requestId: candidate.id };
       const context = candidate.bandBalance || field.phraseContext?.bandBasis ? { ...field.phraseContext, bandBalance: candidate.bandBalance ? 1 : 0, bandBasis: field.bandBasis } : field.phraseContext;
-      const next = selectedMelody(field.sourceDoc, candidate.song, { context, choice, performanceArchive: archive });
+      const next = selectedMelody(field.sourceDoc, candidate.song, { context: candidate.soundPatch || Object.hasOwn(context, "melodySound") ? { ...context, melodySound: candidate.soundPatch ?? null } : context, choice, performanceArchive: archive });
       this._pushUndo();
       this._stopForScopeChange();
       this._finishPartEdit();
+      this.app.scheduler.lastStoppedJamLead = null;
       this.doc = next;
       this.melodyField = null;
       this.activeSongCard = 0;
@@ -18738,12 +19279,12 @@ var PlayFlow = class {
     }
     this._paintJamPads();
     this._paintJamAnswer();
-    const soundLabel = this.root?.querySelector("#pf-key-sound");
-    if (soundLabel && this.doc.jam_session) {
+    const soundLabel2 = this.root?.querySelector("#pf-key-sound");
+    if (soundLabel2 && this.doc.jam_session) {
       const pad = this._liveJamPads()[0];
-      const name = getInstrument(pad.patchId)?.label || pad.patchId;
+      const name = getInstrument(pad.patchId)?.label || sampledSoundLabel(pad.patchId) || pad.patchId;
       const label = `Your next keys: ${name}. ${this.doc.jam_session.dynamic_keys ? "Notes follow the active harmony." : "Fixed notes."}`;
-      if (soundLabel.textContent !== label) soundLabel.textContent = label;
+      if (soundLabel2.textContent !== label) soundLabel2.textContent = label;
     }
     const direction = this.root?.querySelector("#pf-current-direction");
     if (direction && this.doc?.jam_session && !this.doc.jam_session.music_field) {
@@ -19688,6 +20229,14 @@ var PlayFlow = class {
     this.melodyCoverageCache = { backing, song, custom, text };
     return text;
   }
+  /** The wheels are the main things to try, so they get pictured cards rather than plain buttons. */
+  _wheelCardsHtml() {
+    const hint = this._melodyEntryHint(), notesOnly = hint.startsWith("This band has note edits only");
+    return `<div class="pf-wheel-cards" role="group" aria-label="Wheels to try">
+      <div class="pf-wheel-option">${this._btn("melody-field-enter", "Make my tune", "pf-btn pf-next pf-wheel-card pf-wheel-card-tune", 'aria-describedby="pf-wheel-cap-tune"')}<p class="pf-wheel-caption" id="pf-wheel-cap-tune">Tune wheel. Spin for new tunes.</p></div>
+      <div class="pf-wheel-option">${this._btn("melody-field-enter-sound", "Change the sound", "pf-btn pf-wheel-card pf-wheel-card-sound", `aria-describedby="pf-wheel-cap-sound"${notesOnly ? " disabled" : ""}`)}<p class="pf-wheel-caption" id="pf-wheel-cap-sound">${notesOnly ? "Sound wheel. Not ready for this band." : "Sound wheel. Pick who plays the tune."}</p></div>
+    </div><p class="pf-sub" data-melody-entry-coverage>${hint}</p>`;
+  }
   _renderListeningJam() {
     const jam = this.doc.jam_session, playing = Boolean(this.app.scheduler?.isPlaying);
     const livePads = this._liveJamPads();
@@ -19701,7 +20250,8 @@ var PlayFlow = class {
       <h1 class="pf-heading">Find your groove</h1>
       ${jam.exploration_map ? this._musicCircleHtml() : this._musicFieldHtml()}
       <p class="pf-sub" id="pf-current-direction" aria-live="polite"></p>
-      <div class="pf-row">${[this._btn("play", playing ? "Stop" : "Listen", "pf-btn pf-play"), this._btn("melody-field-enter", "Make my tune", "pf-btn pf-next"), this._btn("undo", "Undo", "pf-btn pf-small")].join("")}</div><p class="pf-sub" data-melody-entry-coverage>${this._melodyEntryHint()}</p>
+      <div class="pf-row">${[this._btn("play", playing ? "Stop" : "Listen", "pf-btn pf-play"), this._btn("undo", "Undo", "pf-btn pf-small")].join("")}</div>
+      ${this._wheelCardsHtml()}
       ${this._liveScoreHtml()}
       <div class="pf-jam-pads" role="group" aria-label="Play with the band">${pads}</div>${this._heardMeterHtml()}${this._bandHandHtml()}
       <p class="pf-sub">Touch a pad. ${jam.live_keys ? (this._padNoteNamesOn() ? "Or use the computer keys A to K, the small letters in the corners." : "Or play A to K.") + " Bright pads always fit. Hold to let your note ring." : "Or play A S D F. Your notes repeat with the band."} Play lots. The next group is busy. Hold notes. It is calm.</p>
@@ -20161,7 +20711,7 @@ var PlayFlow = class {
         const isOwn2 = ownIds.has(e.id) || String(e.id).startsWith("jam-live-");
         return `<span class="pf-band-mark pf-part-${partCls}${isOwn2 ? " own" : ""}" data-band-onset="${e.onset}" data-band-end="${e.onset + e.duration}" style="top:${maxPitch > minPitch ? 8 + (maxPitch - e.pitch) / (maxPitch - minPitch) * 28 : 20}px;left:${(left - barStart) / stepCount * 100}%;width:${(end - left) / stepCount * 100}%" aria-hidden="true"></span>`;
       }).join("");
-      const label = getInstrument(row.patch)?.label || row.patch?.replaceAll("_", " ") || roles.find((r) => r[0] === row.role)?.[1] || "Band";
+      const label = getInstrument(row.patch)?.label || sampledSoundLabel(row.patch) || row.patch?.replaceAll("_", " ") || roles.find((r) => r[0] === row.role)?.[1] || "Band";
       return `<section class="pf-band-row${chosen ? " pf-band-selected" : ""}"><div class="pf-band-summary">${this._btn("band-row:" + encodeURIComponent(row.key), `<span aria-hidden="true">${chosen ? "&#9662;" : "&#9656;"}</span> ${esc(label)}<small>${roles.find((r) => r[0] === row.role)?.[1] || esc(row.role)}</small>`, "pf-btn pf-band-label", `aria-expanded="${chosen}" aria-label="${chosen ? "Close" : "Open"} ${esc(label)} notes"`)}<div class="pf-band-track" aria-hidden="true">${marks}<span class="pf-band-cursor" hidden></span></div></div>${chosen ? `<p class="pf-sub">${{ lead: "Tune: the main line you can hum.", bass: "Bass: the low notes that move the song.", harmony: "Chords: notes that ring as a group.", drums: "Beat: the pulse you can tap to.", hocket: "Reply: notes that answer your tune.", fx: "Effect: a sound that adds a change." }[row.role] || "Change a note here."}</p>${detailPicture}` : ""}${!row.sources.length && !row.empty ? '<p class="pf-sub">The band plays this. Try Edit backing.</p>' : ""}</section>`;
     }).join("")}</div>`;
     const rolePickerHtml = `<div class="pf-row" role="group" aria-label="Choose sounds to edit">${roles.filter(([id]) => id === "lead" || this.doc.notes.some((n) => n.role === id)).map(([id, label]) => this._choice(`event-role:${id}`, label, role === id, "pf-btn pf-small")).join("")}</div>`;
@@ -20175,7 +20725,7 @@ var PlayFlow = class {
       ${this.doc.song_cards?.[this.editingCard]?.tune_variant === "lift" ? '<p class="pf-sub">This part plays your tune higher. These are the notes you can change.</p>' : ""}
       <p class="pf-say">Touch a note to change it. Tap a gap to add one.${barsWithOwn.size ? " Your notes have a bright edge." : ""}</p>
       ${layerOff ? `<div class="pf-row" role="status"><span>This sound is off in this part.</span>${this._btn(`card-layer:${this.editingCard}:${editLayer}`, "Turn on", "pf-btn")}</div>` : ""}
-      ${role === "lead" ? `<div class="pf-row pf-melody-sound">${this._btn("change-sound", "Change sound", "pf-btn", `aria-expanded="${Boolean(this.instrumentPickerOpen)}"`)}<span>${esc([...new Set(roleNotes.map((n) => getInstrument(n.patch_id)?.label || n.patch_id).filter(Boolean))].join(" / ") || getInstrument(this.doc.lead_patch_id)?.label || "Tune sound")}</span></div>${this.instrumentPickerOpen ? this._instrumentPickerHtml({ changing: true, melodyOnly: true }) : ""}` : ""}
+      ${role === "lead" ? `<div class="pf-row pf-melody-sound">${this._btn("change-sound", "Change sound", "pf-btn", `aria-expanded="${Boolean(this.instrumentPickerOpen)}"`)}<span>${esc([...new Set(roleNotes.map((n) => getInstrument(n.patch_id)?.label || sampledSoundLabel(n.patch_id) || n.patch_id).filter(Boolean))].join(" / ") || getInstrument(this.doc.lead_patch_id)?.label || "Tune sound")}</span></div>${this.instrumentPickerOpen ? this._instrumentPickerHtml({ changing: true, melodyOnly: true }) : ""}` : ""}
       <div class="pf-row" role="group" aria-label="Choose a bar">${this._choice("event-whole-part", "Whole part", !this.eventTuneZoom)}${!this.eventTuneZoom ? this._btn("event-zoom", "Zoom in", "pf-btn pf-small") : ""}${this.eventTuneZoom ? Array.from({ length: bars }, (_, b) => this._choice(`event-bar:${b}`, `Bar ${b + 1}${barsWithOwn.has(b) ? " \xB7 your notes" : ""}`, b === this.eventTuneBar)).join("") : ""}</div>
       ${!lanes ? `<div class="pf-row">${this._choice("event-pitch-snap", "Snap to key", this.pitchSnap !== false, "pf-btn pf-small")}</div>` : ""}
       <div class="pf-phrase-caption"><span>${lanes ? "Drum sounds" : "Higher notes"}</span><span>Time moves left to right</span></div>
@@ -21608,7 +22158,7 @@ var PlayFlow = class {
     return `<section class="pf-comparison-band" aria-label="Band in this preview"><h3>${c.auditionAlternative ? "Tune idea" : "Original tune"}</h3><p class="pf-sub" data-melody-audition-status>Press Hear to play.</p>${rows.map((row) => {
       const pitches = row.events.map((e) => e.pitch), low = Math.min(...pitches), high = Math.max(...pitches);
       const marks = row.events.map((e) => `<span class="pf-band-mark" data-audition-onset="${e.onset}" data-audition-end="${e.onset + e.duration}" style="left:${e.onset / span * 100}%;width:${Math.min(e.duration, span - e.onset) / span * 100}%;top:${high > low ? 8 + (high - e.pitch) / (high - low) * 28 : 20}px"></span>`).join("");
-      return `<div class="pf-band-summary"><div class="pf-band-label">${esc(getInstrument(row.patch)?.label || row.patch)}<small>${esc({ lead: "Tune", bass: "Bass", harmony: "Chords", drums: "Beat", hocket: "Reply", fx: "Effect" }[row.role] || row.role)}</small></div><div class="pf-band-track" aria-hidden="true">${marks}<span class="pf-audition-cursor" data-audition-span="${span}" hidden></span></div></div>`;
+      return `<div class="pf-band-summary"><div class="pf-band-label">${esc(getInstrument(row.patch)?.label || sampledSoundLabel(row.patch) || row.patch)}<small>${esc({ lead: "Tune", bass: "Bass", harmony: "Chords", drums: "Beat", hocket: "Reply", fx: "Effect" }[row.role] || row.role)}</small></div><div class="pf-band-track" aria-hidden="true">${marks}<span class="pf-audition-cursor" data-audition-span="${span}" hidden></span></div></div>`;
     }).join("")}</section>`;
   }
   _pointPartCircle(event) {
@@ -22052,6 +22602,25 @@ var PlayFlow = class {
     if (pressed) pressed.upAt = performance.now();
     this._releaseLive(`pointer:${ev.pointerId}`);
   }
+  /** An explicit tune sound becomes the new baseline for every lead note. The wheel's remembered
+   * sound and level are dropped (each note goes back to its own level first, as Own sound would),
+   * and a saved jam phrase no longer describes the tune, so Back to jam continues from these notes. */
+  _retimbreLeads(patchId) {
+    this.doc.notes = this.doc.notes.map((note) => {
+      if (note.role !== "lead") return note;
+      const { sound_base, ...rest } = note;
+      if (sound_base) {
+        if (Object.hasOwn(sound_base, "velocity")) rest.velocity = sound_base.velocity;
+        else delete rest.velocity;
+      }
+      return { ...rest, patch_id: patchId };
+    });
+    const wheelContext = this.doc.capture_notes?.melody_field?.context;
+    if (wheelContext && Object.hasOwn(wheelContext, "melodySound")) wheelContext.melodySound = null;
+    const evolution = this.doc.jam_session?.melodic_evolution, phrase = evolution ? restoreMelodicPhrase(evolution) : null;
+    if (phrase && phrase.patch !== patchId) delete this.doc.jam_session.melodic_evolution;
+    this.tuneGrid = retimbreTuneGrid(this.tuneGrid, patchId);
+  }
   async _changeInstrument(id) {
     const instrument = getInstrument(id);
     if (!instrument || !this.doc) return;
@@ -22087,8 +22656,7 @@ var PlayFlow = class {
     else {
       this.eventPatch = null;
       this.doc.lead_patch_id = instrument.patchId;
-      this.doc.notes = this.doc.notes.map((note) => note.role === "lead" ? { ...note, patch_id: instrument.patchId } : note);
-      this.tuneGrid = retimbreTuneGrid(this.tuneGrid, instrument.patchId);
+      this._retimbreLeads(instrument.patchId);
     }
     if (this.doc.jam_session && this.editingCard == null) {
       this.doc.jam_session = { ...this.doc.jam_session, kind: instrument.kind, patchId: instrument.patchId, kit: instrument.kitId || this.doc.drum_kit };
@@ -22147,6 +22715,7 @@ var PlayFlow = class {
     t.focus?.({ preventScroll: true });
     const key = t.dataset.key;
     if (key === "melody-field-enter") return this._enterMelodyField();
+    if (key === "melody-field-enter-sound") return this._enterMelodyField({ sound: true });
     if (key === "melody-field-resume") return this._resumeMelodyField();
     if (this.melodyField && key.startsWith("melody-field-")) return this._melodyFieldAction(key);
     this.deleteMessage = null;
@@ -23283,8 +23852,7 @@ var PlayFlow = class {
           this.doc.selected_instrument = b.lead;
         }
       }
-      this.doc.notes = this.doc.notes.map((note) => note.role === "lead" ? { ...note, patch_id: b.lead } : note);
-      this.tuneGrid = retimbreTuneGrid(this.tuneGrid, b.lead);
+      this._retimbreLeads(b.lead);
       const f = FEELS.find((x) => x.id === b.feel);
       if (f) {
         const opts = chordOptions(this.doc);
@@ -25204,9 +25772,15 @@ var MusicLabStudioApp = class _MusicLabStudioApp {
     document.getElementById("btn-stop-sound").addEventListener("click", stopSound);
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        const wheelSelector = ["[data-melody-disk]", "[data-music-circle]", "[data-music-field]"].find((selector) => document.activeElement?.matches?.(selector));
+        const active = document.activeElement;
+        const wheelSelector = ["[data-melody-disk]", "[data-music-circle]", "[data-music-field]"].find((selector) => active?.closest?.(selector));
+        const wheelKey = wheelSelector ? active?.dataset?.key : null;
         stopSound();
-        if (wheelSelector) this.playFlow?.root?.querySelector(wheelSelector)?.focus({ preventScroll: true });
+        if (wheelSelector) {
+          const root = this.playFlow?.root;
+          const same = wheelKey ? root?.querySelector(`${wheelSelector} [data-key="${CSS.escape(wheelKey)}"]`) : null;
+          (same || root?.querySelector(wheelSelector))?.focus({ preventScroll: true });
+        }
       }
     });
     const togglePlay = () => {

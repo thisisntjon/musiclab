@@ -733,10 +733,17 @@ class MusicLabStudioApp {
     document.getElementById("btn-stop-sound").addEventListener("click", stopSound);
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
-        // Stopping rerenders the wheel. Keep keyboard users on its replacement.
-        const wheelSelector = ['[data-melody-disk]', '[data-music-circle]', '[data-music-field]'].find(selector => document.activeElement?.matches?.(selector));
+        // Stopping rerenders the wheel. Keep keyboard users on its replacement, on the same
+        // hub, group or sound when focus was inside the Sound wheel.
+        const active = document.activeElement;
+        const wheelSelector = ['[data-melody-disk]', '[data-music-circle]', '[data-music-field]'].find(selector => active?.closest?.(selector));
+        const wheelKey = wheelSelector ? active?.dataset?.key : null;
         stopSound();
-        if (wheelSelector) this.playFlow?.root?.querySelector(wheelSelector)?.focus({ preventScroll: true });
+        if (wheelSelector) {
+          const root = this.playFlow?.root;
+          const same = wheelKey ? root?.querySelector(`${wheelSelector} [data-key="${CSS.escape(wheelKey)}"]`) : null;
+          (same || root?.querySelector(wheelSelector))?.focus({ preventScroll: true });
+        }
       }
     });
     const togglePlay = () => {
