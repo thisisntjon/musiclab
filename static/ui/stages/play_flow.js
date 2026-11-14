@@ -1549,8 +1549,7 @@ export class PlayFlow {
     if(this.stage!=='start')this.root.insertAdjacentHTML('beforeend',`<section aria-label="Help and access"><div class="pf-row">
       ${this._btn('settings',this.comfortOpen?'Close help':'Help','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}</div>${this.comfortOpen?this._helpPanelHtml():''}</section>`);
     if(this.partComparison && this.stage==='song'){this.root.insertAdjacentHTML('afterbegin',this._comparisonHtml());this._syncPartAudition();}
-    if (this.pianoMessage === "The sounds did not load. Press Play to try again."
-      && this.app.scheduler?.masterBus?.piano && !this.app.scheduler.masterBus.disposed) this.pianoMessage = "";
+    this._clearCompletedSoundMessage();
     if (this.pianoMessage) this.root.insertAdjacentHTML('afterbegin', `<p role="status">${esc(this.pianoMessage)}</p>${this.app.scheduler?.loadingSession?.state === "failed" ? this._btn('sounds-retry', 'Load sounds again', 'pf-btn pf-small') : ''}`);
     if (this.deleteMessage) this.root.insertAdjacentHTML('afterbegin', `<p role="status">${esc(this.deleteMessage)}</p>`);
     if (this.stage !== 'start' && (isSampledPatch(this.doc?.lead_patch_id) || this.app.compiledSong?.events?.some(n => isSampledPatch(n.patch_id)))
@@ -4289,6 +4288,18 @@ export class PlayFlow {
     return this._startInstrument(instrumentId);
   }
 
+  /** Retire obsolete progress without hiding an active loader's status. */
+  _clearCompletedSoundMessage() {
+    const scheduler = this.app.scheduler;
+    // Stop retires the managed loading session. Melody may then prepare a new
+    // bank before rendering; its old progress line no longer describes the sound.
+    // A live session still owns its next-bar handover and failure/retry messages.
+    if (scheduler?.loadingSession || !scheduler?.masterBus?.piano || scheduler.masterBus.disposed) return false;
+    if (![LOADING_WORDS.loading, LOADING_WORDS.ready, "The sounds did not load. Press Play to try again."].includes(this.pianoMessage)) return false;
+    this.pianoMessage = "";
+    return true;
+  }
+
   /** Sampled sounds are fetched in the background whenever the song needs them. */
   _loadSoundsQuietly() {
     const scheduler = this.app.scheduler;
@@ -4299,9 +4310,7 @@ export class PlayFlow {
     const current = () => scheduler.stopGeneration === generation && this.doc?.id === songId;
     const load = Promise.resolve().then(() => scheduler.preparePiano())
       .then(() => {
-        if (current() && this.pianoMessage === "The sounds did not load. Press Play to try again.") {
-          this.pianoMessage = ""; this.render();
-        }
+        if (current() && this._clearCompletedSoundMessage()) this.render();
       })
       .catch(() => {
         // Stop/navigation retires this load. A cancelled graph is not a failed bank.

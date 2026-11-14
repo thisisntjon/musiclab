@@ -41,3 +41,19 @@ test('a late rejection does not overwrite a ready bank or loading-session messag
   assert.equal(flow.pianoMessage,'Music is on. Full sounds are on the way.');assert.equal(flow.renders,0);
  }
 });
+
+test('quiet loading clears retired progress only when its current bank is ready',async()=>{
+ const {flow,scheduler,resolve}=fixture();
+ flow.pianoMessage='Sound is on. Full sounds are on the way.';
+ scheduler.masterBus.piano={};resolve();await flow.quietLoad;
+ assert.equal(flow.pianoMessage,'');assert.equal(flow.renders,1);
+});
+
+test('quiet completion cannot clear a newer managed session or a retired song message',async()=>{
+ for(const change of [(f,s)=>s.loadingSession={state:'ready'},(f,s)=>s.stopGeneration++,(f)=>f.doc={id:'two'}]){
+  const {flow,scheduler,resolve}=fixture();
+  flow.pianoMessage='Full sounds join at the next bar.';
+  change(flow,scheduler);scheduler.masterBus.piano={};resolve();await flow.quietLoad;
+  assert.equal(flow.pianoMessage,'Full sounds join at the next bar.');assert.equal(flow.renders,0);
+ }
+});

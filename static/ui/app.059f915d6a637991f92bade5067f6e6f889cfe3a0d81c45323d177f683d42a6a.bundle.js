@@ -20515,7 +20515,7 @@ var PlayFlow = class {
       this.root.insertAdjacentHTML("afterbegin", this._comparisonHtml());
       this._syncPartAudition();
     }
-    if (this.pianoMessage === "The sounds did not load. Press Play to try again." && this.app.scheduler?.masterBus?.piano && !this.app.scheduler.masterBus.disposed) this.pianoMessage = "";
+    this._clearCompletedSoundMessage();
     if (this.pianoMessage) this.root.insertAdjacentHTML("afterbegin", `<p role="status">${esc(this.pianoMessage)}</p>${this.app.scheduler?.loadingSession?.state === "failed" ? this._btn("sounds-retry", "Load sounds again", "pf-btn pf-small") : ""}`);
     if (this.deleteMessage) this.root.insertAdjacentHTML("afterbegin", `<p role="status">${esc(this.deleteMessage)}</p>`);
     if (this.stage !== "start" && (isSampledPatch(this.doc?.lead_patch_id) || this.app.compiledSong?.events?.some((n) => isSampledPatch(n.patch_id))) && (!this.app.scheduler?.masterBus?.piano || this.app.scheduler.masterBus.disposed))
@@ -23271,6 +23271,14 @@ var PlayFlow = class {
   _startWithInstrument(kind, instrumentId) {
     return this._startInstrument(instrumentId);
   }
+  /** Retire obsolete progress without hiding an active loader's status. */
+  _clearCompletedSoundMessage() {
+    const scheduler = this.app.scheduler;
+    if (scheduler?.loadingSession || !scheduler?.masterBus?.piano || scheduler.masterBus.disposed) return false;
+    if (![LOADING_WORDS.loading, LOADING_WORDS.ready, "The sounds did not load. Press Play to try again."].includes(this.pianoMessage)) return false;
+    this.pianoMessage = "";
+    return true;
+  }
   /** Sampled sounds are fetched in the background whenever the song needs them. */
   _loadSoundsQuietly() {
     const scheduler = this.app.scheduler;
@@ -23278,10 +23286,7 @@ var PlayFlow = class {
     const generation = scheduler.stopGeneration, songId = this.doc?.id;
     const current = () => scheduler.stopGeneration === generation && this.doc?.id === songId;
     const load = Promise.resolve().then(() => scheduler.preparePiano()).then(() => {
-      if (current() && this.pianoMessage === "The sounds did not load. Press Play to try again.") {
-        this.pianoMessage = "";
-        this.render();
-      }
+      if (current() && this._clearCompletedSoundMessage()) this.render();
     }).catch(() => {
       if (!current() || scheduler.loadingSession || scheduler.masterBus?.piano && !scheduler.masterBus.disposed) return;
       this.pianoMessage = "The sounds did not load. Press Play to try again.";

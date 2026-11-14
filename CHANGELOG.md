@@ -1,5 +1,11 @@
 # Release notes
 
+## 2026-11-14: Accurate sound-loading feedback
+
+After Stop followed by Make my tune, the page now removes the old loading message once the sounds are ready. Active loading and failed-download retry messages remain visible. No music, sound-bank or saved-song format changes.
+
+App candidate: `bb0108d3acfa0c5ce01dfd2e278b2c2136d5e8dc`. Checked with Chrome touch emulation, Chrome/Edge packaged journeys and independent review. Physical-phone behavior remains unverified.
+
 ## 2026-11-14: Bass wheel cache repair and Back to Jam
 
 - Returning visitors now load the stylesheet that matches the app. Previously, an older cached stylesheet could leave the new Bass wheel black with unstyled buttons, even though fresh-browser checks passed.

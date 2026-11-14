@@ -134,6 +134,41 @@ test("L8: the parents page says where the keys and switch scanning are explained
   assert.match(PARENTS, /Load sounds again/);
 });
 
+test("a ready bank after Stop removes the retired session's loading and handover text", () => {
+  for (const message of ["Sound is on. Full sounds are on the way.", "Full sounds join at the next bar."]) {
+    const flow = toJam(screenFlow());
+    flow.pianoMessage = message;
+    flow.app.scheduler.loadingSession = null;
+    flow.render();
+    assert.equal(flow.pianoMessage, "");
+    assert.ok(!flow.root.textContent.includes(message));
+  }
+});
+
+test("render preserves active loading, next-bar handover, failure/retry and unrelated messages", () => {
+  for (const [state, message] of [
+    ["loading", "Sound is on. Full sounds are on the way."],
+    ["ready", "Full sounds join at the next bar."],
+    ["failed", "Full sounds did not load. Press Load sounds again."],
+    [null, "Sound loading cancelled. Your notes are preserved."],
+  ]) {
+    const flow = toJam(screenFlow());
+    flow.pianoMessage = message;
+    flow.app.scheduler.loadingSession = state ? { state } : null;
+    flow.render();
+    assert.equal(flow.pianoMessage, message);
+    assert.ok(flow.root.textContent.includes(message));
+    if (state === "failed") assert.ok(flow.root.querySelector('[data-key="sounds-retry"]'));
+  }
+  for (const bus of [{ piano: null, disposed: false }, { piano: {}, disposed: true }]) {
+    const flow = toJam(screenFlow());
+    flow.app.scheduler.masterBus = bus;
+    flow.pianoMessage = "Sound is on. Full sounds are on the way.";
+    flow.render();
+    assert.match(flow.pianoMessage, /on the way/);
+  }
+});
+
 function rule(selector) {
   const at = CSS_TEXT.lastIndexOf(`${selector} {`);
   assert.ok(at >= 0, `a rule for ${selector}`);
