@@ -145,6 +145,23 @@ export function circlePosition(id,radius=.44) {
   const angle=((groupIndex+(index+.5)/group.sceneIds.length)/CIRCLE_GROUPS.length-.25)*2*Math.PI;
   return {x:.5+radius*Math.cos(angle),y:.5+radius*Math.sin(angle)};
 }
+/** How far round the circle a scene sits, 0 to 1 from the top, clockwise (circlePosition draws it there). */
+const circleTurn=id=>{
+  const groupIndex=CIRCLE_GROUPS.findIndex(g=>g.sceneIds.includes(id));if(groupIndex<0)return null;
+  const group=CIRCLE_GROUPS[groupIndex];return (groupIndex+(group.sceneIds.indexOf(id)+.5)/group.sceneIds.length)/CIRCLE_GROUPS.length;
+};
+/** The scene of ids nearest to id round the circle (the smaller angle between their places; id itself when it is one of
+ * them). A tie goes to the one first in circle order. null when id or every one of ids is off the circle. */
+export function circleNearest(id,ids) {
+  const at=circleTurn(id);if(at==null)return null;
+  let best=null,bestGap=Infinity;
+  for(const other of CIRCLE_SCENES) {
+    if(!ids.includes(other))continue;
+    const d=Math.abs(circleTurn(other)-at)%1,gap=Math.min(d,1-d);
+    if(gap<bestGap-1e-9){best=other;bestGap=gap;}
+  }
+  return best;
+}
 export function circleStep(id,delta) {
   const i=Math.max(0,CIRCLE_SCENES.indexOf(id));return CIRCLE_SCENES[((i+delta)%CIRCLE_SCENES.length+CIRCLE_SCENES.length)%CIRCLE_SCENES.length];
 }

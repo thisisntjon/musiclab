@@ -95,8 +95,19 @@ export async function preparePianoChannels(synth) {
     if(pending.length)throw Error('Instrument channels did not initialize. Try loading again.');
   } finally {synth.receiveEventCallback=receive;}
 }
-export async function createPiano(context, destination) {
-  const {library, bank} = await assets();
+/** Chrome keeps a WorkletSynthesizer's node, and the bank copy inside it, alive while its port is open.
+ * destroy() tells the processor to stop. Once it has had time to arrive, closing the port lets the
+ * browser free the node. Disconnecting alone, or destroying while connected, leaks it on every Stop.
+ */
+export const SYNTH_RETIRE_MS = 50;
+function retireSynth(synth) {
+  // Scheduled first, so the port still closes if destroy() throws.
+  setTimeout(() => synth.worklet?.port?.close(), SYNTH_RETIRE_MS);
+  synth.destroy();
+}
+/** `load` is only replaced by tests, which hand in a fake library and bank. */
+export async function createPiano(context, destination, load = assets) {
+  const {library, bank} = await load();
   await context.audioWorklet.addModule(new URL('spessasynth_processor.min.js', base));
   const synth = new library.WorkletSynthesizer(context);
   const bus = context.createGain();
@@ -106,7 +117,7 @@ export async function createPiano(context, destination) {
     await synth.soundBankManager.addSoundBank(bank.slice(0), 'generaluser-2.0.3-piano-v1');
     await preparePianoChannels(synth);
     setup(synth); bus.gain.value = .35; synth.connect(bus); bus.connect(destination);
-  } catch (error) { bus.disconnect(); synth.destroy(); throw error; }
+  } catch (error) { bus.disconnect(); retireSynth(synth); throw error; }
   const allocation = new PianoAllocation();
   const programs = Array(TOTAL_CHANNELS).fill(0);
   const handles = new Set();
@@ -143,17 +154,28 @@ export async function createPiano(context, destination) {
   }, stop() {
     if (closed) return;
     closed = true; handles.clear(); bus.gain.cancelScheduledValues(context.currentTime);
-    bus.gain.setValueAtTime(0, context.currentTime); bus.disconnect(); synth.stopAll(true); synth.destroy();
+    bus.gain.setValueAtTime(0, context.currentTime); bus.disconnect(); synth.stopAll(true); retireSynth(synth);
   }};
 }
 
+// The WAV export runs on the page's main thread. Giving timers a turn every few ms keeps live playback on time.
+// In browsers a message task, unlike setTimeout(0), is not slowed to 4 ms per turn, and a due timer runs first.
+// Turns are taken for the whole render, so a long song or a slow device never blocks for more than one slice.
+export const RENDER_SLICE_MS = 30;
+const nextTask = () => new Promise(resolve => {
+  const {port1, port2} = new MessageChannel();
+  port1.onmessage = () => { port1.close(); resolve(); };
+  port2.postMessage(null);
+});
 /** Same bank/mapping/gates as live, rendered on sample frames before WebAudio mixing. */
-export async function renderPiano(events, sampleRate, samples) {
-  const {library, bank} = await assets();
+export async function renderPiano(events, sampleRate, samples, load = assets) {
+  const {library, bank} = await load();
   const synth = new library.SpessaSynthProcessor(sampleRate);
   await synth.ready;
   const left = new Float32Array(samples), right = new Float32Array(samples);
   try {
+    await nextTask(); // the caller's setup and the bank parse are two separate blocks
+    const started = performance.now(); // the first slice includes the parse
     synth.soundBankManager.addSoundBank(library.SoundBankLoader.fromArrayBuffer(bank.slice(0)), 'generaluser-2.0.3-piano-v1');
     while (synth.midiChannels.length < TOTAL_CHANNELS) synth.createMIDIChannel();
     setup(synth);
@@ -167,10 +189,15 @@ export async function renderPiano(events, sampleRate, samples) {
       }
     }
     actions.sort((a,b) => a.frame-b.frame || Number(a.on)-Number(b.on));
-    let offset = 0;
+    let offset = 0, slice = started;
+    const renderTo = async end => {
+      while (offset < end) {
+        const n=Math.min(128,end-offset); synth.process(left,right,offset,n); offset+=n;
+        if (performance.now()-slice > RENDER_SLICE_MS) { await nextTask(); slice = performance.now(); }
+      }
+    };
     for (const action of actions) {
-      const end = Math.min(samples, action.frame);
-      while (offset < end) { const n=Math.min(128,end-offset); synth.process(left,right,offset,n); offset+=n; }
+      await renderTo(Math.min(samples, action.frame));
       if (action.frame >= samples) continue;
       if (action.on) {
         if (programs[action.channel] !== action.program) { synth.programChange(action.channel,action.program); programs[action.channel]=action.program; }
@@ -178,7 +205,7 @@ export async function renderPiano(events, sampleRate, samples) {
       }
       else synth.noteOff(action.channel,action.pitch);
     }
-    while(offset<samples) { const n=Math.min(128,samples-offset); synth.process(left,right,offset,n); offset+=n; }
+    await renderTo(samples);
     return [left, right];
   } finally { synth.destroy(); }
 }

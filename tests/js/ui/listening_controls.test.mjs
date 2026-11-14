@@ -75,6 +75,6 @@ test('field status never plots an older coordinate system as the new realized po
  const element={querySelector:s=>s==='[data-field-requested]'?requested:realized};
  f.root={querySelector:s=>s==='[data-music-field]'?element:label,querySelectorAll:()=>[]};
  let version=1;f.app.scheduler.isPlaying=true;f.app.scheduler.activeJamBacking=()=>({phraseContext:{musicField:{version,x:.5,y:.5}}});
- f._paintMusicField();assert.equal(realized.hidden,true);assert.match(label.textContent,/Moving toward/);
+ f._paintMusicField();assert.equal(realized.hidden,true);assert.match(label.textContent,/Changing to/);
  version=2;f._paintMusicField();assert.equal(realized.hidden,false);assert.match(label.textContent,/^Playing:/);
 });

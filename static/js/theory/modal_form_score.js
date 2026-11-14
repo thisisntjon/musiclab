@@ -1,4 +1,4 @@
-// Original modal pedal study. Source premises: workflow/research/genre-expansion-2026-10-30/MODAL-JAZZ.md.
+// Original modal pedal study. Source premises: development records.
 export const SCENE_ID='modal-jazz-v1';
 export function buildBlock(sceneId=SCENE_ID,{root=0,minor=false,density=1,color=1,variant='base',cycle=0,blockIndex=0}={}){
  if(sceneId!==SCENE_ID||!Number.isInteger(root)||root<0||root>11||![density,color].every(x=>Number.isInteger(x)&&x>=0&&x<=4)||!['base','space','answer'].includes(variant)||!Number.isInteger(cycle)||cycle<0||![0,1].includes(blockIndex))throw Error('Invalid modal draft context');

@@ -24,7 +24,7 @@ const programs={
   sampled_clean_guitar_v1:27, sampled_bass_v1:33, sampled_banjo_v1:105,
   sampled_muted_guitar_v1:28, sampled_upright_bass_v1:32,
   // Sound wheel additions (13 Nov 2026): melodic presets measured in
-  // workflow/evidence/sound-wheel-more-2026-11-13/candidate-metrics.json.
+  // development records.
   sampled_accordion_v1:21, sampled_music_box_v1:10, sampled_marimba_v1:12, sampled_vibraphone_v1:11,
   sampled_steel_drums_v1:114, sampled_kalimba_v1:108, sampled_koto_v1:107, sampled_harp_v1:46,
   sampled_pizzicato_v1:45, sampled_solo_vox_v1:85, sampled_synth_voice_v1:54, sampled_recorder_v1:74,

@@ -1,83 +1,114 @@
 #!/usr/bin/env node
-// Stages an immutable make_release.py package into a Cloudflare Workers Static Assets
-// deployment directory without modifying the source package or MANIFEST.json.
+// Stages an immutable make_release.py package into a Cloudflare Workers Static Assets deployment folder without
+// modifying the package or MANIFEST.json. It emits the whole hosting wrapper that runs live: worker.mjs,
+// wrangler.json, public/_headers, public/_redirects, public/.assetsignore and public/404.html. Nothing is laid over
+// it by hand afterwards.
 //
 // Usage:
-//   node stage-musiclab-cloudflare.mjs --pkg <release_pkg_dir> --out <deploy_dir> [--mode shards|r2]
-//     [--worker-name musiclab] [--r2-bucket musiclab-assets]
+//   node stage-musiclab-cloudflare.mjs --pkg <release_pkg_dir> --out <deploy_dir> --expect-manifest-sha <sha256>
+//     [--worker-name musiclab]
 //
-// Modes:
-//   --mode r2     : Excludes the 30.82 MiB .sf2 from static assets and binds R2 bucket
-//                   `SOUND_BANK` (`wrangler r2 object put <bucket>/GeneralUser-GS-2.0.3.sf2 ...`).
-//   --mode shards : Zero-R2 mode (default if R2 is not enabled on the Cloudflare account).
-//                   Splits the verified .sf2 into two <25 MiB static shards (16.00 MiB + 14.82 MiB)
-//                   under `public/_bank_shards/`, omits the raw 30.82 MiB file from `public/`,
-//                   and serves byte-exact `/static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2`
-//                   (with 200, 206 Range, HEAD, and immutable SHA-256 ETag) from `worker.mjs`.
+// --expect-manifest-sha is the sha256 of the package's MANIFEST.json as recorded by the QA run and named in the
+// owner's approval. Any other package is refused, so a rebuilt or altered package with a regenerated manifest is
+// never staged by mistake.
+//
+// What the wrapper does:
+// - /, /static, /static/ and /index.html redirect (302, no-store) to /static/index.html (public/_redirects).
+// - The entry pages revalidate every 300 s with no-transform; css, js and ui files revalidate every hour; vendor
+//   files are cached for a day. Every response carries the security headers, with COOP and CORP same-origin.
+// - The Worker runs first only for /favicon.ico and /api/*. Unknown paths get the small 404.html page.
+// - The unmodified full source bank stays in the package for reproducibility; it is not staged or served.
+// - workers.dev and preview URLs are off, so the custom domain is the only origin.
 
 import { createHash } from 'node:crypto';
-import { cp, mkdir, readFile, stat, writeFile, readdir } from 'node:fs/promises';
+import { cp, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CSP_HEADER, SF2_PATH, SF2_SHA256, SF2_TOTAL_BYTES } from './musiclab-worker.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SHARD_SIZE = 16 * 1024 * 1024; // 16 MiB (< 25 MiB Cloudflare Static Assets ceiling)
+const FULL_BANK = SF2_PATH.slice(1);
+export const ENTRY_ALIASES = ['/', '/static', '/static/', '/index.html'];
+export const RUN_WORKER_FIRST = ['/favicon.ico', '/api/*'];
 
 function parseArgs(argv) {
-  const args = {
-    mode: 'shards',
-    workerName: 'musiclab',
-    r2Bucket: 'musiclab-assets',
-  };
+  const args = { workerName: 'musiclab' };
   for (let i = 2; i < argv.length; i++) {
     const key = argv[i];
     const val = argv[i + 1];
     if (key === '--pkg') args.pkg = val, i++;
     else if (key === '--out') args.out = val, i++;
-    else if (key === '--mode') args.mode = val, i++;
+    else if (key === '--expect-manifest-sha') args.expectManifestSha = val, i++;
     else if (key === '--worker-name') args.workerName = val, i++;
-    else if (key === '--r2-bucket') args.r2Bucket = val, i++;
     else throw new Error(`Unknown argument: ${key}`);
   }
-  if (!args.pkg || !args.out) {
-    throw new Error('Required: --pkg <release_pkg_dir> --out <deploy_dir>');
-  }
-  if (args.mode !== 'shards' && args.mode !== 'r2') {
-    throw new Error(`Invalid --mode "${args.mode}" (expected "shards" or "r2")`);
-  }
+  if (!args.pkg || !args.out) throw new Error('Required: --pkg <release_pkg_dir> --out <deploy_dir> --expect-manifest-sha <sha256>');
   return args;
 }
 
-const headersFile = csp => `# Security and caching headers for musiclab.simoneresearch.com
-# Cloudflare Web Analytics must stay disabled on this hostname so song sessions emit zero beacons.
+export const headersFile = csp => `# Security and caching headers for musiclab.simoneresearch.com
+# Host-injected requests must be evaluated separately from application requests.
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
   Permissions-Policy: geolocation=(), microphone=(self), camera=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
   Content-Security-Policy: ${csp}
 
+# Entry aliases redirect to /static/index.html (_redirects); the redirect itself is never cached.
+${ENTRY_ALIASES.map(alias => `${alias}\n  Cache-Control: no-store\n`).join('\n')}
 /MANIFEST.json
   Cache-Control: public, max-age=60, must-revalidate
 
-/index.html
-  Cache-Control: public, max-age=300, must-revalidate
-
 /static/index.html
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=300, must-revalidate, no-transform
 
 /static/parents.html
-  Cache-Control: public, max-age=300, must-revalidate
+  Cache-Control: public, max-age=300, must-revalidate, no-transform
 
 /static/vendor/sampled-piano/*
   Cache-Control: public, max-age=86400
+
+/static/css/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/static/js/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/static/ui/*
+  Cache-Control: public, max-age=3600, must-revalidate
 `;
+
+export const redirectsFile = () => `# Entry aliases: one hop to the app, served by static assets without the Worker.
+${ENTRY_ALIASES.map(alias => `${alias} /static/index.html 302`).join('\n')}
+`;
+
+export const wranglerConfig = workerName => ({
+  name: workerName,
+  compatibility_date: '2025-10-08',
+  main: './worker.mjs',
+  // The custom domain is the only origin: no second copy with separate saves on workers.dev or preview URLs.
+  workers_dev: false,
+  preview_urls: false,
+  assets: {
+    directory: './public',
+    binding: 'ASSETS',
+    not_found_handling: '404-page',
+    run_worker_first: RUN_WORKER_FIRST,
+    html_handling: 'none',
+  },
+  observability: {
+    enabled: false,
+  },
+});
 
 // Validate every payload before deriving policy or producing a deployment tree.
 export async function verifyPackage(pkgDir, manifest) {
- if(manifest.version!==1||manifest.publication_approved!==false||!manifest.files)throw new Error('Unsupported package manifest');
+ // Older packages carry "publication_approved": false; a manifest must never claim approval.
+ if(manifest.version!==1||(manifest.publication_approved??false)!==false||!manifest.files)throw new Error('Unsupported package manifest');
  const actual={};
  async function walk(dir,prefix='') {
   for(const e of await readdir(dir,{withFileTypes:true})) {
@@ -103,14 +134,16 @@ export function packageCsp(html) {
  return CSP_HEADER.replace('__MUSICLAB_SCRIPT_HASHES__',hashes.join(' '));
 }
 
-async function main() {
-  const args = parseArgs(process.argv);
-  const pkgDir = path.resolve(args.pkg);
-  const outDir = path.resolve(args.out);
-  const relativeOut = path.relative(pkgDir.toLowerCase(),outDir.toLowerCase());
-  if(!relativeOut || (!relativeOut.startsWith('..'+path.sep) && relativeOut!=='..' && !path.isAbsolute(relativeOut)))throw new Error('Output must be outside the immutable package');
-
-
+export async function stagePackage({ pkg, out, expectManifestSha, workerName = 'musiclab' }) {
+  if (!/^[0-9a-f]{64}$/.test(String(expectManifestSha || ''))) {
+    throw new Error('Pass --expect-manifest-sha <sha256 of the approved MANIFEST.json>; nothing is staged without it');
+  }
+  const pkgDir = path.resolve(pkg);
+  const outDir = path.resolve(out);
+  const relativeOut = path.relative(pkgDir.toLowerCase(), outDir.toLowerCase());
+  if (!relativeOut || (!relativeOut.startsWith('..' + path.sep) && relativeOut !== '..' && !path.isAbsolute(relativeOut))) {
+    throw new Error('Output must be outside the immutable package');
+  }
   try {
     await stat(outDir);
     throw new Error(`Output directory already exists: ${outDir}`);
@@ -118,103 +151,62 @@ async function main() {
     if (err.code !== 'ENOENT') throw err;
   }
 
-  const sf2Src = path.join(pkgDir, 'static', 'vendor', 'sampled-piano', 'GeneralUser-GS-2.0.3.sf2');
-  const sf2Bytes = await readFile(sf2Src);
-  const actualSha = createHash('sha256').update(sf2Bytes).digest('hex');
-  if (sf2Bytes.byteLength !== SF2_TOTAL_BYTES || actualSha !== SF2_SHA256) {
-    throw new Error(
-      `SoundFont integrity mismatch: got ${sf2Bytes.byteLength} bytes sha256=${actualSha}`,
-    );
+  const manifestRaw = await readFile(path.join(pkgDir, 'MANIFEST.json'));
+  const manifestSha256 = createHash('sha256').update(manifestRaw).digest('hex');
+  if (manifestSha256 !== expectManifestSha) {
+    throw new Error(`MANIFEST.json sha256 ${manifestSha256} does not match the expected ${expectManifestSha}`);
   }
-
-  const manifestRaw = await readFile(path.join(pkgDir, 'MANIFEST.json'), 'utf8');
-  const manifest = JSON.parse(manifestRaw);
+  const manifest = JSON.parse(manifestRaw.toString('utf8'));
   const verifiedFiles = await verifyPackage(pkgDir, manifest);
-  const csp = packageCsp(await readFile(path.join(pkgDir,'static/index.html'),'utf8'));
-  if (manifest.files?.['static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2'] !== SF2_SHA256) {
-    throw new Error('MANIFEST.json does not match expected SoundFont SHA-256');
+  // The package keeps the exact admitted source bank for reproducibility, even though it is not served.
+  if (manifest.files[FULL_BANK] !== SF2_SHA256 || (await stat(path.join(pkgDir, FULL_BANK))).size !== SF2_TOTAL_BYTES) {
+    throw new Error('MANIFEST.json does not hold the expected source SoundFont');
   }
+  const csp = packageCsp(await readFile(path.join(pkgDir, 'static/index.html'), 'utf8'));
+  const notFoundPage = await readFile(path.join(HERE, '404.html'));
+  if (/<script\b|\son\w+=/i.test(notFoundPage.toString('utf8'))) throw new Error('404.html must not run script under the pinned policy');
 
-  // Copy only web-served assets + public notices/manifest (never Python server or test suites)
-  // into `public/`, keeping `worker.mjs` and `wrangler.json` cleanly outside `assets.directory`.
+  // Copy only web-served assets and the public notices/manifest (never the Python server or test suites) into
+  // public/, keeping worker.mjs and wrangler.json outside assets.directory.
   const publicDir = path.join(outDir, 'public');
   await mkdir(publicDir, { recursive: true });
   for (const rel of ['index.html', 'LICENSE', 'NOTICES.md', 'README.md', 'MANIFEST.json']) {
     await cp(path.join(pkgDir, rel), path.join(publicDir, rel));
   }
+  const fullBankSource = path.join(pkgDir, FULL_BANK);
   await cp(path.join(pkgDir, 'static'), path.join(publicDir, 'static'), {
     recursive: true,
-    filter: (src) => path.basename(src) !== 'GeneralUser-GS-2.0.3.sf2',
+    filter: src => path.resolve(src) !== fullBankSource,
   });
   await cp(path.join(pkgDir, 'examples'), path.join(publicDir, 'examples'), { recursive: true });
   await cp(path.join(pkgDir, 'presets'), path.join(publicDir, 'presets'), { recursive: true });
 
-  if (args.mode === 'shards') {
-    const shardDir = path.join(publicDir, '_bank_shards');
-    await mkdir(shardDir, { recursive: true });
-    const part0 = sf2Bytes.subarray(0, SHARD_SIZE);
-    const part1 = sf2Bytes.subarray(SHARD_SIZE);
-    await writeFile(path.join(shardDir, 'GeneralUser-GS-2.0.3.sf2.part0'), part0);
-    await writeFile(path.join(shardDir, 'GeneralUser-GS-2.0.3.sf2.part1'), part1);
-  }
-
   const workerSrc = await readFile(path.join(HERE, 'musiclab-worker.mjs'), 'utf8');
   // workerd interprets named exports as entrypoints; helper constants are not entrypoints.
-  const entry = workerSrc.replace(/^export (const|function) /gm,'$1 ').replace('__MUSICLAB_SCRIPT_HASHES__',csp.match(/script-src ([^;]+)/)[1].match(/'sha256-[^']+'/g).join(' '));
+  const entry = workerSrc.replace(/^export (const|function) /gm, '$1 ').replace('__MUSICLAB_SCRIPT_HASHES__', csp.match(/script-src ([^;]+)/)[1].match(/'sha256-[^']+'/g).join(' '));
   await writeFile(path.join(outDir, 'worker.mjs'), entry, 'utf8');
   await writeFile(path.join(publicDir, '_headers'), headersFile(csp), 'utf8');
-  await writeFile(
-    path.join(publicDir, '.assetsignore'),
-    ['static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2', ''].join('\n'),
-    'utf8',
-  );
+  await writeFile(path.join(publicDir, '_redirects'), redirectsFile(), 'utf8');
+  await writeFile(path.join(publicDir, '404.html'), notFoundPage);
+  await writeFile(path.join(publicDir, '.assetsignore'), [FULL_BANK, ''].join('\n'), 'utf8');
+  await writeFile(path.join(outDir, 'wrangler.json'), JSON.stringify(wranglerConfig(workerName), null, 2) + '\n', 'utf8');
 
-  const runWorkerFirst = [SF2_PATH, '/favicon.ico', '/api/*'];
-  if (args.mode === 'shards') runWorkerFirst.push('/_bank_shards/*');
-
-  const wranglerConfig = {
-    name: args.workerName,
-    compatibility_date: '2025-10-08',
-    main: './worker.mjs',
-    assets: {
-      directory: './public',
-      binding: 'ASSETS',
-      not_found_handling: 'none',
-      run_worker_first: runWorkerFirst,
-    },
-    ...(args.mode === 'r2'
-      ? {
-          r2_buckets: [
-            {
-              binding: 'SOUND_BANK',
-              bucket_name: args.r2Bucket,
-            },
-          ],
-        }
-      : {}),
-    observability: {
-      enabled: false,
-    },
+  return {
+    ok: true,
+    outDir,
+    commit: manifest.commit || null,
+    verifiedFiles,
+    csp,
+    manifestSha256,
+    expectedManifestSha256: expectManifestSha,
+    fullBankStaged: false,
+    runWorkerFirst: RUN_WORKER_FIRST,
   };
-  await writeFile(
-    path.join(outDir, 'wrangler.json'),
-    JSON.stringify(wranglerConfig, null, 2) + '\n',
-    'utf8',
-  );
+}
 
-  console.log(
-    JSON.stringify({
-      ok: true,
-      mode: args.mode,
-      outDir,
-      commit: manifest.commit || null,
-      verifiedFiles,
-      csp,
-      manifestSha256: createHash('sha256').update(manifestRaw).digest('hex'),
-      sf2Bytes: sf2Bytes.byteLength,
-      sf2Sha256: actualSha,
-    }),
-  );
+async function main() {
+  const args = parseArgs(process.argv);
+  console.log(JSON.stringify(await stagePackage(args)));
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch((err) => {

@@ -5,8 +5,8 @@
  * person picks a slot to replace. Replacing or deleting needs a second press (confirmPress).
  * `storage` is any object with getItem/setItem (window.localStorage in the browser).
  */
-import { MAX_PROJECT_BYTES, validateProject } from './project_validation.js';
-export { MAX_PROJECT_BYTES } from './project_validation.js';
+import { MAX_PROJECT_BYTES, MAX_PROJECT_FILE_BYTES, validateProject } from './project_validation.js';
+export { MAX_PROJECT_BYTES, MAX_PROJECT_FILE_BYTES } from './project_validation.js';
 const KEY = "musiclab.saves.v1";
 export const TRASH_KEY = "musiclab.trash.v1";
 function trashEntries(storage) {
@@ -201,33 +201,67 @@ export function clearWorkingSong(storage) {
   }
 }
 
-/** Export a portable project file payload (.musiclab.json) and validate/import it back on any computer. */
+/** Export a portable project file payload (.musiclab.json) and validate/import it back on any computer.
+ * Compact, with no spacing, so a song that saves here also opens here again (open-release audit S14). */
 export function exportProjectJson(song) {
   if (!song || !song.id) throw new Error("A piece needs its own id before it can be exported");
-  return JSON.stringify(
-    {
-      format: "musiclab.project.v1",
-      exported_at: new Date().toISOString(),
-      title: song.title || "My song",
-      cartridge: summarizeCartridge(song),
-      song: JSON.parse(JSON.stringify(song)),
-    },
-    null,
-    2
-  );
+  return JSON.stringify({
+    format: "musiclab.project.v1",
+    exported_at: new Date().toISOString(),
+    title: song.title || "My song",
+    cartridge: summarizeCartridge(song),
+    song: JSON.parse(JSON.stringify(song)),
+  });
+}
+
+/** Bytes of text as a file holds them. */
+export function textBytes(text) {
+  return new TextEncoder().encode(String(text)).length;
+}
+
+/** File name for a downloaded song: its title in any language, safe on every computer (open-release audit L31). */
+export function songFileName(title, extension = ".musiclab.json") {
+  const base = String(title || "").normalize("NFC").toLowerCase()
+    .replace(/[^\p{L}\p{M}\p{N}_-]+/gu, "_").replace(/^[_-]+|[_-]+$/g, "").slice(0, 80).replace(/[_-]+$/, "");
+  return `${base || "my_song"}${extension}`;
+}
+
+// Key order and the "source" mark do not make two songs different.
+function sameSong(a, b) {
+  const plain = value => Array.isArray(value) ? value.map(plain)
+    : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, plain(value[key])])) : value;
+  const strip = song => { const { source, ...rest } = song || {}; return rest; };
+  return JSON.stringify(plain(strip(a))) === JSON.stringify(plain(strip(b)));
+}
+
+/**
+ * A file whose song id is already on this device, saved, unfinished or in Trash, opens as its own copy unless it is
+ * that same song. So opening an old backup, or a friend's change to a shared song, never replaces a song here
+ * (open-release audit S3).
+ */
+export function openedFileSong(storage, song) {
+  const trashed = trashEntries(storage)?.some(e => e.id === song.id) ?? true;
+  const here = [...listSaves(storage, { includeTrashed: true }).map(entry => entry.song), ...listWorkingSongs(storage, { includeTrashed: true })]
+    .filter(stored => stored?.id === song.id);
+  if (!here.length || (!trashed && here.every(stored => sameSong(stored, song)))) return song;
+  return { ...song, id: `song-import-${globalThis.crypto.randomUUID()}`, title: `${song.title || "My song"} (opened copy)` };
 }
 
 export function parseProjectJson(jsonText) {
   try {
     const text = typeof jsonText === 'string' ? jsonText : JSON.stringify(jsonText);
-    if (new TextEncoder().encode(text).length > MAX_PROJECT_BYTES) return { ok: false, reason: 'too_large' };
+    if (textBytes(text) > MAX_PROJECT_FILE_BYTES) return { ok: false, reason: 'too_large' };
     const parsed = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
+    // The limit is for the song, not for the spacing an older download added (S14).
+    if (textBytes(typeof jsonText === 'string' ? JSON.stringify(parsed) : text) > MAX_PROJECT_BYTES) return { ok: false, reason: 'too_large' };
     if (parsed?.format !== undefined && parsed.format !== 'musiclab.project.v1') return { ok: false, reason: 'unsupported_format' };
     if (parsed?.format && parsed.title !== undefined && typeof parsed.title !== 'string') return { ok: false, reason: 'invalid_project' };
     const song = parsed?.format === "musiclab.project.v1" && parsed?.song ? parsed.song : parsed;
     if (!song || typeof song !== "object" || !Array.isArray(song.notes) || !song.global_context) {
       return { ok: false, reason: "invalid_project" };
     }
+    // The old build wrote a minor sheet's backup as "minor"; that is natural minor (open-release audit S13).
+    if (song.global_context?.scale_type === 'minor') song.global_context.scale_type = 'natural_minor';
     validateProject(song);
     const clean = JSON.parse(JSON.stringify(song));
     if (!clean.id) clean.id = `song-import-${globalThis.crypto.randomUUID()}`;

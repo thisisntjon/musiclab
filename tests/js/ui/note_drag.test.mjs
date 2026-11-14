@@ -163,6 +163,6 @@ test("the note editor opens on your own notes and names them apart from the band
   await press(flow, `event-select:${mine.id}`);
   assert.match(flow._renderEventTune(), /Your note \d+ selected/);
   flow.eventTuneZoom = true;
-  assert.match(flow._renderEventTune(), /Bar \d+ · your notes/);
+  assert.match(flow._renderEventTune(), /Bar \d+ · yours/); // three words or fewer on a button
   assert.match(html, /Your notes have a bright edge\./);
 });

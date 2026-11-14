@@ -19,4 +19,4 @@ Everyone who participates in this repository — whether sharing feedback from a
 
 ## Reporting a problem
 
-If someone's behavior in this repository makes it unsafe or unwelcoming, you can report it to the maintainer through GitHub (including privately via the repository's **Security → Report a vulnerability** channel if no public issue is appropriate). Maintainers may edit, hide, or remove comments, issues, or pull requests that break these guidelines.
+If someone's behavior in this repository makes it unsafe or unwelcoming, you can report it to the maintainer through GitHub. To report privately, when no public issue is appropriate, use the repository's **Security → Report a vulnerability** tab, or, if that tab is not shown or you have no GitHub account, the contact listed in https://simoneresearch.com/.well-known/security.txt. Maintainers may edit, hide, or remove comments, issues, or pull requests that break these guidelines.

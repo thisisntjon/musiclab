@@ -31,6 +31,8 @@ Every screen in the main route works by **touch, mouse, keyboard only, or untime
 
 ### Two-switch scanning (`Space` + `Enter`)
 
+First open **Help** and turn on **Switch scanning**. It is off by default, so Space normally presses the focused button.
+
 MusicLab includes built-in two-switch scanning that is **untimed** — nothing moves on a countdown, so there is never a moving highlight you have to catch in time:
 
 - **Switch 1 (`Space`):** Move focus to the next interactive control on the screen (wraps cleanly back to the start).

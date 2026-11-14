@@ -60,6 +60,8 @@ To unlock instruments like Celesta (`8`), Xylophone (`13`), Cello (`42`), Sitar 
 3. **Put it on the Sound wheel** by adding an entry to `MELODY_SOUNDS` in [`static/ui/melody_field_session.js`](static/ui/melody_field_session.js) (its label, short label, patch ID, group and loudness `level`), and give it a plain name in [`static/js/theory/sampled_sound_labels.js`](static/js/theory/sampled_sound_labels.js). Or, to offer it as a jam instrument, **add a visible card** in `INSTRUMENTS` inside [`static/js/theory/instrument_catalogue.js`](static/js/theory/instrument_catalogue.js) (instrument icons live in `static/assets/instruments/`). Run the JS tests afterwards; the Sound wheel tests pin the current list.
 
 > Check [`NOTICES.md`](NOTICES.md) and `static/vendor/sampled-piano/GeneralUser-GS-LICENSE.txt` if you redistribute modified or replacement SoundFonts.
+>
+> The full bank works on your own computer (`launch.cmd` or `python app.py`). The Cloudflare stage in [`hosting/`](hosting/) does not publish it, so a hosted copy that switches to the full bank must serve that file some other way.
 
 ---
 

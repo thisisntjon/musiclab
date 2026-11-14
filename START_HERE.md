@@ -30,7 +30,7 @@ Here is what the main words on this page mean:
 1. **Play online immediately:** Open https://musiclab.simoneresearch.com/.
 2. **Or grab an offline copy:** Click the green **Code** button near the top-right of the file list → click **Download ZIP** → unzip it on your computer.
    - Install [Python 3.11+](https://www.python.org/downloads/) if you don't have it yet.
-   - On Windows, double-click **`launch.cmd`**. On Mac/Linux, open Terminal in that folder and run `python3 app.py`, then open http://127.0.0.1:8765.
+   - On Windows, double-click **`launch.cmd`**; it opens http://127.0.0.1:8777 and explains if Python is missing. On Mac/Linux, open Terminal in that folder and run `python3 app.py`, then open http://127.0.0.1:8765.
 
 ### Level 2: Share feedback or ask a question in Issues (free GitHub account)
 1. Create a free account on https://github.com/ if you don't have one.
@@ -56,7 +56,7 @@ If terminal commands feel intimidating, install **[GitHub Desktop](https://deskt
 
 ## Part 3: How to tweak MusicLab using popular AI coding harnesses
 
-Because MusicLab offers a **no-build development route** (switch to the source entry first using [this short setup](CUSTOMIZING.md#before-your-first-edit)) and **over 1,400 automated safety tests**, it is a wonderful project to customize with an AI coding harness — even if you have never written JavaScript before.
+Because MusicLab offers a **no-build development route** (switch to the source entry first using [this short setup](CUSTOMIZING.md#before-your-first-edit)) and automated regression tests, you can customize it with an AI coding harness — even if you have never written JavaScript before.
 
 We have also included an **[`AGENTS.md`](AGENTS.md)** (and **[`CLAUDE.md`](CLAUDE.md)**) guide right inside the project root. Ask your harness to read both guides explicitly before editing. Instruction-file discovery differs between tools and configurations; do not assume it happened automatically.
 
@@ -134,6 +134,6 @@ Copy any of the ideas below into your AI coding tool and adjust the details to f
 1. **Keep speaker volume low when testing audio edits.** Even though MusicLab has a −3 dBFS limiter, always test synth or audio changes at low headphone/speaker volume first.
 2. **You are the listener.** Automated tests check rules and math; only a real person can tell whether a sound feels warm, joyful, or overwhelming.
 3. **Never let an edit take away player agency.** Keep `Escape` (**Stop sound**), **Undo**, untimed controls (no countdowns!), local-only privacy (no external internet calls), and separate ownership of the player's notes intact.
-4. **Did something break?** If you used Git or GitHub Desktop, you can always undo uncommitted edits cleanly (`git checkout -- .` or right-click → **Discard changes** in GitHub Desktop), or re-download a fresh ZIP anytime!
+4. **Did something break?** Review the changed files first. In GitHub Desktop, discard only the file you intend to reset; this permanently removes that file's uncommitted edits. Save a copy or checkpoint before doing so. Keep unrelated work and your downloaded songs. To compare with a clean version, unzip a fresh copy into a separate folder.
 
 If you make a remix or adaptation that helped someone play music, we would love to hear about it in the **Issues** tab under **"Share an idea, adaptive setup, or remix"**!

@@ -1,6 +1,6 @@
 // Native voices run through a saturating chain and need velocities about a hundredth of a sampled voice's (scene_voice_levels.js).
 // Generated scores already use them. Stand-ins and live keys did not, so they pinned the ceiling 24 dB above the sampled voices.
-// The levels themselves are measured in a real browser: .qa-tools/pad-level-probe.cjs with PAD_GATE=1.
+// The levels themselves are measured in a real browser: a development tool with PAD_GATE=1.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

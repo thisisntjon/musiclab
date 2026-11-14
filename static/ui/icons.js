@@ -52,7 +52,8 @@ const PATHS = {
 export const ICON_NAMES = Object.keys(PATHS);
 
 export function icon(name) {
-  const body = PATHS[name];
+  // Own names only: a name like "toString" from stored data is unknown, not a built-in (open-release audit L6).
+  const body = Object.hasOwn(PATHS, name) ? PATHS[name] : null;
   if (!body) throw new Error(`Unknown icon: ${name}`);
   return `<svg class="pf-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${body}</svg>`;
 }

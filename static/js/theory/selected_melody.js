@@ -1,10 +1,12 @@
 import {restoreMelodicPhrase} from './melodic_evolution.js';
+import {archivedSong,keepPlayedNotes} from './song_history.js';
 
 /** Commit a complete editable score. This is not an audio-clock recording. */
 export function selectedMelody(source,song,{context,choice,performanceArchive=null}={}) {
   const doc=structuredClone(source),stepSec=15/song.bpm;
-  doc.capture_source=structuredClone(performanceArchive||(source.captured_performance?source:source.capture_source||source));
-  doc.melody_original=structuredClone(source.melody_original||source);
+  // Each is kept with only the one song it came from, so a melody kept again and again never holds every trip before.
+  doc.capture_source=archivedSong(performanceArchive||(source.captured_performance?source:source.capture_source||source));
+  doc.melody_original=archivedSong(source.melody_original||source);
   delete doc.captured_performance;
   doc.notes=song.events.map(event=>{
     const note=structuredClone(event);
@@ -38,5 +40,6 @@ export function selectedMelody(source,song,{context,choice,performanceArchive=nu
     semantics:'Complete chosen score; performed exploration is retained separately in capture_source.'}};
   doc.capture_development_started=true;doc.song_path={version:1,step:'melody'};
   delete doc.tune_grid_state;
-  return doc;
+  // Keys played in the wheel or the jam that the cut history held stay in this song.
+  return keepPlayedNotes(doc,source,performanceArchive);
 }

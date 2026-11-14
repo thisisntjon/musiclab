@@ -10,6 +10,7 @@ import { LookaheadScheduler, recordHummedPhraseToDraftNotes } from "../js/audio/
 import { PHRASE_SHAPES, SHAPE_ACTIONS, transformPhraseEnding } from "../js/theory/phrase_transforms.js";
 import { EAR_PROMPT, newEarTrial, endingKind, earFeedback } from "../js/theory/ear_check.js";
 import { PlayFlow } from "./stages/play_flow.js";
+import { createApiGate, selftestAllowed } from "./host_mode.js";
 import { seededRandom } from "../js/visual/particles.js";
 import { icon } from "./icons.js";
 import { NoiseSculptorUI, PATCH_META } from "./noise_sculptor.js";
@@ -36,6 +37,9 @@ import {
   gradeFalsificationTrialJS,
   buildStandaloneSeed,
 } from "./standalone_compiler.js";
+
+// The studio view talks to /api only when the local MusicLab server answers there; a static host gets one GET probe.
+const apiFetch = createApiGate((path, options) => fetch(path, options));
 
 class MusicLabStudioApp {
   static HUM_MESSAGES = {
@@ -110,7 +114,7 @@ class MusicLabStudioApp {
     this._bindPhase5Surfaces();
     this._startVisualLoop();
     // A self-test run is not a person's session: it is never logged.
-    if (!new URLSearchParams(window.location.search).has("selftest")) this._logSessionEvent("load", { ts_ms: this.sessionLoadMs });
+    if (!selftestAllowed(window.location)) this._logSessionEvent("load", { ts_ms: this.sessionLoadMs });
     this.playFlow = new PlayFlow(this);
     // Phase 14.2: `?seed=N` fixes the opening style so a listen can be repeated and named. Not a control; nothing in the UI shows it.
     const seedParam = Number(new URLSearchParams(window.location.search).get("seed"));
@@ -126,11 +130,11 @@ class MusicLabStudioApp {
       this.compiledSong = compileSongStandalone(this.songDoc, this._buildScaffoldOptions());
       this.scheduler.setCompiledSong(this.compiledSong);
       this.playFlow.mount();
-      if (params.has("selftest")) import("./selftest.js").then((m) => m.runSelfTest(this));
+      if (selftestAllowed(window.location)) import("./selftest.js").then((m) => m.runSelfTest(this));
     } else {
       this.loadInitialSong("starter_neutral_100_cm").then(() => {
         document.getElementById("advanced-studio-container")?.style.removeProperty("display");
-        if (params.has("selftest")) import("./selftest.js").then((m) => m.runSelfTest(this));
+        if (selftestAllowed(window.location)) import("./selftest.js").then((m) => m.runSelfTest(this));
       });
     }
   }
@@ -218,14 +222,14 @@ class MusicLabStudioApp {
     try {
       const qs = reset ? "?reset=1" : "";
       const [res, cpRes, earRes, listRes] = await Promise.all([
-        fetch(`/api/songs/${presetId}${qs}`),
-        fetch("/api/custom-patches"),
-        fetch("/api/ear-mission", {
+        apiFetch(`/api/songs/${presetId}${qs}`),
+        apiFetch("/api/custom-patches"),
+        apiFetch("/api/ear-mission", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "generate", difficulty: "starter" }),
         }),
-        fetch("/api/songs"),
+        apiFetch("/api/songs"),
       ]);
       if (!res.ok) throw new Error("Static fallback");
       const data = await res.json();
@@ -256,7 +260,7 @@ class MusicLabStudioApp {
 
   async compileAndRefresh(recordUndo = true) {
     try {
-      const res = await fetch("/api/compile", {
+      const res = await apiFetch("/api/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -372,7 +376,7 @@ class MusicLabStudioApp {
         const scaleType = this.songDoc?.global_context?.scale_type || "major";
         let options = suggestHarmonyAlternatives(rootPc, scaleType);
         try {
-          const res = await fetch("/api/harmony-options", {
+          const res = await apiFetch("/api/harmony-options", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ root_pc: rootPc, scale_type: scaleType }),
@@ -488,12 +492,7 @@ class MusicLabStudioApp {
         if (this.abRawActive) this.compileAndRefresh(false);
       });
     }
-    window.addEventListener("keydown", (ev) => {
-      if (ev.key === "\\" && !["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
-        ev.preventDefault();
-        toggleAB();
-      }
-    });
+    // The old backslash shortcut is gone: a single key must not silently switch the music to a raw mode (WCAG 2.1.4).
 
     // Surface B: Persistent Tonic Reference Drone
     const droneBtn = document.getElementById("btn-tonic-drone");
@@ -517,7 +516,7 @@ class MusicLabStudioApp {
       const btn = document.getElementById(btnId);
       if (!btn) return;
       btn.addEventListener("mouseenter", async () => {
-        const res = await fetch("/api/diagnose", {
+        const res = await apiFetch("/api/diagnose", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ song: this.songDoc, action: "preview_diff", target_action: actionName }),
@@ -555,7 +554,7 @@ class MusicLabStudioApp {
     const loadFlawedBtn = document.getElementById("btn-load-flawed-demo");
     if (loadFlawedBtn) {
       loadFlawedBtn.addEventListener("click", async () => {
-        const res = await fetch("/api/songs/flawed_beginner_loop?reset=1");
+        const res = await apiFetch("/api/songs/flawed_beginner_loop?reset=1");
         const data = await res.json();
         this.songDoc = data.song;
         this.compiledSong = data.compiled;
@@ -572,7 +571,7 @@ class MusicLabStudioApp {
     const fixAllBtn = document.getElementById("btn-fix-all-issues");
     if (fixAllBtn) {
       fixAllBtn.addEventListener("click", async () => {
-        const res = await fetch("/api/diagnose", {
+        const res = await apiFetch("/api/diagnose", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -768,6 +767,8 @@ class MusicLabStudioApp {
     playBtn.addEventListener("click", togglePlay);
 
     window.addEventListener("keydown", (ev) => {
+      // The play flow has its own Play and Stop; there Space presses the focused control instead.
+      if (document.body.classList.contains("pf-mode")) return;
       const activeEl = document.activeElement;
       const isInteractiveCellOrControl =
         ["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(activeEl?.tagName) ||
@@ -836,7 +837,7 @@ class MusicLabStudioApp {
 
     document.getElementById("btn-kick-lock").addEventListener("click", async () => {
       this.ghostAddedNotes = [];
-      const res = await fetch("/api/hocket-transform", {
+      const res = await apiFetch("/api/hocket-transform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ song: this.songDoc, action: "kick_lock" }),
@@ -854,7 +855,7 @@ class MusicLabStudioApp {
 
     document.getElementById("btn-hocket-call-response").addEventListener("click", async () => {
       this.ghostAddedNotes = [];
-      const res = await fetch("/api/hocket-transform", {
+      const res = await apiFetch("/api/hocket-transform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ song: this.songDoc, action: "hocket_call_response" }),
@@ -872,7 +873,7 @@ class MusicLabStudioApp {
 
     document.getElementById("btn-lead-call-response").addEventListener("click", async () => {
       this.ghostAddedNotes = [];
-      const res = await fetch("/api/hocket-transform", {
+      const res = await apiFetch("/api/hocket-transform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ song: this.songDoc, action: "lead_call_response" }),
@@ -890,7 +891,7 @@ class MusicLabStudioApp {
 
     const stepHistory = async (direction) => {
       try {
-        const res = await fetch(direction === "undo" ? "/api/undo" : "/api/redo", {
+        const res = await apiFetch(direction === "undo" ? "/api/undo" : "/api/redo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ song: this.songDoc }),
@@ -938,13 +939,13 @@ class MusicLabStudioApp {
         title: this.songDoc?.title || "My MusicLab Song",
       });
       try {
-        const res = await fetch("/api/songs", {
+        const res = await apiFetch("/api/songs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ song: this.songDoc }),
         });
         if (res.ok) {
-          const sRes = await fetch("/api/songs");
+          const sRes = await apiFetch("/api/songs");
           if (sRes.ok) {
             const sData = await sRes.json();
             this.savedSongsList = sData.songs || [];
@@ -971,7 +972,7 @@ class MusicLabStudioApp {
         );
       } catch (_e) {
         try {
-          const res = await fetch("/api/render-wav", {
+          const res = await apiFetch("/api/render-wav", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ song: this.songDoc }),
@@ -1022,7 +1023,7 @@ class MusicLabStudioApp {
       const pId = this.sculptor.activePatchId;
       const g = this.sculptor.gesture;
       const label = `${pId.split("_")[0].toUpperCase()} (${g.vowel_start || "O"}->${g.vowel_end || "I"})`;
-      const res = await fetch("/api/custom-patches", {
+      const res = await apiFetch("/api/custom-patches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1269,19 +1270,29 @@ class MusicLabStudioApp {
     return result;
   }
 
-  _announce(text, { speak = true } = {}) {
+  _announce(text, { speak = true, append = false, notice = true } = {}) {
+    // A notice that belongs to this action (a kept bass giving way) rides in its message, not in a second one.
+    // notice: false is for a message the same action follows with another (the band hand's receipt, then its Undo).
+    if (notice) text = this.playFlow?.takeNotice?.(text) ?? text;
     const el = document.getElementById("sr-announcer");
     if (!el) return;
     if (speak) this.onAnnounce?.(text); // spoken prompts, when the comfort setup asks for them
+    // An appended notice joins a message still waiting to be written, so neither replaces the other.
+    const written = append && this._announceWaiting != null ? `${this._announceWaiting} ${text}` : text;
     // Clear first so repeating the same message is still announced.
     el.textContent = "";
-    setTimeout(() => {
-      el.textContent = text;
+    clearTimeout(this._announceTimer);
+    this._announceWaiting = written;
+    this._announceTimer = setTimeout(() => {
+      this._announceWaiting = null;
+      el.textContent = written;
     }, 50);
   }
 
   renderAll() {
-    if (!this.songDoc || !this.compiledSong) return;
+    // The developer studio draws song text as markup. In the play flow it is hidden and songDoc is the song the
+    // person opened, so it never draws there (open-release audit B1).
+    if (!this.songDoc || !this.compiledSong || document.body.classList.contains("pf-mode")) return;
 
 
     // Update Provenance Badge (Zero-percentage plain-English ownership summary)
@@ -1327,7 +1338,7 @@ class MusicLabStudioApp {
           }
         },
         onApplyFix: async (issue) => {
-          const res = await fetch("/api/diagnose", {
+          const res = await apiFetch("/api/diagnose", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1359,7 +1370,7 @@ class MusicLabStudioApp {
           );
         },
         onGradeMission: async (mission) => {
-          const res = await fetch("/api/ear-mission", {
+          const res = await apiFetch("/api/ear-mission", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1375,7 +1386,7 @@ class MusicLabStudioApp {
           this.renderAll();
         },
         onNewMission: async () => {
-          const res = await fetch("/api/ear-mission", {
+          const res = await apiFetch("/api/ear-mission", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1399,7 +1410,7 @@ class MusicLabStudioApp {
       this.activeSectionId,
       {
         onToggleArrangementMode: async (unfoldToSong) => {
-          const res = await fetch("/api/arrange", {
+          const res = await apiFetch("/api/arrange", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1724,5 +1735,7 @@ class MusicLabStudioApp {
 
 window.addEventListener("DOMContentLoaded", () => {
   window.musicLabApp = new MusicLabStudioApp();
+  // The page shipped with only a loading line showing; now the real controls work.
+  document.body.removeAttribute("data-booting");
   window.musicLabBootReady?.();
 });

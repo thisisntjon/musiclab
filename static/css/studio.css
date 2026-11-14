@@ -1291,7 +1291,7 @@ body.pf-mode .play-flow {
 }
 .pf-journey-step:disabled {
   /* Dimmed, but still readable: at .45 the label rendered at 3.9:1 on the page; .62 keeps it above the 4.5:1
-     text bar of the standing rules (.qa-tools/access-contrast-gate.cjs measures the rendered pair). */
+     text bar of the standing rules (a development tool measures the rendered pair). */
   opacity: .62;
 }
 .pf-speed {
@@ -1432,6 +1432,9 @@ body.pf-mode .play-flow {
   font-weight: 400;
   color: var(--pf-text-muted);
 }
+/* display:block above beats the browser's [hidden] rule, so a hidden line (the Bass wheel's "band is softer") still
+   showed. This attribute rule is more specific than .pf-sub, the only rule that gives .pf-sub a display. */
+.pf-sub[hidden] { display: none; }
 .pf-tabs .pf-btn[aria-pressed="true"] {
   background: var(--pf-surface-3);
 }
@@ -2503,7 +2506,7 @@ body.pf-listening .transport-bar { background: #050507; z-index: 10; }
 .pf-music-circle:focus-visible { outline: 3px solid white; outline-offset: 5px; }
 .pf-music-circle .pf-listening-visual { position: absolute; inset: 20%; width: 60%; height: 60%; pointer-events: none; opacity: .45; }
 .pf-circle-title { position: absolute; left: 30%; top: 40%; width: 40%; text-align: center; font-size: clamp(14px, 2vw, 20px); pointer-events: none; }
-.pf-circle-family { position: absolute; transform: translate(-50%,-50%); width: 65px; text-align: center; font-size: 11px; font-weight: 600; pointer-events: none; }
+.pf-circle-family { position: absolute; transform: translate(-50%,-50%); width: 65px; text-align: center; font-size: 12px; font-weight: 600; pointer-events: none; }
 .pf-circle-tick { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #c4cbd7; transform: translate(-50%,-50%); pointer-events: none; }
 .pf-music-circle .pf-field-requested, .pf-music-circle .pf-field-realized { pointer-events: none; }
 #pf-circle-picker { max-width: 100%; width: 100%; min-height: 44px; }
@@ -2522,6 +2525,16 @@ body.pf-listening .transport-bar { background: #050507; z-index: 10; }
 .pf-phrase-note.pf-phrase-own, .pf-phrase-note.pf-phrase-own[aria-pressed="true"] { border:4px solid var(--pf-own); font-weight:800; }
 /* Controls reached by keyboard must not land under the sticky header (it wraps taller on phones). */
 html:has(body.pf-mode) { scroll-padding-top: 140px; }
+/* At 400% zoom a short window would lose half its height to the sticky bar: it scrolls with the page instead. */
+@media (max-height: 450px) {
+  body.pf-mode .transport-bar { position: static; }
+  html:has(body.pf-mode) { scroll-padding-top: 0; }
+}
+/* While the app script loads only a loading line shows; the old studio bar would be visible but dead. */
+body[data-booting] .transport-bar,
+body[data-booting] .why-banner { display: none; }
+body:not([data-booting]) #boot-loading { display: none; }
+#boot-loading { margin: 2rem 1rem; font: 600 1.25rem/1.4 system-ui, sans-serif; }
 .pf-phrase-note:focus-visible { outline:3px solid #ffbb46; outline-offset:4px; z-index:4; }
 .pf-phrase-cursor { position:absolute; top:0; bottom:0; width:2px; background:#ffbb46; pointer-events:none; z-index:2; }
 .pf-phrase-cursor[hidden] { display:none; }
@@ -2748,7 +2761,7 @@ body.pf-less-motion .pf-receipt { animation: none; }
 
 /* ── Access batch 2026-11-02: every rendered control meets the target size ──
    A drawer handle (<summary>) and a slider are controls like any button, so they take the shared target height
-   rather than one line of text; .qa-tools/access-target-gate.cjs measures every rendered box on each screen. */
+   rather than one line of text; a development tool measures every rendered box on each screen. */
 body.pf-mode summary[data-key] { display: list-item; box-sizing: border-box; min-height: var(--pf-target); padding: 8px 4px; align-content: center; cursor: pointer; }
 body.pf-mode input[type="range"] { box-sizing: border-box; min-height: 32px; height: 32px; }
 
@@ -2767,6 +2780,7 @@ body.pf-mode input[type="range"] { box-sizing: border-box; min-height: 32px; hei
 :root .pf-library-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; max-width:760px; }
 .pf-library-tile { display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-height:128px; text-align:left; }
 .pf-song-library { margin-block:24px; padding:20px; border:1px solid #515863; border-radius:20px; }
+.pf-song-library .pf-library-heading { font-size:1.5em; margin:0; }
 .pf-library-actions { margin-top:16px; padding-top:12px; border-top:1px solid #515863; }
 .pf-phrase-note.pf-note-playing { background:#ffbc53; color:#101218; box-shadow:0 0 0 3px #ffbc53; }
 .pf-phrase-note[aria-pressed="true"] { outline:3px solid #fff; outline-offset:3px; }
@@ -2831,7 +2845,7 @@ body.pf-mode input[type="range"] { box-sizing: border-box; min-height: 32px; hei
 .pf-melody-disk { width: min(76vw, 470px, max(230px, calc(100svh - 370px))); aspect-ratio: 1; position: relative; margin: .6rem auto; border-radius: 50%; border: 1px solid #7592a8; touch-action: none; background: radial-gradient(circle, #090c16 12%, #202536 54%, transparent 76%), conic-gradient(#456a77, #674367, #687a4a, #3e7682, #456a77); }
 .pf-melody-disk:focus-visible { outline: 3px solid #2fe3f4; outline-offset: 5px; }
 .pf-mf-label { position: absolute; font-weight: 600; font-size: .85rem; pointer-events: none; white-space: nowrap; text-shadow: 0 1px 6px #05070c; transition: opacity .15s; }
-.pf-mf-region[data-near="true"] { opacity: .12; }
+.pf-mf-region[data-near="true"] { opacity: 0; visibility: hidden; }
 .pf-mf-region { transform: translate(-50%, -50%); }
 .pf-mf-score text, .pf-live-score text { fill: #b5c4d2; font: 600 10px system-ui, sans-serif; }
 .pf-mf-band { display: block; margin: .9rem 0; }
@@ -2945,9 +2959,9 @@ body.pf-bigger #pf-circle-picker { min-height: var(--pf-target); }
 @media (max-width: 480px) { .pf-octave { flex-wrap: nowrap; gap: 6px; } .pf-octave .pf-btn { flex: 1 1 0; min-width: 0; padding-inline: 6px; white-space: nowrap; } }
 /* Keep screen: the two download buttons match Save here in height (their border added 2px). */
 .pf-btn.pf-big[data-key="download"], .pf-btn.pf-big[data-key="dl-project"] { box-sizing: border-box; }
-/* Jam wheel: a family name fades while a marker sits on it. */
-.pf-circle-family { transition: opacity 160ms ease; }
-.pf-circle-family[data-near="true"] { opacity: .25; }
+/* Jam wheel: a family name hides while a marker sits on it (faint grey text would fail contrast); the centre title names the style. */
+.pf-circle-family { transition: opacity 160ms ease, visibility 160ms; }
+.pf-circle-family[data-near="true"] { opacity: 0; visibility: hidden; }
 
 /* Respect the selected target size in compact phone melody and journey rows. */
 @media (max-width: 480px) {
@@ -3059,3 +3073,78 @@ body.pf-less-motion .pf-btn.pf-wheel-card:hover::before, body.pf-less-motion .pf
   .pf-sound-sector[data-heard="true"]::after { color: CanvasText; }
   .pf-sound-sector:focus-visible { outline-color: CanvasText; }
 }
+/* Bass wheel (14 Nov): six ways of playing round the disk (Deep at the top, then clockwise), three sizes outward
+   (Light, Full, Big) and the band's own bass in the middle. The disk owns pointer input, so its picture and buttons
+   take no pointer events; keys, switches and assistive technology still press the buttons. States sit on the cells
+   and labels: chosen is filled in the way's colour with its size inside the label; heard is a lighter fill and a
+   small playing mark (not an outline, which is the focus ring). Nothing on the disk moves, pulses or animates. */
+.pf-mf-main.pf-bass-main { align-items: start; }
+.pf-mf-wheel.pf-bass-wheel { width: min-content; max-width: 100%; justify-self: center; }
+.pf-melody-disk.pf-bass-disk { background: #090c16; border-color: #7592a8; container-type: inline-size; }
+.pf-bass-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; pointer-events: none; }
+.pf-bass-cell { fill: var(--hue, #8a93a6); fill-opacity: .26; stroke: #090c16; stroke-width: 1.6; }
+.pf-bass-cell[data-ring="full"] { fill-opacity: .38; }
+.pf-bass-cell[data-ring="big"] { fill-opacity: .52; }
+.pf-bass-cell[data-heard="true"] { fill-opacity: .72; }
+.pf-bass-cell[data-chosen="true"] { fill-opacity: 1; }
+.pf-bass-hub-cell { fill: #141a2b; fill-opacity: 1; stroke: #4c5874; stroke-width: 1.4; }
+.pf-bass-hub-cell[data-heard="true"] { fill: #27304a; }
+.pf-bass-hub-cell[data-chosen="true"] { fill: #e8edf7; }
+.pf-bass-sector { position: absolute; transform: translate(-50%, -50%); width: max-content; margin: 0; padding: .16rem .42rem .26rem; border: 0; border-radius: 999px; pointer-events: none; cursor: inherit; color: #fff; background: transparent; font-family: inherit; font-size: .85rem; font-weight: 700; line-height: 1.15; text-align: center; white-space: nowrap; text-shadow: 0 1px 5px #05070c, 0 0 2px #05070c; }
+.pf-bass-size { display: block; font-size: .7rem; font-weight: 800; line-height: 1.1; }
+.pf-bass-size:empty { display: none; }
+.pf-bass-hub { left: 50%; top: 50%; width: 30%; height: 30%; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; padding: .2rem; border-radius: 50%; white-space: normal; }
+.pf-bass-sector[data-chosen="true"] { background: var(--hue, #e8edf7); color: #05070c; text-shadow: none; }
+.pf-bass-hub[data-chosen="true"] { background: transparent; }
+.pf-bass-sector:focus { outline: none; }
+.pf-bass-sector:focus-visible { outline: 3px solid var(--pf-focus, #ffffff); outline-offset: 2px; }
+.pf-bass-sector[data-heard="true"]::after { content: "\266A"; content: "\266A" / ""; position: absolute; left: 50%; top: -4px; transform: translate(-50%, -100%); color: #fff; font-size: .85rem; font-weight: 400; line-height: 1; text-shadow: 0 0 4px #05070c, 0 0 2px #05070c; }
+.pf-bass-hub[data-heard="true"]::after { top: 16%; transform: translate(-50%, -50%); }
+.pf-bass-hub[data-heard="true"][data-chosen="true"]::after { color: #05070c; text-shadow: none; }
+.pf-bass-sector:disabled { opacity: .55; }
+/* Size words (14 Nov clarity): Light, Full and Big named once on the spoke between Steady and Walk, sitting just above the
+   line (a picture: no pointer input, not read aloud; the legend under the disk says it in words). The line under the disk
+   holds the legend, or the hint of a way being looked at that is not playing; its room is kept so nothing below jumps. */
+.pf-bass-ring-word { position: absolute; transform: translate(-50%, -100%); padding-bottom: 2px; pointer-events: none; color: #dfe6f2; font-size: .75rem; font-weight: 700; line-height: 1; white-space: nowrap; text-shadow: 0 0 3px #05070c, 0 0 2px #05070c, 0 1px 2px #05070c; }
+.pf-bass-legend { margin: .15rem 0 .4rem; min-height: 2.6em; text-align: center; }
+.pf-bass-legend [data-bass-peek] { color: var(--hue, inherit); font-weight: 600; }
+@container (min-width: 400px) { .pf-bass-ring-word { font-size: .8rem; } }
+/* Hear bass clearly, seen (14 Nov review): the tune and chord lanes of the wheel's score fade while bass and beat stay. */
+.pf-mf-score[data-spotlight="bass"] [data-vis-lead] { opacity: .3; }
+.pf-mf-score[data-spotlight="bass"] .pf-vis-note.pf-part-chords { opacity: .16; }
+.pf-wheel-card-bass::before { background: radial-gradient(circle closest-side, #f0f4ff 0 17%, #0b0e18 18% 30%, transparent 31% 54%, rgba(9, 12, 22, .9) 55% 59%, transparent 60% 76%, rgba(9, 12, 22, .9) 77% 81%, transparent 82%), conic-gradient(from -30deg, #6f8df0 0 60deg, #4fd1c5 0 120deg, #7fcf8a 0 180deg, #f2d04b 0 240deg, #f07a5a 0 300deg, #b59cf0 0); }
+.pf-wheel-card-bass::after { animation-delay: 2.1s; border-color: rgba(240, 122, 90, .6); }
+.pf-btn.pf-wheel-card-bass:disabled::after { animation: none; opacity: 0; }
+.pf-btn.pf-wheel-card-bass:disabled:hover::before { transform: none; transition: none; }
+/* Phones: the three wheel tabs share one row; the disk keeps its normal size in Bigger mode (no 59vw Tune rule). */
+@media (max-width: 480px) { .pf-wheel-tabs { flex-wrap: nowrap; gap: .4rem; } .pf-btn.pf-wheel-tab { flex: 1 1 0; min-width: 0; padding-inline: .35rem; font-size: .92rem; white-space: normal; } .pf-bass-sector { font-size: .78rem; padding-inline: .34rem; } .pf-bass-size { font-size: .66rem; } }
+@media (max-width: 480px) { body.pf-bigger .pf-melody-disk.pf-bass-disk { width: min(76vw, 470px, max(230px, calc(100svh - 370px))); } }
+@container (max-width: 299px) { .pf-bass-sector { font-size: .78rem; padding-inline: .3rem; } .pf-bass-size { font-size: .66rem; } }
+@container (min-width: 400px) { .pf-bass-sector { font-size: .92rem; } body.pf-bigger .pf-bass-sector { font-size: 1rem; } }
+@container (min-width: 280px) and (max-width: 399px) { body.pf-bigger .pf-bass-sector { font-size: .9rem; } body.pf-bigger .pf-bass-size { font-size: .74rem; } }
+@media (forced-colors: active) {
+  .pf-melody-disk.pf-bass-disk { background: Canvas; border-color: CanvasText; }
+  .pf-bass-art { forced-color-adjust: none; }
+  .pf-bass-cell, .pf-bass-hub-cell { fill: Canvas; fill-opacity: 1; stroke: CanvasText; }
+  /* The picture keeps its own colours (above), so its heard and chosen fills are restated here with system colours. */
+  .pf-bass-cell[data-heard="true"], .pf-bass-hub-cell[data-heard="true"] { fill: Canvas; fill-opacity: 1; }
+  .pf-bass-cell[data-chosen="true"] { fill: Highlight; }
+  .pf-bass-hub-cell[data-chosen="true"] { fill: Highlight; }
+  .pf-bass-sector { background: none; color: ButtonText; text-shadow: none; }
+  /* Ways not chosen sit on Canvas, so the ring lines stop at a label instead of running through its words. */
+  .pf-bass-way:not([data-chosen="true"]) { background: Canvas; }
+  .pf-bass-hub { border: 2px solid ButtonText; }
+  .pf-bass-sector[data-chosen="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+  /* The heard mark brings its own Canvas chip, so it shows on whatever lies under it: a chosen Highlight cell, the hub
+     or a ring line. No palette promises CanvasText on Highlight. */
+  .pf-bass-sector[data-heard="true"]::after, .pf-bass-hub[data-heard="true"][data-chosen="true"]::after { forced-color-adjust: none; background: Canvas; color: CanvasText; border: 1px solid CanvasText; border-radius: 999px; padding: 0 .22em; text-shadow: none; }
+  .pf-bass-sector:focus-visible { outline-color: CanvasText; }
+  .pf-bass-ring-word { color: CanvasText; text-shadow: none; }
+}
+/* Forced colours: every note is CanvasText, so the faded lanes go hollow instead of faint. */
+@media (forced-colors: active) {
+  .pf-mf-score[data-spotlight="bass"] [data-vis-lead], .pf-mf-score[data-spotlight="bass"] .pf-vis-note.pf-part-chords { opacity: 1; }
+  .pf-mf-score[data-spotlight="bass"] [data-vis-lead] .pf-vis-note, .pf-mf-score[data-spotlight="bass"] .pf-vis-note.pf-part-chords { fill: none; stroke: CanvasText; stroke-width: 1; }
+}
+/* Wide screens: the three wheel cards share one row beside the Jam wheel (phones keep one card per row). */
+@media (min-width: 960px) { .pf-wheel-cards { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); } }

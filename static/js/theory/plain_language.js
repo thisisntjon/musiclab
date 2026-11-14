@@ -1,7 +1,7 @@
 /**
  * Plain-language check for T5 (9c-2): every kid-facing prompt reads at grade 2 or below.
  * Flesch-Kincaid grade = 0.39 × (words / sentences) + 11.8 × (syllables / words) − 15.59, the formula the
- * inclusion audit used (workflow/research/inclusion-wave/iw4-app-inclusion-audit.md, section 1). The syllable
+ * inclusion audit used (development records, section 1). The syllable
  * counter is a heuristic, good to about ±1 grade, so the bar is checked per prompt rather than averaged away.
  */
 export const MAX_GRADE = 2;

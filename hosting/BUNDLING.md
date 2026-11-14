@@ -21,20 +21,22 @@ After a successful build, generate a fresh `MANIFEST.json` over the final stage 
 
 Hashed bundles (`*.<sha256>.bundle.js`) may be cached immutably. Entry HTML (`index.html`, `static/index.html`) and `MANIFEST.json` must revalidate (`must-revalidate`); do not apply indefinite cache headers to HTML.
 
-## 2. Cloudflare Workers Static Assets stage (`stage-musiclab-cloudflare.mjs`)
+## 2. Cloudflare Workers Static Assets stage
 
-`static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2` is `32,319,396` bytes (`30.82 MiB`), which exceeds Cloudflare Workers Static Assets' `25 MiB` per-file ceiling. `hosting/stage-musiclab-cloudflare.mjs` stages a verified release directory into a ready-to-deploy Wrangler directory (`wrangler.json`, `worker.mjs`, `public/_headers`) that:
+The stage helper verifies the package inventory and emits the entire hosting wrapper: the Worker, headers, entry redirects and a proper 404 page. The app uses the 11.7 MB MusicLab36 sound bank. The complete 32.3 MB source bank remains in the download for local customization; the hosted stage does not serve it. There are no shard or R2 modes in this version.
 
-1. Verifies every file against `MANIFEST.json` and computes exact SHA-256 `Content-Security-Policy` hashes for `static/index.html`.
-2. Copies only web-served files (`index.html`, `static/`, `presets/`, `examples/`, `LICENSE`, `NOTICES.md`, `README.md`, `MANIFEST.json`) into `public/`.
-3. Serves byte-exact `/static/vendor/sampled-piano/GeneralUser-GS-2.0.3.sf2` (including `206 Partial Content` byte ranges and `ETag`) either from two `< 25 MiB` static shards (`--mode shards`, zero R2 account required) or from a bound R2 bucket (`--mode r2`).
+Use a reviewed, finalized package. Compute its manifest SHA-256 with `sha256sum MANIFEST.json` (macOS: `shasum -a 256 MANIFEST.json`; PowerShell: `Get-FileHash MANIFEST.json -Algorithm SHA256`). Pass that exact digest:
 
 ```bash
-node hosting/stage-musiclab-cloudflare.mjs \
-  --pkg <verified-release-directory> \
-  --out <new-deploy-directory> \
-  --mode shards \
-  --worker-name musiclab
+node hosting/stage-musiclab-cloudflare.mjs --pkg <verified-release-directory> --out <new-deploy-directory> --expect-manifest-sha <64-character-sha256> --worker-name <your-worker-name>
 ```
 
-Then deploy from `<new-deploy-directory>` with `npx wrangler deploy`. Keep Cloudflare Web Analytics and automatic script injection disabled on your hostname so `connect-src 'self'` and `script-src` remain completely clean.
+Inspect the generated `wrangler.json` before deployment. Choose your own Worker name and Cloudflare account, and configure a custom domain for it in Cloudflare. The generated config does not assign a domain. `workers_dev` and preview URLs are disabled. Test the generated stage with `wrangler dev --local` and your actual browser before deploying with `wrangler deploy` from the stage directory. The helper itself never deploys.
+
+Keep host-injected analytics disabled on the app hostname. The wrapper uses same-origin resource/opener policies and a restrictive content security policy. Songs stay in the browser; hosting providers may separately collect request or network-error data as described in [SECURITY.md](../SECURITY.md).
+
+## 3. Packaging a changed fork
+
+The published `MANIFEST.json` identifies the original app candidate and hashes each included file. It is an integrity inventory, not proof that changed code has been tested. Source edits invalidate both that inventory and the original bundle provenance.
+
+For ordinary local edits, use the source entry described above; no release packaging is needed. For a distributable fork, export only the reviewed files into a new directory, build and verify its bundles if used, and create an inventory over those final files with your own revision identifier. Do not stage your working directory, caches, credentials, saved songs or Git history. The upstream private release exporter is not included in this repository; self-hosters must review their own package inventory before computing its manifest digest.

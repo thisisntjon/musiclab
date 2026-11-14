@@ -1,10 +1,10 @@
 // Verifier's hostile input against the two repairs of 2 November: Keep after rest (3c0a260: the window reaches
 // back to the earliest live note, capped at sixteen bars, and says so past the cap) and Stop safety (d64e0a5:
 // silence first, a throwing release callback cannot escape, running out of voices costs a note, not the band).
-// Each test states the contract it holds the code to (workflow/PLAN.md, "Standing preservation and access
+// Each test states the contract it holds the code to (development records, "Standing preservation and access
 // contracts"). A failing test here is a finding, not a broken test. Imports the worktree's production modules
 // read-only, as tests/js/audio/ does.
-//   node --test "workflow/evidence/verify-2026-11-02/hostile/*.test.mjs"
+//   node --test "development records"
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LookaheadScheduler } from '../../../static/js/audio/scheduler.js';

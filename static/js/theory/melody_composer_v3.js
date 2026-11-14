@@ -65,7 +65,7 @@ const degToMidi=(scale,deg,base)=>{const n=scale.length,o=Math.floor(deg/n),i=((
 function midiToDeg(scale,midi,base){let best=0,dist=1e9;for(let d=-30;d<=30;d++){const m=degToMidi(scale,d,base);if(Math.abs(m-midi)<dist){dist=Math.abs(m-midi);best=d;}}return best;}
 
 // Bar rhythms (onsets on 16 steps) with their share among 13,336 folk phrases (Nottingham + Essen),
-// from workflow/research/melody-corpus-folk-2026-11-08/patterns.json. Statistics only, no melodies.
+// from development records. Statistics only, no melodies.
 const CORPUS_BAR_RHYTHMS=[[[0,4,8,12],.111],[[0,2,4,6,8,10,12,14],.069],[[0,6,8,12],.036],[[0,4,8,12,14],.035],[[0,8,12],.029],
   [[0,2,4,6,8,12,14],.029],[[0,4,8],.029],[[0,8],.029],[[0,2,4,6,8,12],.028],[[0,12],.024],[[0,4,8,10,12,14],.023],[[0,4,6,8,10,12,14],.022],
   [[0,4,6,8,12,14],.021],[[0,4,6,8,12],.019],[[0,6,8,10,12,14],.018],[[0,2,4,6,8],.017],[[0,4,8,14],.017],[[0,12,14],.013],[[0,6,8,14],.009],[[0,8,12,14],.008]];

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 import tempfile
 import threading
 import unittest
@@ -13,7 +14,30 @@ from urllib.request import Request, urlopen
 from src.app_shell import create_studio_server
 
 
+# sha256 of engine.js with its esbuild module-path comments trimmed; the source bytes are d91b0d72...c549.
+ENGINE_TRIMMED_SHA256 = '7373221c9e777b14643e18cc012bd7e3a1059a89808a15a34429ab25291b3289'
+VENDOR_PINS = {
+    # The sampled-sound AudioWorklet runs inside every sampled session; pin it beside engine.js.
+    'spessasynth_processor.min.js': '8c7f312664ab705a38d22abdeb248f1cf91d647b8a4ce3cb8a34a00ad8d45105',
+}
+
+
+def vendor_pin_mismatches(static_dir: Path) -> list:
+    folder = static_dir / 'vendor/sampled-piano'
+    return [name for name, digest in VENDOR_PINS.items()
+            if hashlib.sha256((folder / name).read_bytes()).hexdigest() != digest]
+
+
 class TestStudioIntegration(unittest.TestCase):
+    def test_audio_worklet_processor_is_pinned(self) -> None:
+        self.assertEqual(vendor_pin_mismatches(Path("static")), [])
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp) / 'vendor/sampled-piano'
+            copy.mkdir(parents=True)
+            source = Path("static/vendor/sampled-piano/spessasynth_processor.min.js").read_bytes()
+            (copy / 'spessasynth_processor.min.js').write_bytes(source + b"\n// changed\n")
+            self.assertEqual(vendor_pin_mismatches(Path(tmp)), ['spessasynth_processor.min.js'], "a changed processor is caught")
+
     def test_runtime_assets_do_not_embed_remote_resource_urls(self) -> None:
         """Check executable/text resources and pin the reviewed vendor exception.
 
@@ -26,8 +50,10 @@ class TestStudioIntegration(unittest.TestCase):
                 if asset == static_dir / 'vendor/sampled-piano/engine.js':
                     # This exact audited bundle contains documentation URLs. Do not
                     # strip comments with regex: quoted markers can hide real fetches.
-                    self.assertEqual(hashlib.sha256(asset.read_bytes()).hexdigest(),
-                                     'd91b0d72d61dfe6260ac420746a3a5a123cd813db320698bfc19345169d0c549')
+                    # A release package trims the three esbuild module-path comments to
+                    # "// node_modules/..." (release/make_release.py); every other byte is pinned.
+                    data = re.sub(rb'(?m)^// [.]qa-tools/morph-renderer/node_modules/', b'// node_modules/', asset.read_bytes())
+                    self.assertEqual(hashlib.sha256(data).hexdigest(), ENGINE_TRIMMED_SHA256)
                     continue
                 content = asset.read_text(encoding="utf-8")
                 # SVG's standard namespace identifies markup; it is not a fetched resource,

@@ -94,11 +94,33 @@ export function renderDurationSeconds(song) {
   return Math.max(declared, noteEnd) + tail;
 }
 
+// The music of a score's generated bass: each note's onset (step plus its performed offset, or the song's swing on an
+// odd step, as it plays), length, pitch and sound, rounded to a millionth and in time order. Velocity alone is not a
+// different line. Rounded, because one line comes in two forms: Play schedules the raw candidate and every later
+// request sends melodyFieldPlaybackView of it, whose offsets are recomputed as precise - step (0.666667 comes back
+// as 0.6666670000000039); exact floats would hear an unchanged line as a new one and delay the join to the half bar.
+const r6 = x => Math.round(x * 1e6) / 1e6;
+const generatedBassKey = song => {
+  const swing = Number(song?.swing ?? .5), stepSec = 15 / (Number(song?.bpm) || 100);
+  return JSON.stringify((song?.events || [])
+    .filter(e => e.role === "bass" && e.provenance === "jam_generated" && !e.edited_from_generator)
+    .map(e => {
+      const step = Number(e.step), performed = e.performance?.version === 1 && Number.isFinite(e.performance.offset_steps);
+      const onset = step + (performed ? e.performance.offset_steps : step % 2 === 1 ? swing - .5 : 0);
+      const length = Number.isFinite(Number(e.duration_sec)) ? Number(e.duration_sec) : Number(e.duration_steps) * stepSec;
+      const pitch = Number.isFinite(e.concrete?.midi_pitch) ? e.concrete.midi_pitch : r6(Number(e.concrete?.freq_hz));
+      return [r6(onset), r6(length), pitch, e.patch_id ?? null, String(e.id)];
+    })
+    .sort((a, b) => a[0] - b[0] || a[4].localeCompare(b[4])));
+};
+
 export function roleMatchesLayer(role, layerId) {
   if (!layerId) return false;
   if (layerId === "beat" || layerId === "drums") return role === "drums";
   if (layerId === "tune" || layerId === "lead") return role === "lead";
   if (layerId === "under") return role === "harmony" || role === "bass" || role === "hocket";
+  // Hear bass clearly (the Bass wheel): bass and beat stay full, the tune and chords go softer.
+  if (layerId === "bass-beat") return role === "bass" || role === "drums";
   return role === layerId;
 }
 
@@ -636,22 +658,48 @@ export class LookaheadScheduler {
   }
 
   /** Join a pinned melody on the existing clock; submitted voices and live holds survive. */
-  /** joinSteps: where a new choice may enter. Default is the bar line; the melody screen asks for the beat (4). */
-  queueContinuousPartAudition(compiledSong, {sectionId, requestId, joinSteps = null} = {}) {
+  /** joinSteps: where a new choice may enter. Default is the bar line; the melody screen asks for the beat (4).
+   * bassSafe (a choice that changes the bass, see bass_wheel.js bassJoinPlan): it enters only at a join where no
+   * generated bass note of the outgoing score still sounds, and while it waits, outgoing generated bass notes are
+   * ended .1 step before the coming join. Personal and edited bass are never shortened. bassSafe 'auto' decides per
+   * request: when its generated bass differs from the score already scheduled it joins bass-safe at the half bar,
+   * otherwise it keeps joinSteps. */
+  queueContinuousPartAudition(compiledSong, {sectionId, requestId, joinSteps = null, bassSafe = false} = {}) {
     if(joinSteps!==null&&(!Number.isInteger(joinSteps)||joinSteps<1))return {ok:false};
     const prior=this.compiledSong;
     if(!this.isPlaying || !Number.isFinite(this.gridOriginTime) || !sectionId || !requestId || !compiledSong?.events
       || !Number.isInteger(compiledSong.total_steps) || compiledSong.total_steps<1
       || compiledSong.bpm!==prior?.bpm
       || (compiledSong.steps_per_bar||16)!==(prior.steps_per_bar||16))return {ok:false};
-    if(this.partAudition)return this.queuePartAudition(compiledSong,{sectionId,requestId,joinSteps});
-    this.pendingPartHandoff={song:structuredClone(compiledSong),sectionId,requestId,joinSteps};
+    if(this.partAudition)return this.queuePartAudition(compiledSong,{sectionId,requestId,joinSteps,bassSafe});
+    // The first entry hands the jam over at a bar line. It is bass-safe there too (bassSafe true, or 'auto' with a
+    // generated bass that differs from the one the jam plays now): while it waits, the jam's generated bass notes end
+    // .1 step before that bar line, and it never enters while one still sounds (it takes the next bar line).
+    const playing=this.committedJamBacking===null?prior:{...prior,events:this.committedJamBacking};
+    const safe=bassSafe===true||(bassSafe==='auto'&&generatedBassKey(compiledSong)!==generatedBassKey(playing));
+    this.pendingPartHandoff={song:structuredClone(compiledSong),sectionId,requestId,joinSteps,bassSafe:safe};
     return {ok:true};
+  }
+
+  /** The first entry's _partBassGate: while a bass-safe handoff waits, end the jam's generated bass notes before the
+   * coming bar line (null: too late to sound), and remember how long the jam's generated bass rings. */
+  _handoffBassGate(ev, evToPlay, stepIndex, stepSec, attack) {
+    if(ev.role!=='bass'||ev.provenance!=='jam_generated'||ev.edited_from_generator)return evToPlay;
+    let out=evToPlay;
+    if(this.pendingPartHandoff?.bassSafe) {
+      const bar=this.compiledSong.steps_per_bar||16;
+      const end=this.nextStepAudioTime+((Math.floor(stepIndex/bar)+1)*bar-stepIndex-.1)*stepSec;
+      if(end-attack<.02)return null;
+      if(attack+(Number(out.duration_sec)||.25)>end)out={...out,duration_sec:end-attack,duration_steps:(end-attack)/stepSec};
+    }
+    this.jamBassRingUntil=Math.max(this.jamBassRingUntil??-Infinity,attack+(Number(out.duration_sec)||.25));
+    return out;
   }
 
   _commitContinuousPartIfDue() {
     const h=this.pendingPartHandoff;
     if(!h || this.currentStep%(this.compiledSong.steps_per_bar||16)!==0)return;
+    if(h.bassSafe&&(this.jamBassRingUntil??-Infinity)>this.nextStepAudioTime+1e-6)return;
     this.pendingPartHandoff=null;
     const reached=this.activeJamBacking();
     const fallbackSong=structuredClone(reached ? {...this.compiledSong,
@@ -667,8 +715,10 @@ export class LookaheadScheduler {
     this.currentStep=((tick%h.song.total_steps)+h.song.total_steps)%h.song.total_steps;
     this.loopStartStep=0;this.loopEndStep=null;this.repeatPlayback=true;
     this.lastPartAuditionState=null;
+    // The jam's bass that still rings holds the next bass-safe join back too.
     this.partAudition={sectionId:h.sectionId,requestedId:h.requestId,scheduledId:h.requestId,
-      initial:h.song,fallbackSong,pending:null,timeline:[],loopStart:0,loopEnd:null,joinSteps:h.joinSteps};
+      initial:h.song,fallbackSong,pending:null,timeline:[],loopStart:0,loopEnd:null,joinSteps:h.joinSteps,
+      bassRingUntil:this.jamBassRingUntil??-Infinity};
   }
 
   /** Detached compiled-part audition. This is not Jam generation or live-input capture. */
@@ -682,16 +732,38 @@ export class LookaheadScheduler {
     return {ok:true};
   }
 
-  queuePartAudition(compiledSong, {sectionId, requestId, joinSteps = null} = {}) {
+  queuePartAudition(compiledSong, {sectionId, requestId, joinSteps = null, bassSafe = false} = {}) {
     if(joinSteps!==null&&(!Number.isInteger(joinSteps)||joinSteps<1))return {ok:false};
     const a=this.partAudition;
     if (!a || !this.isPlaying || !requestId || sectionId!==a.sectionId || !compiledSong?.events
       || this.loopStartStep!==a.loopStart || this.loopEndStep!==a.loopEnd
       || !['bpm','swing','total_steps','steps_per_bar'].every(k=>compiledSong[k]===a.initial[k]))
       return {ok:false,reason:'This band needs a new preview.'};
-    a.requestedId=requestId;if(Number.isInteger(joinSteps)&&joinSteps>0)a.joinSteps=joinSteps;
-    a.pending=requestId===a.scheduledId ? null : {requestId,song:structuredClone(compiledSong)};
+    // 'auto': compare this request's generated bass with the score already scheduled (not the last request, which
+    // this call replaces); a changed bass joins bass-safe at the half bar whatever join the caller asked for.
+    let safe=bassSafe===true,join=joinSteps;
+    if(bassSafe==='auto'&&generatedBassKey(compiledSong)!==generatedBassKey(this.compiledSong)) {
+      safe=true;join=Math.max(join||0,(compiledSong.steps_per_bar||16)/2);
+    }
+    a.requestedId=requestId;if(Number.isInteger(join)&&join>0)a.joinSteps=join;
+    a.pending=requestId===a.scheduledId ? null : {requestId,song:structuredClone(compiledSong),bassSafe:safe};
     return {ok:true};
+  }
+
+  /** While a bass-safe choice waits: end an outgoing generated bass note before the coming join (null: it would
+   * start too late to sound), and remember how long generated bass rings so a join never lands under it. */
+  _partBassGate(ev, evToPlay, stepIndex, stepSec, attack) {
+    const a=this.partAudition;
+    if(!a||ev.role!=='bass'||ev.provenance!=='jam_generated'||ev.edited_from_generator)return evToPlay;
+    let out=evToPlay;
+    if(a.pending?.bassSafe) {
+      const join=a.joinSteps||this.compiledSong.steps_per_bar||16;
+      const end=this.nextStepAudioTime+((Math.floor(stepIndex/join)+1)*join-stepIndex-.1)*stepSec;
+      if(end-attack<.02)return null;
+      if(attack+(Number(out.duration_sec)||.25)>end)out={...out,duration_sec:end-attack,duration_steps:(end-attack)/stepSec};
+    }
+    a.bassRingUntil=Math.max(a.bassRingUntil??-Infinity,attack+(Number(out.duration_sec)||.25));
+    return out;
   }
 
   getPartAuditionState() {
@@ -717,6 +789,8 @@ export class LookaheadScheduler {
     if (!a) return;
     if (!a.timeline.length) a.timeline.push({requestId:a.scheduledId,song:this.compiledSong,audioTime:this.nextStepAudioTime});
     if (this.currentStep % (a.joinSteps || this.compiledSong.steps_per_bar || 16)!==0 || !a.pending) return;
+    // A bass change never enters under a generated bass note that is still sounding; it takes the next join.
+    if (a.pending.bassSafe && (a.bassRingUntil ?? -Infinity) > this.nextStepAudioTime + 1e-6) return;
     const next=a.pending;
     a.pending=null;a.scheduledId=next.requestId;this.compiledSong=next.song;
     a.timeline.push({requestId:next.requestId,song:next.song,audioTime:this.nextStepAudioTime});
@@ -1104,10 +1178,11 @@ export class LookaheadScheduler {
       if(item.time<now-LATE_STEP_TOLERANCE_SEC){this.cancelJamAnswer('Answer cancelled after a pause. Your notes stay.');break;}
       if(this.mutedLayers.has('lead')||this.mutedLayers.has('tune')){this.cancelJamAnswer('Answer is muted. Your notes stay.');break;}
       try {
-        const event=this._resolveVoice(this.spotlightRole&&!roleMatchesLayer(item.event.role,this.spotlightRole)
-          ?{...item.event,velocity:dimmedVelocity(item.event.velocity)}:item.event);
+        const dim=this.spotlightRole&&!roleMatchesLayer(item.event.role,this.spotlightRole);
+        const event=this._resolveVoice(dim?{...item.event,velocity:dimmedVelocity(item.event.velocity)}:item.event);
         triggerScheduledEvent(this.audioCtx,this.masterBus,event,item.time,this.compiledSong.bpm||100,{answer:true});
-        this._rememberPerformance(event,item.time);
+        // Hear bass clearly is only a way of listening: its take keeps the answer at its own level (as the band's notes).
+        this._rememberPerformance(dim&&this.spotlightRole==="bass-beat"?{...event,velocity:item.event.velocity}:event,item.time);
         item.state='scheduled';
         // Bound repeated echoes and sampled release overlap; no backlog or stolen personal voices.
         this.answerAvailableAt=Math.max(this.answerAvailableAt||0,item.time+item.event.duration_sec+SAMPLE_TAIL);
@@ -1312,6 +1387,7 @@ export class LookaheadScheduler {
     this.gridOriginTime=this.nextStepAudioTime-this.currentStep*(15/this.compiledSong.bpm);
     this.jamBackingTimeline=[];
     this._rememberJamBacking(this.nextStepAudioTime);
+    this.jamBassRingUntil=-Infinity;
     this.droppedSteps = 0;
     this.droppedVoices = 0;
     this.droppedVoicesSaid = false;
@@ -1459,8 +1535,14 @@ export class LookaheadScheduler {
         }
         // Resolve once; the energy and spotlight shapes build on the resolved event, not the request.
         let evToPlay = this._resolveVoice(ev);
+        evToPlay = this.partAudition ? this._partBassGate(ev, evToPlay, stepIndex, stepSec, attack)
+          : this._handoffBassGate(ev, evToPlay, stepIndex, stepSec, attack);
+        if (!evToPlay) continue;
         if (energy > .02 && ev.provenance === 'jam_generated' && (ev.role === 'drums' || ev.role === 'bass') && ev.generated_by !== 'musiclab_energy')
           evToPlay = { ...evToPlay, velocity: Math.min(1, (ev.velocity ?? .8) * (1 + .45 * energy)) };
+        // A take keeps what was heard, except under Hear bass clearly (the Bass wheel), which is only a way of listening:
+        // there the take keeps each note at its own level, so a song saved from it is never dimmed.
+        const kept = evToPlay;
         if (this.spotlightRole && !roleMatchesLayer(ev.role, this.spotlightRole)) {
           evToPlay = { ...evToPlay, velocity: dimmedVelocity(ev.velocity) };
         }
@@ -1480,7 +1562,7 @@ export class LookaheadScheduler {
         }
         submitted.push(evToPlay);
         if (Number(evToPlay.velocity ?? .85) > 0) this.visualNotes.push({ event: evToPlay, time: attack, end: attack + Math.max(.001, Number(evToPlay.duration_sec) || Number(evToPlay.duration_steps || 1)*stepSec) });
-        this._rememberPerformance(evToPlay, this.nextStepAudioTime + performanceOffsetSeconds(ev, stepSec, swingOffset));
+        this._rememberPerformance(this.spotlightRole === "bass-beat" ? kept : evToPlay, this.nextStepAudioTime + performanceOffsetSeconds(ev, stepSec, swingOffset));
       }
 
       this.jamClockTimeline=[...(this.jamClockTimeline||[]),{step:stepIndex,time:this.nextStepAudioTime}].slice(-32);

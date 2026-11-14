@@ -1,5 +1,5 @@
 ﻿// Size must not compound: a Keep carries the original loop forward, not every previous take. No played note may be lost.
-// A failed save is said plainly. Real browser check: .qa-tools/storage-probe.cjs.
+// A failed save is said plainly. Real browser check: a development tool.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PlayFlow } from '../../../static/ui/stages/play_flow.js';

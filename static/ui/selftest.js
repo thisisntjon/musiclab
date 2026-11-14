@@ -83,40 +83,75 @@ async function hitCentroid(patchId, kit) {
   return den ? num / den : 0;
 }
 
-/** Diagnostics use isolated storage and never consume a person's save slots or draft. */
+/** A Storage that lives in memory only. */
+function memoryStorage() {
+  const map = new Map();
+  return {
+    get length() { return map.size; },
+    key: (i) => [...map.keys()][i] ?? null,
+    getItem: (k) => (map.has(String(k)) ? map.get(String(k)) : null),
+    setItem: (k, v) => { map.set(String(k), String(v)); },
+    removeItem: (k) => { map.delete(String(k)); },
+    clear: () => map.clear(),
+  };
+}
+
+/** Swap localStorage and sessionStorage for empty stand-ins; the returned function puts the real ones back. */
+function isolateStorage() {
+  const host = typeof window !== "undefined" ? window : globalThis;
+  const saved = ["localStorage", "sessionStorage"].map((name) => [name, Object.getOwnPropertyDescriptor(host, name)]);
+  for (const [name] of saved) {
+    const standIn = memoryStorage();
+    Object.defineProperty(host, name, { configurable: true, enumerable: true, get: () => standIn });
+  }
+  return () => {
+    for (const [name, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(host, name, descriptor);
+      else delete host[name];
+    }
+  };
+}
+
+/**
+ * Diagnostics run on in-memory storage. A person's saves, draft and settings are never read, removed or written,
+ * so closing the tab during a run loses nothing.
+ */
 export async function runSelfTest(app) {
-  const storageKeys = ["musiclab.saves.v1", "musiclab.working.v1", COMFORT_KEY];
-  const stored = new Map(storageKeys.map(key => [key, localStorage.getItem(key)]));
   const flow = app.playFlow;
   const original = {
     log: app._logSessionEvent, preview: app.scheduler.previewSound, bar: app.scheduler.previewBar,
     listen: app._listenForHum, speaker: flow.speaker, comfort: flow.comfort,
     doc: flow.doc ? JSON.parse(JSON.stringify(flow._canonicalDoc())) : null, stage: flow.stage,
   };
-  for (const key of storageKeys) localStorage.removeItem(key);
+  const restoreStorage = isolateStorage();
+  // The self-test drives the two-switch route, so it turns Switch scanning on (Space moves, Enter presses).
+  localStorage.setItem(COMFORT_KEY, JSON.stringify({ switchScan: true }));
   flow.comfort = loadComfort(localStorage);
   flow._applyComfort();
   try {
+    flow.comfort = loadComfort(localStorage);
+    flow._applyComfort();
     return await runIsolatedSelfTest(app);
   } finally {
-    app.scheduler.stop();
-    app._logSessionEvent = original.log;
-    app.scheduler.previewSound = original.preview;
-    app.scheduler.previewBar = original.bar;
-    app._listenForHum = original.listen;
-    flow.speaker = original.speaker;
+    try {
+      app.scheduler.stop();
+      app._logSessionEvent = original.log;
+      app.scheduler.previewSound = original.preview;
+      app.scheduler.previewBar = original.bar;
+      app._listenForHum = original.listen;
+      flow.speaker = original.speaker;
+      // Reload the song while the stand-in is still in place, so the real draft is not rewritten.
+      if (original.doc) flow._loadDocIntoFlow(original.doc, { stage: original.stage });
+      else {
+        flow.doc = null;
+        flow._go("start");
+      }
+    } finally {
+      restoreStorage();
+    }
     flow.comfort = original.comfort;
     flow._applyComfort();
-    if (original.doc) flow._loadDocIntoFlow(original.doc, { stage: original.stage });
-    else {
-      flow.doc = null;
-      flow._go("start");
-    }
-    for (const [key, value] of stored) {
-      if (value === null) localStorage.removeItem(key);
-      else localStorage.setItem(key, value);
-    }
-    // Repaint saved-song choices after putting the person's storage back.
+    // Repaint saved-song choices from the person's own storage.
     flow.render();
   }
 }
@@ -174,6 +209,24 @@ async function runIsolatedSelfTest(app) {
     out.steps.push({ step: label, ok: false, stage_after: flow.stage });
     return false;
   }
+  // A song starts from the start screen's sound picker, which sits under More > Other ways in. Open each closed
+  // drawer by scanning to its summary (a drawer already open stays open), then pick Drums and Soft drums.
+  const scannable = (key) => flow._scanItems().some((el) => el.dataset?.key === key);
+  async function startDrumSong(groupLabel, startLabel) {
+    for (const [drawer, name] of [["demo-tools", "open More"], ["start-options", "open Other ways in"]]) {
+      if (!scannable("instrument-group:drums") && scannable(drawer)) await scanTo((k) => k === drawer, `${name} (${startLabel})`);
+    }
+    await scanTo((k) => k === "instrument-group:drums", groupLabel);
+    await scanTo((k) => k === "start-instrument:soft", startLabel);
+    return Boolean(flow.doc && flow.stage === "jam");
+  }
+  // When no song could be started the rest of the run has nothing to read: say so instead of throwing.
+  const stopWithoutSong = (step) => {
+    out.pass = false;
+    out.error = `No song started at "${step}" (stage ${flow.stage}); the start screen route did not reach a sound to choose.`;
+    app._logSessionEvent = realLog;
+    return publish(out);
+  };
 
   onPress = () => {
     previewsThisPress = 0;
@@ -186,8 +239,7 @@ async function runIsolatedSelfTest(app) {
     out.scan_stops[name] = flow._scanItems().length;
   };
   audit("start");
-  await scanTo((k) => k === "instrument-group:drums", "open drum sounds");
-  await scanTo((k) => k === "start-instrument:soft", "choose soft drums");
+  if (!await startDrumSong("open drum sounds", "choose soft drums")) return stopWithoutSong("choose soft drums");
   audit("jam");
   const beforeJam = JSON.stringify(flow.doc.notes);
   await scanTo((k) => k === "jam-pad:0", "add a jam hit");
@@ -348,8 +400,10 @@ async function runIsolatedSelfTest(app) {
 
   // Back goes where the person came from: make a song, skip ahead with Keep it, then Back must return to the beat.
   flow._go("start");
-  await scanTo((k) => k === "instrument-group:drums", "open drum sounds again");
-  await scanTo((k) => k === "start-instrument:soft", "make another song");
+  if (!await startDrumSong("open drum sounds again", "make another song")) {
+    flow._loadDocIntoFlow(mainDoc, { stage: "keep" });
+    return stopWithoutSong("make another song");
+  }
   await scanTo((k) => k === "jam-edit", "skip jam exploration");
   await scanTo((k) => k === "keep", "skip ahead with Keep it");
   const backLabel = root.querySelector('[data-key="back"]')?.textContent?.trim() || "";
@@ -371,7 +425,8 @@ async function runIsolatedSelfTest(app) {
     }
   });
   // Start from the default settings, so a person's saved choices (Calm already on, say) can't flip the switches below.
-  localStorage.removeItem(COMFORT_KEY);
+  // Switch scanning stays on: this part is still driven by Space and Enter.
+  localStorage.setItem(COMFORT_KEY, JSON.stringify({ switchScan: true }));
   flow.comfort = loadComfort(localStorage);
   flow._applyComfort();
   flow._go("start");
@@ -563,6 +618,11 @@ async function runIsolatedSelfTest(app) {
     out.swaps_listed_at_once === 3 &&
     out.offsite_requests.length === 0;
   app._logSessionEvent = realLog;
+  return publish(out);
+}
+
+/** Shows the result on the page and as window.__selftest. */
+function publish(out) {
   window.__selftest = out;
   let pre = document.getElementById("selftest-results");
   if (!pre) {

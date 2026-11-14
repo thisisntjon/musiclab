@@ -18,6 +18,8 @@ export const LANES = [
   { id: "perc", patch: "perc", midi: 45, label: "Noise tick" },
 ];
 const PATCH_TO_LANE = Object.fromEntries(LANES.map(lane => [lane.patch, lane.id]));
+// Own names only: a stored sound called "toString" is an unknown sound, not a built-in (open-release audit L6).
+const laneOf = patch => Object.hasOwn(PATCH_TO_LANE, patch) ? PATCH_TO_LANE[patch] : undefined;
 const isOwn = provenance => provenance === "user_placed" || provenance === "hummed_confirmed";
 
 /** Curated 8-step groove crates for #6 Pin-and-Spin Groove Dice. */
@@ -213,7 +215,7 @@ export function beatGridFromNotes(notes, stepsPerBar = 16) {
   for(const lane of LANES)grid[lane.id]=grid[lane.id].slice(0,stepsPerBar/2);
   for (const n of notes || []) {
     if (n.role !== "drums") continue;
-    const lane = PATCH_TO_LANE[n.patch_id];
+    const lane = laneOf(n.patch_id);
     const step = Number(n.step || 0);
     if (!lane || step >= STEPS_PER_BAR || step % 2 !== 0) continue;
     // Keep the person's pin visible if multiple same-voice hits share a cell.
@@ -240,14 +242,14 @@ export function notesFromBeatGrid(grid, otherNotes = [], { bar4Fill = false, pro
   }
   const protectedNote = note => protectOwn && isOwn(note.provenance);
   const affected = note => !protectedNote(note) && note.role === "drums" && note.step >= 0 && note.step < BARS * STEPS_PER_BAR
-    && note.step % 2 === 0 && changed.has(`${PATCH_TO_LANE[note.patch_id]}:${(note.step % STEPS_PER_BAR) / 2}`);
+    && note.step % 2 === 0 && changed.has(`${laneOf(note.patch_id)}:${(note.step % STEPS_PER_BAR) / 2}`);
   const result = source.filter(note => !affected(note));
   for (const lane of LANES) {
     (grid[lane.id] || []).forEach((cell, i) => {
       if (i>=BEAT_STEPS || !cell || !changed.has(`${lane.id}:${i}`)) return;
       for (let bar = 0; bar < BARS; bar++) {
         const step = bar * STEPS_PER_BAR + i * 2;
-        const existing = source.filter(note => note.role === "drums" && note.step === step && PATCH_TO_LANE[note.patch_id] === lane.id);
+        const existing = source.filter(note => note.role === "drums" && note.step === step && laneOf(note.patch_id) === lane.id);
         if (existing.length) {
           // Protected events are already in result, unchanged and only once.
           result.push(...existing.filter(note => !protectedNote(note)).map(note => ({ ...note, provenance: cell })));
@@ -266,7 +268,7 @@ export function notesFromBeatGrid(grid, otherNotes = [], { bar4Fill = false, pro
       }
     });
   }
-  const placedSteps = new Set(result.filter(note => note.role === "drums").map(note => `${PATCH_TO_LANE[note.patch_id]}:${note.step}`));
+  const placedSteps = new Set(result.filter(note => note.role === "drums").map(note => `${laneOf(note.patch_id)}:${note.step}`));
   if (bar4Fill) {
     const bar4Base = (BARS - 1) * STEPS_PER_BAR; // 48
     const fillEvents = [

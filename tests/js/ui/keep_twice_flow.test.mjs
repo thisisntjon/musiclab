@@ -3,7 +3,7 @@
 // stubbed as in tests/js/ui/no_refusals.test.mjs; the capture the scheduler hands over is fixed, so what is
 // tested is what the screen does with it. Contract: what the app says at Keep is true (PLAN, preservation
 // contracts; 3c0a260 "the same honest line is heard and seen").
-//   node --test "workflow/evidence/verify-2026-11-02/hostile/*.test.mjs"
+//   node --test "development records"
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PlayFlow } from '../../../static/ui/stages/play_flow.js';

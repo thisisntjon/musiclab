@@ -152,7 +152,7 @@ class TestAudioEngine(unittest.TestCase):
         vel_sigma = statistics.pstdev(velocities)
         self.assertGreaterEqual(vel_sigma, 0.04, f"Velocity std dev {vel_sigma} < 0.04")
 
-        # Render into a temp dir: the accepted WAVs in workflow/evidence must never be rewritten by a test run.
+        # Render into a temp dir: the accepted WAVs in development records must never be rewritten by a test run.
         with tempfile.TemporaryDirectory() as tmpdir:
             wav_out = Path(tmpdir) / "phase1_heavybass_demo.wav"
             metrics = render_compiled_song_to_wav(compiled, wav_out, sample_rate=22050)

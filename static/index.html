@@ -7,8 +7,10 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%232563eb'/%3E%3Cpath d='M10 8l6 4-6 4z' fill='%23fff'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="./css/studio.css" />
 </head>
-<body>
+<body data-booting>
   <div class="app-shell">
+    <!-- Shown only until the app script runs; the bar below is hidden until then (its buttons do nothing yet). -->
+    <p id="boot-loading" role="status">Loading MusicLab&hellip;</p>
     <!-- Top Transport Bar (Radically Simplified Guided Header: 3 Core Actions + Collapsible Studio Tools Drawer) -->
     <header class="transport-bar">
       <div class="brand-block">
@@ -79,7 +81,7 @@
           </select>
         </div>
 
-        <div class="control-pill ab-bypass-pill" title="Compare Raw Unassisted (A) vs. Guided Studio (B) — Shortcut: \ key">
+        <div class="control-pill ab-bypass-pill" title="Compare Raw Unassisted (A) vs. Guided Studio (B)">
           <button id="btn-ab-bypass" class="btn btn-sm btn-secondary">
             &#9878; Compare Before/After (B)
           </button>
@@ -519,6 +521,6 @@
       window.addEventListener("load", ready);
     })();
   </script>
-  <script type="module" src="./ui/app.6528166c064e6bad66331c12ac11e75032523173f9943f84c60e2f2cf876c06e.bundle.js" onerror="musicLabBootFailed()"></script>
+  <script type="module" src="./ui/app.672ca5d4da8376c7e1df4d4923b4c34e0df31f273232ed176293d7996e5476e9.bundle.js" onerror="musicLabBootFailed()"></script>
 </body>
 </html>

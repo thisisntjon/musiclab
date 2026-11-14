@@ -90,7 +90,7 @@ test('wheel labels name the direction and how much',()=>{
   assert.equal(melodyChoice(at(270,.5)).label,'More space, more');
 });
 
-// Phase 5 (folk corpus study, workflow/research/melody-corpus-folk-2026-11-08): music that answers.
+// Phase 5 (folk corpus study, development records): music that answers.
 const masks=plan=>[0,1,2,3].map(b=>leadOf(plan).filter(n=>Math.floor(n.step/16)===b).map(n=>n.step%16).join(','));
 test('each direction has its own phrase shape: flowing runs on, hook repeats',()=>{
   let flowingVaried=0,hookRepeats=0,n=0;

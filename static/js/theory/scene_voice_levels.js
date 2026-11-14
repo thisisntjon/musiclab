@@ -3,7 +3,7 @@
  * reinterpret older saved velocities. New recipes still need matched renders.
  */
 export const NATIVE_SCENE_BASS_LEVEL=.0036;
-// Sampled velocity to native velocity, measured against the sampled voices: .qa-tools/pad-level-probe.cjs.
+// Sampled velocity to native velocity, measured against the sampled voices: a development tool.
 const STAND_IN_LEVEL={bass:.008,lead:.012,harmony:.01,hocket:.01};
 export const standInLevel=role=>STAND_IN_LEVEL[role]??.01;
 const LIVE_SAMPLED_VELOCITY=.85,LIVE_DRUM_VELOCITY=.1;

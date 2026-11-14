@@ -4,6 +4,7 @@ import {tripleBacking} from './triple_scene.js';
 import {anchoredBacking} from './band_anchor.js';
 import {applyStyleTraits} from './style_traits.js';
 import { bassInterval } from './underneath.js';
+import { bassKeyFits } from './bass_wheel.js';
 /** Local band playground. These pure edits never start audio or claim generated notes as authored. */
 import { BARS, STEPS_PER_BAR } from "./session_rules.js";
 import { blendedBacking, spectrumBacking } from "./style_blend.js";
@@ -21,8 +22,35 @@ const DRUMS = {
 const PITCHED = new Set(["sampled_muted_guitar_v1", "sampled_upright_bass_v1", "sampled_overdrive_guitar_v1", "sampled_organ_v1", "sampled_harmonica_v1", "sampled_strings_v1", "sampled_steel_guitar_v1", "sampled_trumpet_v1", "sampled_tenor_sax_v1", "sampled_clarinet_v1", "sampled_ooh_v1", "sampled_piano_v1", "sampled_electric_piano_v1", "sampled_guitar_v1", "sampled_clean_guitar_v1", "sampled_bass_v1", "sampled_banjo_v1", "warm_keys", "pluck_lead", "supersaw_stab", "clean_bass", "monster_growl", "talking_yoi", "wobble_bass", "sub_drop_808", "laser_screech", "vocal_chop", "reverse_swell"]);
 const level = (value, fallback = 1) => Number.isFinite(Number(value)) ? Math.max(0, Math.min(4, Math.round(Number(value)))) : fallback;
 const isCaptured = note => note.capture_occurrence !== undefined;
-const isBandOwned = note => note.provenance === "jam_generated" && note.generated_by === GENERATED && !note.edited_from_generator;
-const isGenerated = (note, replaceCaptured = false) => isBandOwned(note) && (replaceCaptured || !isCaptured(note));
+// A kept Bass wheel line (bass_wheel.js) plays as the band's bass: while it stays, the band writes no bass of its
+// own (no second line in its gaps), and on the next Jam direction change it gives way to the band's own bass.
+const BASS_WHEEL = "musiclab_bass_wheel_v1";
+const isKeptWheelBass = note => note.provenance === "jam_generated" && note.generated_by === BASS_WHEEL
+  && note.role === "bass" && !note.edited_from_generator;
+// It also gives way once the song's key, major or minor chords or PLAYED swing are not the ones it was built for (the
+// band hand's "X is home" edits global_context and keeps the direction): its pitches and offsets are concrete. The
+// played swing is the compiler's (humanize off plays .5), so a line kept over a swung band by the doc's first Keep
+// gives way on the next call, when the regenerated band plays straight; a swing number the band does not play keeps it.
+// Each note says what it was built for; a line saved before notes carried it falls back to the Keep's saved record.
+const savedBassBand = doc => {
+  const field = doc?.capture_notes?.melody_field;
+  return (field?.context?.bassWheel ?? field?.bassWheel)?.band ?? null;
+};
+const keptLineMoved = (note, doc) => isKeptWheelBass(note)
+  && !bassKeyFits(note.bass_wheel?.built_for ?? savedBassBand(doc), doc);
+const isBandOwned = note => note.provenance === "jam_generated" && !note.edited_from_generator
+  && (note.generated_by === GENERATED || isKeptWheelBass(note));
+const isGenerated = (note, replaceCaptured = false, yieldKept = false) => isBandOwned(note)
+  && (replaceCaptured || !isCaptured(note)) && (yieldKept || note.generated_by === GENERATED);
+/** True for band material a direction change may replace: the band's own notes and a kept Bass wheel line. */
+export const isBandOwnedNote = note => Boolean(note) && isBandOwned(note);
+// What the band plays: its scene, spectrum, blend, field, variant, density and colour. Other calls (the Answer
+// toggle, a finished hold, Stay adjustments, a pad press) keep a kept bass line.
+const directionOf = session => session ? JSON.stringify([session.scene_id ?? null,
+  Number.isFinite(session.style_spectrum) ? session.style_spectrum : null,
+  Number.isFinite(session.style_blend) ? session.style_blend : null,
+  session.music_field ? [session.music_field.version, session.music_field.x, session.music_field.y] : null,
+  session.scene_variant || "base", level(session.density), level(session.color)]) : null;
 // Captured onsets can lie between grid columns; replies must respect their full gates.
 const noteStart = note => note.step + (note.performance?.version === 1
   && Number.isFinite(note.performance.offset_steps) && note.performance.offset_steps >= 0
@@ -189,11 +217,16 @@ export function startJam(doc, { kind = "pitched", patchId, kit } = {}) {
   if (!doc.jam_session) next.notes = (next.notes || []).filter(note => !isStarterPulse(note));
   next.drum_kit = next.jam_session.kit;
   if (!drums) next.lead_patch_id = selected;
-  return setJamDirection(next, next.jam_session);
+  // A fresh session is a new band: a kept bass line gives way to its own bass.
+  return directJam(next, next.jam_session, doc.jam_session ?? null);
 }
 
 /** Replace only this module's generated band; all retained notes and song context remain untouched. */
-export function setJamDirection(doc, { density, color, responsive, style_blend, style_spectrum, scene_variant, showcase_version, showcase_palette, showcase_arrangement, scene_catalogue, scene_id, scene_mix, anchor_drums, anchor_chords, style_drums, style_chords, band_chord_patch, music_field, replace_captured_band = false } = {}) {
+export function setJamDirection(doc, options = {}) {
+  return directJam(doc, options, doc?.jam_session ?? null);
+}
+
+function directJam(doc, { density, color, responsive, style_blend, style_spectrum, scene_variant, showcase_version, showcase_palette, showcase_arrangement, scene_catalogue, scene_id, scene_mix, anchor_drums, anchor_chords, style_drums, style_chords, band_chord_patch, music_field, replace_captured_band = false } = {}, previous = null) {
   const next = clone(doc);
   if (!next.jam_session) return next;
   const session = { ...next.jam_session, density: level(density ?? next.jam_session.density), color: level(color ?? next.jam_session.color) };
@@ -253,7 +286,8 @@ export function setJamDirection(doc, { density, color, responsive, style_blend, 
   if(!sceneTempoAllowed(session.scene_id,next.global_context?.bpm??100))throw Error('This Black-metal arrangement supports up to 160 BPM. Your tempo and notes are unchanged.');
   if(['catalogue-circle-v1','catalogue-circle-v2'].includes(session.exploration_map)&&(next.global_context?.bpm??100)>160)throw Error('Circular exploration supports up to 160 BPM. Your tempo and notes are unchanged.');
   next.jam_session = session;
-  const preserved = (next.notes || []).filter(note => !isGenerated(note, replace_captured_band));
+  const yieldKept = directionOf(previous) !== directionOf(session);
+  const preserved = (next.notes || []).filter(note => !isGenerated(note, replace_captured_band, yieldKept || keptLineMoved(note, next)));
   const keptBandRoles = new Set(preserved.filter(isBandOwned).map(note => note.role));
   const backing=bandNotes(next,session,preserved);
   // Stay already contains the response that actually played. Answering again

@@ -106,3 +106,20 @@ test("the page writes itself from what has sounded, and the beat ball lands on b
   assert.ok(cy(onBeat) > cy(between), "the ball is on the staff line at the beat and up in the air between beats");
   assert.match(onBeat, /pf-sheet-beat-mark on/);
 });
+
+// Open-release audit L6 (review residual): a drum sound name from a tampered stored song is never read as a built-in name.
+test("a drum named like a built-in (toString, constructor) draws and writes as a snare instead of breaking the sheet", () => {
+  for (const name of ["toString", "constructor", "__proto__", "hasOwnProperty"]) {
+    const odd = [ev("k0", 0, "drums", 36), { id: "odd", step: 4, role: "drums", duration_steps: 1, velocity: .7, patch_id: name, provenance: "generator_default" }];
+    const score = scoreFromEvents(odd, { title: "Odd", bpm: 96, totalSteps: 16 });
+    const item = score.measures[0].parts.drums.find(i => i.kind === "note" && i.notes.some(n => n.id === "odd"));
+    assert.equal(item.notes[0].midi, 38, name);
+    const xml = toMusicXML(score);
+    assert.match(xml, /<display-step>C<\/display-step><display-octave>5<\/display-octave>/, name);
+    assert.match(renderSheetSvg(score), /data-id="odd"/, name);
+  }
+  const sheet = toMusicXML(scoreFromEvents([ev("k0", 0, "drums", 36)], { title: "Odd", bpm: 96, totalSteps: 16 }))
+    .replace("<display-step>F</display-step><display-octave>4</display-octave>", "<display-step>toStrin</display-step><display-octave>g</display-octave>");
+  const back = fromMusicXML(sheet);
+  assert.deepEqual(back.notes.filter(n => n.role === "drums").map(n => n.patch_id), ["snare"]);
+});

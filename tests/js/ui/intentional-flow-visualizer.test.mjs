@@ -124,6 +124,9 @@ test("Button discipline & calm scan budget hold across Start, Jam, Melody, Refin
   assert.ok(countTopScanStops(circleJamHtml) <= 35, `Circle Jam scan stops <= 35 (got ${countTopScanStops(circleJamHtml)})`);
   assert.match(circleJamHtml, /data-live-score/, "Circle Jam renders shared causal live score strip");
   assert.match(circleJamHtml, /data-key="melody-field-enter"/, "Circle Jam exposes Make my tune as equal pillar");
+  // Three wheel cards (14 Nov): Make my tune, Change the sound, Feel the bass; the scan budget above holds with all three.
+  assert.deepEqual([...circleJamHtml.matchAll(/data-key="(melody-field-enter[a-z-]*)"/g)].map((m) => m[1]).slice(0, 3),
+    ["melody-field-enter", "melody-field-enter-sound", "melody-field-enter-bass"], "Circle Jam shows the three wheel cards in order");
   assert.match(circleJamHtml, /Go deeper/, "Circle Jam folds secondary sound tweaks behind Go deeper");
 
   // 3. Honeycomb Jam screen

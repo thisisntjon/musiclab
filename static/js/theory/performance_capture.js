@@ -1,6 +1,7 @@
 import {extractSongMaterial} from './song_view.js';
 /** Materialize audio-clock event occurrences, never regenerate requested backing. */
 import { standInLevel } from "./scene_voice_levels.js";
+import { archivedSong, keepPlayedNotes, sourceLoop } from "./song_history.js";
 
 /** A frequency is stored to a few places, so an exact semitone comes back as 79.0000028. A real bend stays as played. */
 function pitchFromFrequency(hz) {
@@ -13,9 +14,12 @@ export function materializePerformance(source, capture, { keepWholeSource = fals
   const doc = JSON.parse(JSON.stringify(source));
   const stepSec = 15 / capture.bpm;
   // Over a kept song, carry the loop it began from rather than the whole song, or every Keep holds all the ones before.
+  // A kept melody has no captured_performance, so the chain decides. A song kept whole holds no history of its own.
   // Whatever the person played in that song is in this take or saved as its own song; if that save failed, it stays here.
-  const fromLoop = !keepWholeSource && source.captured_performance && source.capture_source;
-  doc.capture_source = JSON.parse(JSON.stringify(fromLoop ? source.capture_source : source));
+  // A played note the cut history held (keys played in the Tune wheel live only in a kept melody's played take) stays too.
+  const fromLoop = !keepWholeSource && Boolean(doc.capture_source);
+  doc.capture_source = fromLoop ? sourceLoop(doc) : archivedSong(doc);
+  if (doc.melody_original) doc.melody_original = archivedSong(doc.melody_original);
   doc.captured_performance = JSON.parse(JSON.stringify(capture));
   doc.global_context.bpm = capture.bpm;
   if(capture.steps_per_bar!==undefined)doc.global_context.steps_per_bar=capture.steps_per_bar;
@@ -52,5 +56,5 @@ export function materializePerformance(source, capture, { keepWholeSource = fals
     delete doc.song_cards[0].material;
   }
   delete doc.tune_grid_state;
-  return doc;
+  return keepPlayedNotes(doc, source);
 }

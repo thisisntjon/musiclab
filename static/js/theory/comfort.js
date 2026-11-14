@@ -6,10 +6,12 @@
  * - bigger: larger pads, buttons and text
  * - quietPresses: a press never makes a sound; only Play does
  * - movingLights: particles and the beat ball move even when the system asks for reduced motion (off: they fade in place)
+ * - switchScan: two-switch scanning, Space moves to the next control and Enter presses it (off: Space presses, as on any page)
+ * - letterKeys: A to K play notes and Z and X move them anywhere on the jam screen (off: only while a pad has focus)
  */
 export const COMFORT_KEY = "musiclab.comfort.v1";
-export const COMFORT_DEFAULTS = Object.freeze({ speak: false, voiceVolume: 0.8, lessMotion: false, bigger: false, quietPresses: false, movingLights: false });
-export const COMFORT_SWITCHES = ["speak", "lessMotion", "bigger", "quietPresses", "movingLights"];
+export const COMFORT_DEFAULTS = Object.freeze({ speak: false, voiceVolume: 0.8, lessMotion: false, bigger: false, quietPresses: false, movingLights: false, switchScan: false, letterKeys: true });
+export const COMFORT_SWITCHES = ["speak", "lessMotion", "bigger", "quietPresses", "movingLights", "switchScan", "letterKeys"];
 const VOICE_STEP = 0.2;
 
 export function loadComfort(storage) {

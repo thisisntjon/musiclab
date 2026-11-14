@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import base64
 import copy
+import hashlib
 import json
 import mimetypes
+import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -33,6 +36,59 @@ STATIC_DIR = ROOT_DIR / "static"
 # Local only: requests must name a loopback host, and posts must come from this app's own pages as JSON.
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "[::1]", "::1")
 MAX_BODY_BYTES = 5 * 1024 * 1024
+
+# The hosted script policy (release/cloudflare/musiclab-worker.mjs CSP_HEADER), sent by this server too, so a local
+# run blocks injected script the same way (open-release audit B1). upgrade-insecure-requests is left out: this server
+# is plain http on this computer. tests/test_local_csp.py checks that the directives still match the hosted ones.
+CSP_DIRECTIVES = (
+    "default-src 'self'",
+    "script-src 'self' 'wasm-unsafe-eval' 'unsafe-hashes' {hashes}",
+    "worker-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "media-src 'self' blob:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+)
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "geolocation=(), microphone=(self), camera=(), payment=(), usb=(), interest-cohort=()",
+}
+_csp_cache: Dict[str, Any] = {}
+
+
+def content_security_policy() -> str:
+    """The policy for this checkout's static/index.html: its boot check and its one inline handler, by hash.
+
+    Worked out as release/cloudflare/stage-musiclab-cloudflare.mjs packageCsp does (HTML reads an inline script with
+    its line endings as single new lines). A page whose inline pieces cannot be found gets no hashes at all.
+    """
+    page = STATIC_DIR / "index.html"
+    try:
+        stamp = page.stat().st_mtime_ns
+    except OSError:
+        stamp = None
+    if _csp_cache.get("stamp") != stamp or "policy" not in _csp_cache:
+        sources = []
+        try:
+            html = page.read_text(encoding="utf-8")
+            boot = re.search(r"<script\b[^>]*\bid=[\"']boot-check[\"'][^>]*>([\s\S]*?)</script>", html)
+            if boot:
+                sources.append(boot.group(1).replace("\r\n", "\n").replace("\r", "\n"))
+            sources.extend(dict.fromkeys(re.findall(r'\bon\w+="([^"]*)"', html)))
+        except OSError:
+            sources = []
+        hashes = " ".join(
+            "'sha256-" + base64.b64encode(hashlib.sha256(src.encode("utf-8")).digest()).decode("ascii") + "'" for src in sources
+        )
+        _csp_cache.update(stamp=stamp, policy="; ".join(CSP_DIRECTIVES).replace(" {hashes}", f" {hashes}" if hashes else ""))
+    return _csp_cache["policy"]
 
 
 class BadRequest(Exception):
@@ -113,12 +169,18 @@ def create_request_handler(state: MusicLabStudioState):
             # Keep test/CLI output clean
             return
 
+        def _send_security_headers(self) -> None:
+            self.send_header("Content-Security-Policy", content_security_policy())
+            for name, value in SECURITY_HEADERS.items():
+                self.send_header(name, value)
+
         def _send_json(self, payload: Any, status: int = 200) -> None:
             raw = json.dumps(payload).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(raw)))
             self.send_header("Cache-Control", "no-store")
+            self._send_security_headers()
             self.end_headers()
             self.wfile.write(raw)
 
@@ -456,6 +518,7 @@ def create_request_handler(state: MusicLabStudioState):
             self.send_header("Content-Type", mime_type or "application/octet-stream")
             self.send_header("Content-Length", str(len(raw)))
             self.send_header("Cache-Control", "no-store")
+            self._send_security_headers()
             self.end_headers()
             self.wfile.write(raw)
 

@@ -12,6 +12,10 @@
  */
 
 export const DIVISIONS = 4; // divisions per quarter note: one per 16th step
+// Reading limits (open-release audit S12): a sheet bigger than this is not read, and no note starts past
+// eight parts of four bars, the most a song holds.
+export const MAX_SHEET_BYTES = 1024 * 1024;
+const MAX_SHEET_BARS = 8 * 4;
 export const SHEET_PARTS = [
   { id: "tune", label: "Tune", clef: "G", roles: ["lead"] },
   { id: "chords", label: "Chords", clef: "G", roles: ["harmony", "hocket"] },
@@ -22,6 +26,8 @@ const OWN = new Set(["user_placed", "hummed_confirmed"]);
 // Standard drum-set placement on a five-line percussion staff.
 const DRUM_LINES = { kick: ["F", 4, "normal"], snare: ["C", 5, "normal"], clap: ["C", 5, "x"], hat_closed: ["G", 5, "x"], hat_open: ["G", 5, "circle-x"], perc: ["A", 5, "x"] };
 const DRUM_MIDI = { kick: 36, snare: 38, clap: 39, hat_closed: 42, hat_open: 46, perc: 45 };
+// A sound name from a stored song is looked up as the table's own key only, never a built-in name (open-release audit L6).
+const drumLine = patch => Object.hasOwn(DRUM_LINES, patch) ? DRUM_LINES[patch] : null;
 const SHARPS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const FLATS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 const MAJOR_FIFTHS = { 0: 0, 7: 1, 2: 2, 9: 3, 4: 4, 11: 5, 6: 6, 5: -1, 10: -2, 3: -3, 8: -4, 1: -5 };
@@ -75,7 +81,7 @@ export function scoreFromEvents(events, { title = "My song", bpm = 100, rootPc =
         const dur = part.id === "drums" ? 1 : Math.min(wanted, next - onset, end - onset);
         const { steps, type, dots } = noteType(dur);
         items.push({ kind: "note", step: onset - start, steps, type, dots, notes: stack.map(e => ({
-          id: e.id, midi: Number(e.concrete?.midi_pitch ?? e.concrete?.midi ?? (part.id === "drums" ? DRUM_MIDI[e.patch_id] ?? 38 : 60)),
+          id: e.id, midi: Number(e.concrete?.midi_pitch ?? e.concrete?.midi ?? (part.id === "drums" ? (Object.hasOwn(DRUM_MIDI, e.patch_id) ? DRUM_MIDI[e.patch_id] : 38) : 60)),
           patch: e.patch_id || null, own: OWN.has(e.provenance), velocity: e.velocity ?? .8,
           // Phase 15.2: a band note that opens on the person's note points back at it. A live key
           // press is recorded with a source id and no id, so that is what the answer names.
@@ -119,9 +125,9 @@ export function toMusicXML(score) {
         if (item.kind === "rest") return `      <note><rest/><duration>${dur}</duration><type>${item.type}</type>${dots}</note>`;
         return item.notes.map((n, i) => {
           const pitch = p.clef === "percussion"
-            ? (() => { const [s, o, head] = DRUM_LINES[n.patch] || DRUM_LINES.snare; return `<unpitched><display-step>${s}</display-step><display-octave>${o}</display-octave></unpitched>`; })()
+            ? (() => { const [s, o, head] = drumLine(n.patch) || DRUM_LINES.snare; return `<unpitched><display-step>${s}</display-step><display-octave>${o}</display-octave></unpitched>`; })()
             : (() => { const { step, alter, octave } = spellPitch(n.midi, score.key.flats); return `<pitch><step>${step}</step>${alter ? `<alter>${alter}</alter>` : ""}<octave>${octave}</octave></pitch>`; })();
-          const head = p.clef === "percussion" && (DRUM_LINES[n.patch] || [])[2] && DRUM_LINES[n.patch][2] !== "normal" ? `<notehead>${DRUM_LINES[n.patch][2]}</notehead>` : "";
+          const head = p.clef === "percussion" && (drumLine(n.patch) || [])[2] && drumLine(n.patch)[2] !== "normal" ? `<notehead>${drumLine(n.patch)[2]}</notehead>` : "";
           const instrument = p.clef === "percussion" ? `<instrument id="P-drums-${xml(n.patch || "snare")}"/>` : "";
           return `      <note${n.id ? ` id="${xml(n.id)}"` : ""}${n.own ? ` color="#FF2BD6"` : ""}>${i ? "<chord/>" : ""}${pitch}<duration>${dur}</duration>${instrument}<type>${item.type}</type>${dots}${head}</note>`;
         }).join("\n");
@@ -145,8 +151,24 @@ ${body}
 }
 
 /* ---- a small XML reader: enough for MusicXML we wrote or that a notation program saved ---- */
+/** Leave out instructions, the doctype and comments in one pass. An unclosed one is an error, found at once (S12). */
+function withoutMarkupNotes(text) {
+  let out = "", at = 0;
+  for (;;) {
+    const open = text.indexOf("<", at);
+    if (open < 0) return out + text.slice(at);
+    out += text.slice(at, open);
+    const close = text.startsWith("<!--", open) ? ["-->", 4] : text.startsWith("<?", open) ? ["?>", 2]
+      : /^<!DOCTYPE/i.test(text.slice(open, open + 9)) ? [">", 9] : null;
+    if (!close) { out += "<"; at = open + 1; continue; }
+    const end = text.indexOf(close[0], open + close[1]);
+    if (end < 0) throw new Error("unclosed-markup");
+    at = end + close[0].length;
+  }
+}
+
 export function parseXml(text) {
-  const src = String(text).replace(/<\?[\s\S]*?\?>/g, "").replace(/<!DOCTYPE[\s\S]*?>/i, "").replace(/<!--[\s\S]*?-->/g, "");
+  const src = withoutMarkupNotes(String(text));
   const root = { name: "#root", attrs: {}, children: [], text: "" };
   const stack = [root];
   const tag = /<\/?([A-Za-z][\w:.-]*)((?:\s+[\w:.-]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>|([^<]+)/g;
@@ -170,15 +192,18 @@ const textOf = (n, name) => decode(child(n, name)?.text.trim() ?? "");
 const STEP_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const DRUM_FROM_LINE = { "F4": "kick", "C5": "snare", "G5": "hat_closed", "A5": "perc", "E4": "kick", "D5": "snare" };
 
-/** MusicXML back into MusicLab notes: {title, bpm, root_pc, scale_type, steps_per_bar, notes, bars}. */
+/** MusicXML back into MusicLab notes: {title, bpm, root_pc, scale_type, steps_per_bar, notes, bars}.
+ * Only what a song can hold is read: 3/4 or 4/4, eight parts of four bars, tempo 20 to 400, pitches 0 to 127. */
 export function fromMusicXML(text) {
-  const doc = parseXml(text);
+  if (new TextEncoder().encode(String(text)).length > MAX_SHEET_BYTES) return { ok: false, reason: "too-large" };
+  let doc;
+  try { doc = parseXml(text); } catch (_) { return { ok: false, reason: "not-musicxml" }; }
   const score = child(doc, "score-partwise");
   if (!score) return { ok: false, reason: "not-musicxml" };
   const partNames = Object.fromEntries(kids(child(score, "part-list"), "score-part").map(sp => [sp.attrs.id, textOf(sp, "part-name").toLowerCase()]));
   const ownIds = new Set((kids(child(child(score, "identification"), "miscellaneous"), "miscellaneous-field").find(f => f.attrs.name === "musiclab-own-notes")?.text || "").split(/\s+/).filter(Boolean));
   const notes = [];
-  let bpm = 100, fifths = 0, mode = "major", beats = 4, divisions = DIVISIONS, totalSteps = 0, counter = 0;
+  let bpm = 100, fifths = 0, mode = "major", beats = 4, beatType = 4, divisions = DIVISIONS, totalSteps = 0, counter = 0;
   for (const part of kids(score, "part")) {
     const label = partNames[part.attrs.id] || "";
     let clef = "G", stepCursor = 0;
@@ -186,23 +211,25 @@ export function fromMusicXML(text) {
     for (const measure of kids(part, "measure")) {
       const attrs = child(measure, "attributes");
       if (attrs) {
-        if (textOf(attrs, "divisions")) divisions = Number(textOf(attrs, "divisions")) || divisions;
+        if (textOf(attrs, "divisions")) { const d = Number(textOf(attrs, "divisions")); if (Number.isFinite(d) && d >= 1) divisions = d; }
         const key = child(attrs, "key"); if (key) { fifths = Number(textOf(key, "fifths")) || 0; mode = textOf(key, "mode") || mode; }
-        const time = child(attrs, "time"); if (time) beats = Number(textOf(time, "beats")) || beats;
+        const time = child(attrs, "time"); if (time) { beats = Number(textOf(time, "beats")) || beats; beatType = Number(textOf(time, "beat-type")) || beatType; }
+        if (beatType !== 4 || (beats !== 3 && beats !== 4)) return { ok: false, reason: "meter" };
         const sign = textOf(child(attrs, "clef"), "sign"); if (sign) clef = sign === "percussion" ? "percussion" : sign;
       }
-      for (const d of kids(measure, "direction")) { const t = Number(child(d, "sound")?.attrs.tempo || textOf(child(child(d, "direction-type"), "metronome"), "per-minute")); if (t) bpm = t; }
-      const barStart = stepCursor;
+      for (const d of kids(measure, "direction")) { const t = Number(child(d, "sound")?.attrs.tempo || textOf(child(child(d, "direction-type"), "metronome"), "per-minute")); if (Number.isFinite(t) && t > 0) bpm = Math.min(400, Math.max(20, t)); }
+      const barStart = stepCursor, lastStep = MAX_SHEET_BARS * beats * 4;
+      if (barStart >= lastStep) break; // the rest of this part is past the last part of a song
       let at = barStart, lastStart = barStart;
       for (const el of measure.children) {
-        if (el.name === "backup") { at -= toSteps(textOf(el, "duration"), divisions); continue; }
-        if (el.name === "forward") { at += toSteps(textOf(el, "duration"), divisions); continue; }
+        if (el.name === "backup") { at = Math.max(barStart, at - toSteps(textOf(el, "duration"), divisions, lastStep)); continue; }
+        if (el.name === "forward") { at = Math.min(lastStep, at + toSteps(textOf(el, "duration"), divisions, lastStep)); continue; }
         if (el.name !== "note") continue;
-        const steps = toSteps(textOf(el, "duration"), divisions);
+        const steps = toSteps(textOf(el, "duration"), divisions, lastStep);
         const isChord = Boolean(child(el, "chord"));
         const start = isChord ? lastStart : at;
-        if (!isChord) { lastStart = at; at += steps; }
-        if (child(el, "rest") || child(el, "grace")) continue;
+        if (!isChord) { lastStart = at; at = Math.min(lastStep, at + steps); }
+        if (child(el, "rest") || child(el, "grace") || start >= lastStep) continue;
         const role = roleFromClef();
         let midi, patch = null;
         if (child(el, "pitch")) {
@@ -210,25 +237,30 @@ export function fromMusicXML(text) {
           midi = 12 * (Number(textOf(p, "octave")) + 1) + STEP_PC[textOf(p, "step")] + (Number(textOf(p, "alter")) || 0);
         } else if (child(el, "unpitched")) {
           const u = child(el, "unpitched");
-          patch = DRUM_FROM_LINE[`${textOf(u, "display-step")}${textOf(u, "display-octave")}`] || "snare";
+          const line = `${textOf(u, "display-step")}${textOf(u, "display-octave")}`;
+          patch = (Object.hasOwn(DRUM_FROM_LINE, line) && DRUM_FROM_LINE[line]) || "snare";
           midi = DRUM_MIDI[patch];
         } else continue;
+        if (!Number.isFinite(midi)) continue;
+        midi = Math.min(127, Math.max(0, Math.round(midi)));
         const id = el.attrs.id || `sheet-${++counter}`;
         const own = ownIds.has(id) || /^#?ff2bd6$/i.test(el.attrs.color || "");
-        notes.push({ id, step: start, duration_steps: Math.max(1, steps), velocity: .8, role, patch_id: patch || (role === "bass" ? "clean_bass" : role === "harmony" ? "warm_keys" : "warm_keys"),
+        notes.push({ id, step: start, duration_steps: Math.max(1, Math.min(steps, lastStep - start)), velocity: .8, role, patch_id: patch || (role === "bass" ? "clean_bass" : role === "harmony" ? "warm_keys" : "warm_keys"),
           pitch_lock_mode: "concrete", concrete: role === "drums" ? { midi, freq_hz: 200 } : { midi_pitch: midi, freq_hz: 440 * 2 ** ((midi - 69) / 12) },
           provenance: own ? "user_placed" : "generator_default" });
       }
       stepCursor = barStart + beats * 4;
-      totalSteps = Math.max(totalSteps, stepCursor);
+      totalSteps = Math.min(lastStep, Math.max(totalSteps, stepCursor));
     }
   }
   const major = ((fifths % 12) + 12) % 12, rootMajor = Object.entries(MAJOR_FIFTHS).find(([, f]) => f === fifths)?.[0];
-  const root_pc = rootMajor === undefined ? 0 : mode === "minor" ? (Number(rootMajor) + 9) % 12 : Number(rootMajor);
-  return { ok: true, title: textOf(child(score, "work"), "work-title") || "Opened sheet", bpm, root_pc, scale_type: mode === "minor" ? "minor" : "major",
+  const minor = /^(minor|aeolian)$/i.test(mode);
+  const root_pc = rootMajor === undefined ? 0 : minor ? (Number(rootMajor) + 9) % 12 : Number(rootMajor);
+  // The app's own minor sheets say "minor"; the song calls that scale natural_minor (open-release audit S13).
+  return { ok: true, title: textOf(child(score, "work"), "work-title") || "Opened sheet", bpm, root_pc, scale_type: minor ? "natural_minor" : "major",
     steps_per_bar: beats * 4, bars: Math.max(1, Math.round(totalSteps / (beats * 4))), notes };
 }
-const toSteps = (duration, divisions) => Math.max(0, Math.round((Number(duration) || 0) / divisions * DIVISIONS));
+const toSteps = (duration, divisions, most = Infinity) => Math.min(most, Math.max(0, Math.round((Number(duration) || 0) / divisions * DIVISIONS))) || 0;
 
 /* ---- drawing ---- */
 const STAFF_GAP = 8, LINE = 1, PART_H = 74, BAR_W = 196, LEFT = 44, TOP = 28, PER_LINE = 4;
@@ -283,7 +315,7 @@ export function renderSheetSvg(score, { playheadStep = null, width = null, beat 
           continue;
         }
         const heads = item.notes.map(n => {
-          const [ds, doct, headKind] = p.clef === "percussion" ? (DRUM_LINES[n.patch] || DRUM_LINES.snare) : [];
+          const [ds, doct, headKind] = p.clef === "percussion" ? (drumLine(n.patch) || DRUM_LINES.snare) : [];
           const y = p.clef === "percussion" ? lineY(4) - (diatonic(ds, doct) - diatonic("E", 4)) * (STAFF_GAP / 2) : yFor(n.midi);
           const ledger = [];
           if (p.clef !== "percussion") {

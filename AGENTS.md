@@ -34,8 +34,8 @@ Never break these principles unless the user explicitly asks in their private fo
 
 ## 3. Zero-build architecture & fast file map
 
-- **Local source editing:** the release entry loads checked bundles. Switch its module script to `./ui/app.js` for no-build development, as described below; raw-module edits do not alter generated bundles.
-- **Run locally:** `python app.py` (serves `http://127.0.0.1:8765`, loopback-only) or Windows `launch.cmd`, or static mode `python -m http.server 8790 --bind 127.0.0.1 --directory .` (`http://127.0.0.1:8790/static/index.html`).
+- **Local source editing:** the release entry loads checked bundles. Before the first source edit, switch its module script to `./ui/app.js` for no-build development, as described below; raw-module edits do not alter generated bundles, so without the switch the person sees no change.
+- **Run locally:** `python app.py` (serves `http://127.0.0.1:8765`, loopback-only) or Windows `launch.cmd` (serves `http://127.0.0.1:8777`; it tries `py -3`, then `python`, and stops with plain words if neither runs), or static mode `python -m http.server 8790 --bind 127.0.0.1 --directory .` (`http://127.0.0.1:8790/static/index.html`).
 
 ### Where to make common customizations
 

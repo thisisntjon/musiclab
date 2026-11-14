@@ -1,7 +1,7 @@
 /**
  * Draws the particle field on one canvas behind the page (aria-hidden, no pointer events).
  * Glow comes from pre-rendered sprites added together ("lighter"), not shadowBlur, which
- * measured about twice as slow (workflow/research/visual-wave/w4-prior-art-rendering.md).
+ * measured about twice as slow (development records).
  * Off when the person asks for less motion, in forced-colours mode, or when it cannot draw.
  */
 import { createField, burst, step, seededRandom, enforceCaps, SPRITE_SCALE } from "./particles.js";

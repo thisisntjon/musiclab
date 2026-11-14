@@ -21,6 +21,7 @@ If you are adapting MusicLab for your own setup, classroom, or remix, see [`ACCE
   - Nothing essential is timed or scored.
   - Sound starts only after a press and respects the `−3 dBFS` ceiling and `Escape` / **Stop sound**.
   - Every new control works with keyboard focus and untimed two-switch scanning (`Space` + `Enter`), avoids drag-only traps, and keeps user-facing wording plain and short (checked by [`static/js/theory/plain_language.js`](static/js/theory/plain_language.js)).
+- **Set up development tools first:** follow the Python, Node.js, pytest and pytest-subtests instructions in [START_HERE.md](START_HERE.md). Playing the app does not require the test dependencies.
 - **Run the tests before opening a pull request:**
 
 ```bash

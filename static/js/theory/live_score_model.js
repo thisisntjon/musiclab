@@ -5,7 +5,7 @@ import { partOfRole } from "./visual_tokens.js";
  * Deterministic causal live score & groove model shared across JAM, MELODY,
  * REFINE, SONG, and KEEP playback surfaces.
  *
- * Grounded in workflow/research/visual-wave/SYNTHESIS.md:
+ * Grounded in development records:
  * - Pitch = vertical height (higher MIDI pitch -> smaller y, monotonically).
  * - Time = left-to-right across the active loop/bar window, preserving swing
  *   and captured microtiming offsets.

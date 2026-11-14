@@ -3,6 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { PlayFlow } from "../../../static/ui/stages/play_flow.js";
+import { checkPrompt } from "../../../static/js/theory/plain_language.js";
 
 function setup() {
   const values = new Map(), session = new Map();
@@ -25,7 +26,7 @@ test("the front door says who it is for and what they keep, in one line", () => 
   const flow = setup();
   flow.stage = "start";
   const html = flow._renderStart();
-  assert.match(html, /pf-for-parents">For kids and new players\. Your song stays on this device\. <button[^>]*data-key="parents"/);
+  assert.match(html, /pf-for-parents">For kids and new players\. Your song stays on this device\. <a[^>]*data-key="parents"[^>]*href="[^"]*parents\.html"/);
   assert.match(html, /data-key="listen-circle"/, "the line sits beside Listen, not in a fold");
 });
 
@@ -66,4 +67,15 @@ test("Parents fetch failure leaves the current song page intact", async () => {
   assert.equal(window.location.href, before);
   assert.match(message, /Your song is still here/);
   assert.equal(flow.app.scheduler.isPlaying, false);
+});
+
+// Open-release audit L16 review: the host and error-report lines are new, so they meet the grade-2 rule.
+test("the Cloudflare host and error-report lines are in plain words that pass the grade-2 check", () => {
+  const page = fs.readFileSync(new URL("../../../static/parents.html", import.meta.url), "utf8");
+  const para = [...page.matchAll(/<p>([^<]*Cloudflare[^<]*)<\/p>/g)].map(m => m[1]);
+  assert.equal(para.length, 1, "one paragraph names the host");
+  assert.match(para[0], /browser may send/, "it still says the browser may send a report");
+  assert.match(para[0], /which page/, "it still says the report names the page");
+  assert.match(para[0], /never holds your songs/);
+  assert.deepEqual(checkPrompt(para[0]).problems, [], para[0]);
 });

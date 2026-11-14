@@ -10,6 +10,8 @@ import { LANES, BEAT_STEPS } from "./beat_model.js";
 
 export const STEPS_PER_BAR = 16;
 const PATCH_TO_LANE = { kick: "kick", clap: "clap", snare: "snare", hat_closed: "hat", hat_open: "hat_open", perc: "perc" };
+// Own names only, as in beat_model.js (open-release audit L6).
+const laneOf = patch => Object.hasOwn(PATCH_TO_LANE, patch) ? PATCH_TO_LANE[patch] : undefined;
 const STEPS_PER_BEAT_PAD = STEPS_PER_BAR / BEAT_STEPS; // 2: one beat pad is an eighth note
 
 /** Move the playhead to `stepEvt` ({step, events}). `prev` is the last result, or null. */
@@ -26,7 +28,7 @@ export function advancePlayhead(prev, stepEvt, totalSteps = 64, cycle = 16) {
     if (e.role === "lead" && Number.isFinite(e.concrete?.midi_pitch)) {
       lead = { step, length: Math.max(1, Number(e.duration_steps || 1)), midi: e.concrete.midi_pitch };
     } else if (e.role === "drums" && local % STEPS_PER_BEAT_PAD === 0) {
-      const lane = PATCH_TO_LANE[e.patch_id];
+      const lane = laneOf(e.patch_id);
       if (lane && !hits.includes(lane)) hits = [...hits, lane];
     }
   }
@@ -37,7 +39,7 @@ export function advancePlayhead(prev, stepEvt, totalSteps = 64, cycle = 16) {
     bar: Math.floor(step / STEPS_PER_BAR),
     bars: Math.max(1, Math.ceil(totalSteps / STEPS_PER_BAR)),
     local,
-    hits: stepEvt.sounding ? [...new Set(stepEvt.sounding.filter(e => e.role === "drums").map(e => PATCH_TO_LANE[e.patch_id]).filter(Boolean))] : hits,
+    hits: stepEvt.sounding ? [...new Set(stepEvt.sounding.filter(e => e.role === "drums").map(e => laneOf(e.patch_id)).filter(Boolean))] : hits,
     lead,
   };
 }

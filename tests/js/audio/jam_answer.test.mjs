@@ -88,6 +88,11 @@ test('Focus attenuation is identical in reply playback and capture',()=>{
  near(attacks[0].event.velocity,.85*.8*.22);near(s.performanceTake.events.at(-1).event.velocity,attacks[0].event.velocity);
 });
 
+test('Hear bass clearly (the Bass wheel) softens a reply as heard, but its take keeps the reply at its own level',()=>{
+ const {s,attacks}=setup();s.spotlightRole='bass-beat';s.requestJamAnswer();s.audioCtx.currentTime=2.35;s._serviceJamAnswer();
+ near(attacks[0].event.velocity,.85*.8*.22);near(s.performanceTake.events.at(-1).event.velocity,.85*.8);
+});
+
 
 test('released ringing final tap is included and answer waits for all gates on a beat',()=>{
  const {s}=setup();s.audioCtx.currentTime=1;s.currentStep=7;s.nextStepAudioTime=1.04;

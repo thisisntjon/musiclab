@@ -1,5 +1,5 @@
 /**
- * The one colour and shape table for the parts of a song (workflow/research/visual-wave/SYNTHESIS.md).
+ * The one colour and shape table for the parts of a song (development records).
  * The five colours stay apart under all three kinds of colour blindness (checked by simulation), and every part
  * also has its own shape, so meaning never rests on colour alone. No saturated red. CSS mirrors these as --pf-part-*.
  */

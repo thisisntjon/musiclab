@@ -1,7 +1,7 @@
 // A jam begun from an instrument has no scene_id and its band has no form cursor. undefined === undefined must not read
 // as a matching cursor: JSON.parse(JSON.stringify(undefined)) throws, and it took Make my song, Undo and every edit down.
-// Test drafted by the interface agent (workflow/evidence/interface-repair-2026-11-02/json-error/proposed-fix.patch).
-// The real route, with notes reaching the kept song by identity, is .qa-tools/instrument-route-probe.cjs.
+// Test drafted by the interface agent (development records).
+// The real route, with notes reaching the kept song by identity, is a development tool.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PlayFlow } from "../../../static/ui/stages/play_flow.js";

@@ -4,7 +4,8 @@
 
 MusicLab is a local-first musical instrument:
 
-- **No accounts, telemetry or external network calls.** Runtime composition, playback, saving, spoken prompts, and WAV export make zero third-party requests. Hosted deployments enforce `connect-src 'self'`.
+- **No accounts or telemetry, and no third-party requests from the app's code.** Runtime composition, playback, saving, spoken prompts, and WAV export make zero third-party requests. Hosted deployments enforce `connect-src 'self'`.
+- **The host's error reports.** The hosted copy at https://musiclab.simoneresearch.com/ runs on Cloudflare, which adds Network Error Logging headers (`NEL` and `Report-To`) at its edge. When a page fails to load, a visitor's browser may send Cloudflare a short report (the page address, status and timing). Song data is never in it. The app's own code sends nothing.
 - **Audio, speech, and microphone stay local and gesture-gated.** Sound never autoplays before interaction, master output is hard-limited to `−3 dBFS`, `Escape` / **Stop sound** silences playback immediately, spoken prompts use on-device `localService` voices only ([`static/js/audio/speech.js`](static/js/audio/speech.js)), and the optional **Hum** recorder accesses the microphone only when explicitly pressed.
 - **Local Python server ([`app.py`](app.py), [`src/app_shell/server.py`](src/app_shell/server.py), [`src/song_store/store.py`](src/song_store/store.py)):**
   - Binds strictly to loopback (`127.0.0.1`).
@@ -25,6 +26,9 @@ MusicLab is a local-first musical instrument:
 
 Please do **not** post exploitable security vulnerabilities in public GitHub issues.
 
-Report security issues privately via **GitHub Security Advisories** in this repository's **Security → Report a vulnerability** tab.
+Report security issues privately, in either of these ways:
+
+- **GitHub private vulnerability reporting:** this repository's **Security → Report a vulnerability** tab.
+- **If that tab is not shown, or you have no GitHub account:** use the contact listed in https://simoneresearch.com/.well-known/security.txt.
 
 Include steps to reproduce, whether the issue affects static browser mode or `python app.py` local server mode, and the commit hash from [`MANIFEST.json`](MANIFEST.json).

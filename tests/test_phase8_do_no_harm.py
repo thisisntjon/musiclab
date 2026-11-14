@@ -1,4 +1,4 @@
-"""Phase 8.0 "Do No Harm" acceptance tests (workflow/phases/phase-8.md section 5).
+"""Phase 8.0 "Do No Harm" acceptance tests (development records section 5).
 
 Server-side criteria run here directly. The JS criteria live in tests/js/*.test.mjs and are run
 by test_js_unit_suite via `node --test tests/js`.

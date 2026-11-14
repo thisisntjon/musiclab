@@ -1,5 +1,5 @@
 /**
- * Phase A of the spectrum + chorus plan (workflow/research/spectrum-chorus-2026-11-02/SYNTHESIS.md):
+ * Phase A of the spectrum + chorus plan (development records):
  * change the band of one song section without touching anything else.
  *
  * A trial is a detached candidate. The document is not written until applySectionTrial, so discarding a
@@ -7,16 +7,17 @@
  * canonical song (PlayFlow._canonicalDoc), not an editor projection. The materialized notes are the
  * save, playback and export truth; section_direction only records how they were made.
  */
-import { setJamDirection } from "./jam_session.js";
+import { setJamDirection, isBandOwnedNote } from "./jam_session.js";
 import { SCENE_CATALOGUE_VERSION, sceneIndex } from "./scene_catalogue.js";
 import { applySongMaterial, extractSongMaterial, normalizeSongCards, SECTION_DIRECTION_VERSION } from "./song_view.js";
 
 export const BAND_ROLES = Object.freeze(["drums", "bass", "harmony"]);
 const clone = value => JSON.parse(JSON.stringify(value));
 
-/** Only untouched generator output may be replaced. An edited band note lost generated_by when it was edited. */
+/** Only untouched generator output may be replaced. An edited band note lost generated_by when it was edited.
+ * A kept Bass wheel line counts as the band's bass, as in setJamDirection, so a new band never adds a second bass. */
 export function isReplaceableNote(note) {
-  return note?.provenance === "jam_generated" && note.generated_by === "musiclab_jam" && !note.edited_from_generator;
+  return isBandOwnedNote(note);
 }
 
 export { ensureSectionIds } from './song_view.js';

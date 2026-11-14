@@ -119,6 +119,12 @@ for(const action of ['melody-field-keep','melody-field-refine','melody-field-bac
     assert.equal(nodes.get('[data-key="melody-field-keep"]').textContent,'Keep when ready');
     assert.equal(nodes.get('.pf-melody-keep-more').open,true);
     await flow._melodyFieldAction(action);
+    if(action==='melody-field-back'){
+      // Audit S15: Back to jam never waits for full sounds. It leaves the wheel and keeps nothing new.
+      assert.deepEqual(flow.doc,before);assert.equal(flow.melodyField,null);assert.equal(flow.stage,'jam');
+      assert.match(announcements[0],/did not change/);
+      return;
+    }
     assert.deepEqual(flow.doc,before);assert.equal(flow.melodyField,field);
     assert.match(announcements[0],/Save played take/);
     scheduler.loadingSession={state:'live',liveAt:1.1};
