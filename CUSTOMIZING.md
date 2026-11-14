@@ -1,10 +1,20 @@
 # Customizing & Adapting MusicLab
 
-MusicLab ships **unbundled** with zero accounts, zero cloud services, and zero mandatory build tools so anyone — from a teacher or assistive-tech specialist tweaking keys for one player, to a musician adding new styles and instruments — can make it their own.
+MusicLab includes its original source beside a checked release bundle, with zero accounts, zero cloud services, and zero mandatory build tools for local source editing so anyone — from a teacher or assistive-tech specialist tweaking keys for one player, to a musician adding new styles and instruments — can make it their own.
 
 > **New to GitHub or want to customize MusicLab using an AI coding harness** (Claude Code, Codex, Cursor, Antigravity, Gemini CLI, or GitHub Copilot)? Start with **[`START_HERE.md`](START_HERE.md)** for a plain-English GitHub walkthrough and ready-to-paste prompt ideas! This repo also includes [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) so AI coding tools automatically understand MusicLab's layout and safety rules.
 
-[`static/index.html`](static/index.html) loads [`./ui/app.js`](static/ui/app.js) directly as standard browser ES modules. Edit any file under `static/` in a plain text editor (such as Notepad, TextEdit, or VS Code), save, refresh `http://127.0.0.1:8765`, and your change is live immediately.
+## Before your first edit
+
+The release page loads `./ui/app.<hash>.bundle.js`, a generated copy of the JavaScript. Editing the original source alone will not change what that page runs.
+
+1. In your own copy, open [`static/index.html`](static/index.html). Find the final `<script type="module" ...>` tag.
+2. Change only its `src` value from `./ui/app.<hash>.bundle.js` to `./ui/app.js`. Keep `type="module"` and `onerror="musicLabBootFailed()"` unchanged.
+3. Start `python3 app.py` (Windows: `launch.cmd`), open http://127.0.0.1:8765, and hard-refresh after edits (`Ctrl+Shift+R` / `Cmd+Shift+R`). Source edits now load without a build step.
+
+For the Bigger buttons example below, use a fresh browser profile: a previously saved comfort preference takes precedence over the new default. Do not clear browser storage containing songs just to test a default.
+
+This is a local development copy, not a rebuilt release. Its shipped `MANIFEST.json` and `BUNDLE-PROVENANCE.json` no longer certify changed files. For publishing a fork, follow [`hosting/BUNDLING.md`](hosting/BUNDLING.md) and regenerate release evidence; do not copy old hashes onto new code.
 
 ---
 

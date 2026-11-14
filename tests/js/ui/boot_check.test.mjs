@@ -4,9 +4,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { createHash } from 'node:crypto';
 
 const html = readFileSync(new URL('../../../static/index.html', import.meta.url), 'utf8');
 const WORDS = 'This did not load.';
+// Development loads source; the published snapshot loads a content-addressed bundle.
+// Both must keep the same error handler and load after the boot controller.
+const appEntry = html.match(/<script type="module" src="(\.\/ui\/app(?:\.([a-f0-9]{64})\.bundle)?\.js)" onerror="musicLabBootFailed\(\)">/);
+
 
 function boot() {
   const message = {textContent: ''}, buttonListeners = {};
@@ -32,11 +37,14 @@ test('the box is in the page, hidden, and spoken when filled', () => {
   assert.match(tag, /role="alert"/);
   assert.match(tag, /display:\s*none/, 'nothing shows until something has failed');
   assert.ok(html.indexOf('id="boot-failed"') < html.indexOf('id="boot-check"'), 'the box exists before its script runs');
-  assert.ok(html.indexOf('id="boot-check"') < html.indexOf('src="./ui/app.js"'), 'the check is ready before the app can fail');
+  assert.ok(appEntry, 'source or hashed bundle keeps the boot failure handler');
+  assert.ok(html.indexOf('id="boot-check"') < appEntry.index, 'the check is ready before the app can fail');
+  const entryBytes = readFileSync(new URL('../../../static/' + appEntry[1], import.meta.url));
+  if (appEntry[2]) assert.equal(createHash('sha256').update(entryBytes).digest('hex'), appEntry[2], 'bundle name matches its bytes');
 });
 
 test('a module that fails to fetch shows the words', () => {
-  assert.match(html, /<script type="module" src="\.\/ui\/app\.js" onerror="musicLabBootFailed\(\)">/);
+  assert.ok(appEntry, 'source or hashed bundle keeps the boot failure handler');
   const { box, window } = boot();
   assert.equal(shown(box), false);
   window.musicLabBootFailed();

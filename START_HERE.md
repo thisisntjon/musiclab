@@ -42,7 +42,7 @@ Here is what the main words on this page mean:
 Want to try changing a label or default setting without installing *any* coding tools?
 1. Click the **Fork** button near the top-right of this repository and click **Create fork**. You now own a personal copy!
 2. In your fork, click into a file — for example [`static/js/theory/comfort.js`](static/js/theory/comfort.js).
-3. Click the **pencil icon ("Edit this file")** in the top-right corner of the file box.
+3. First follow [Before your first edit](CUSTOMIZING.md#before-your-first-edit) in your fork to switch `static/index.html` to the source entry. Then click the **pencil icon ("Edit this file")** in the top-right corner of the file box.
 4. Change `bigger: false` to `bigger: true` (so **Bigger buttons** starts turned on), then click the green **Commit changes...** button to save your checkpoint.
 5. Anytime you download a ZIP of *your* fork, it has your custom defaults built in — and if you ever make a mistake, click **History** on that file to see and restore what was there before.
 
@@ -56,7 +56,7 @@ If terminal commands feel intimidating, install **[GitHub Desktop](https://deskt
 
 ## Part 3: How to tweak MusicLab using popular AI coding harnesses
 
-Because MusicLab has **no build step** (plain JavaScript and Python files you can reload immediately) and **over 1,400 automated safety tests**, it is a wonderful project to customize with an AI coding harness — even if you have never written JavaScript before.
+Because MusicLab offers a **no-build development route** (switch to the source entry first using [this short setup](CUSTOMIZING.md#before-your-first-edit)) and **over 1,400 automated safety tests**, it is a wonderful project to customize with an AI coding harness — even if you have never written JavaScript before.
 
 We have also included an **[`AGENTS.md`](AGENTS.md)** (and **[`CLAUDE.md`](CLAUDE.md)**) guide right inside the project root. That means modern coding harnesses **automatically read MusicLab's map and safety rules** the moment you open the folder!
 
@@ -74,7 +74,7 @@ We have also included an **[`AGENTS.md`](AGENTS.md)** (and **[`CLAUDE.md`](CLAUD
 ### Your 3-step workflow with any harness
 
 1. **Unzip or clone MusicLab** onto your computer, and open that folder in your chosen harness.
-2. **Start MusicLab** (`launch.cmd` on Windows, or `python3 app.py` on Mac/Linux) and keep http://127.0.0.1:8765 open in your browser with your speaker volume low.
+2. **Switch to the source entry** using [Before your first edit](CUSTOMIZING.md#before-your-first-edit), then **start MusicLab** (`launch.cmd` on Windows, or `python3 app.py` on Mac/Linux) and keep http://127.0.0.1:8765 open in your browser with your speaker volume low.
 3. **Ask for one clear tweak at a time**, refresh your browser tab (`Ctrl+Shift+R` or `Cmd+Shift+R` so the browser loads your new file), and **listen with your own ears**.
 
 ---
