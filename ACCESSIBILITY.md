@@ -45,7 +45,7 @@ Most USB switch interfaces (such as Hitch, JoyCable, Xbox Adaptive Controller vi
 | Where you are | Keys | What happens |
 | --- | --- | --- |
 | **Anywhere** | `Escape` | Immediately stops all sound and releases held notes. |
-| **Anywhere (outside text boxes)** | `Space` then `Enter` | Step through controls (`Space`) and press the highlighted control (`Enter`). |
+| **Switch scanning enabled (outside text boxes)** | `Space` then `Enter` | Step through controls (`Space`) and press the highlighted control (`Enter`). |
 | **Anywhere** | `Tab` / `Shift + Tab` | Standard browser focus navigation with high-visibility focus rings. |
 | **Listen and explore — 8 pads** | `A` `S` `D` `F` `G` `H` `J` `K` | Play the eight musical pads along with the band. Holding a key holds the note; if the browser window loses focus, held notes release automatically so nothing gets stuck ringing. |
 | **Listen and explore — octave** | `Z` / `X` | Move the eight pads lower (`Z`) or higher (`X`). |
