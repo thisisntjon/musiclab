@@ -10,7 +10,7 @@ The release page loads `./ui/app.<hash>.bundle.js`, a generated copy of the Java
 
 1. In your own copy, open [`static/index.html`](static/index.html). Find the final `<script type="module" ...>` tag.
 2. Change only its `src` value from `./ui/app.<hash>.bundle.js` to `./ui/app.js`. Keep `type="module"` and `onerror="musicLabBootFailed()"` unchanged.
-3. Start `python3 app.py` (Windows: `launch.cmd`), open http://127.0.0.1:8765, and hard-refresh after edits (`Ctrl+Shift+R` / `Cmd+Shift+R`). Source edits now load without a build step.
+3. Start `python3 app.py` and open http://127.0.0.1:8765. On Windows, `launch.cmd` instead opens http://127.0.0.1:8777; use the tab it opens. Hard-refresh after edits (`Ctrl+Shift+R` / `Cmd+Shift+R`). Source edits now load without a build step.
 
 For the Bigger buttons example below, use a fresh browser profile: a previously saved comfort preference takes precedence over the new default. Do not clear browser storage containing songs just to test a default.
 
