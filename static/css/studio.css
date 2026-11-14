@@ -1171,7 +1171,7 @@ body.pf-mode #btn-volume-lock {
   min-width: var(--pf-target);
   min-height: var(--pf-target);
 }
-body.pf-mode #btn-stop-sound {
+body.pf-mode #btn-stop-sound, body.pf-mode #btn-back-jam {
   min-height: var(--pf-target);
   padding: 0 var(--pf-space-4);
   font: inherit;
@@ -2928,6 +2928,14 @@ body.pf-mode .transport-bar { z-index: 10; }
 }
 
 /* Keep screen: Save here is the one main button; the two downloads are ordinary buttons of the same size. */
+/* Jam remains next to transport controls; wrap instead of squeezing Stop or volume offscreen. */
+#btn-back-jam[hidden] { display: none !important; }
+body.pf-mode #btn-back-jam { white-space: nowrap; flex: none; }
+@media (max-width: 600px) {
+  body.pf-mode .transport-bar { flex-wrap: wrap; }
+  body.pf-mode .transport-controls { width: 100%; flex-wrap: wrap; }
+  body.pf-mode .transport-controls .volume-control { flex: 1 1 200px; }
+}
 .pf-btn.pf-big[data-key="download"], .pf-btn.pf-big[data-key="dl-project"],
 .pf-btn.pf-big[data-key="download"]:hover, .pf-btn.pf-big[data-key="dl-project"]:hover {
   background: rgba(255, 255, 255, 0.06); color: var(--pf-text);

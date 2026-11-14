@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MusicLab</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%232563eb'/%3E%3Cpath d='M10 8l6 4-6 4z' fill='%23fff'/%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./css/studio.css" />
+  <link rel="stylesheet" href="./css/studio.css?v=5908eeda7af835e2ca6c8969673d6188520a55657c591489467336396659b991" />
 </head>
 <body data-booting>
   <div class="app-shell">
@@ -20,6 +20,7 @@
 
       <div class="transport-controls">
         <button id="btn-stop-sound" class="btn btn-secondary" title="Stop all sound (Escape)" aria-keyshortcuts="Escape">Stop sound</button>
+        <button id="btn-back-jam" class="btn btn-secondary" hidden>Back to Jam</button>
         <button id="btn-play" class="btn btn-primary" title="Play or Stop your song (Space)">
           <span id="play-icon">&#9654;</span> <span id="play-label">Play Song</span>
         </button>
@@ -521,6 +522,6 @@
       window.addEventListener("load", ready);
     })();
   </script>
-  <script type="module" src="./ui/app.672ca5d4da8376c7e1df4d4923b4c34e0df31f273232ed176293d7996e5476e9.bundle.js" onerror="musicLabBootFailed()"></script>
+  <script type="module" src="./ui/app.ede509164f4e7a294ac739709b2c4f6f84ab2f5df938d7fe64e5fc85614f866c.bundle.js" onerror="musicLabBootFailed()"></script>
 </body>
 </html>

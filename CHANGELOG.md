@@ -1,5 +1,13 @@
 # Release notes
 
+## 2026-11-14: Bass wheel cache repair and Back to Jam
+
+- Returning visitors now load the stylesheet that matches the app. Previously, an older cached stylesheet could leave the new Bass wheel black with unstyled buttons, even though fresh-browser checks passed.
+- Back to Jam stays beside Stop and volume throughout the wheel journey and saved Jam songs. It works with pointer, keyboard and enabled switch scanning. The narrow toolbar wraps to keep controls reachable.
+- Returning retains the selected bass and uses the existing preservation path. Leaving Show me puts back its preview instead of silently accepting it.
+
+App candidate: `8c7cb1fc5eca61f9051283a9d8e11848ae14403c`. Verified with a prior-release browser cache, Chrome desktop/touch emulation, Edge at 320px, exact save/reopen and independent package review. These checks do not establish physical-phone or screen-reader speech acceptance. Keep or download your work before refreshing an already-open page.
+
 ## 2026-11-14: Bass wheel and release fixes
 
 - **Feel the bass:** six ways to play, each Light, Full or Big, plus Band bass. Starts from any style by moving to a nearby bass-ready style when needed. Hear bass clearly softens the other parts while choosing.

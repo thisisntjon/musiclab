@@ -730,6 +730,7 @@ class MusicLabStudioApp {
       this._announce("Sound stopped.", { speak: false });
     };
     document.getElementById("btn-stop-sound").addEventListener("click", stopSound);
+    document.getElementById("btn-back-jam")?.addEventListener("click", () => this.playFlow?.returnToJam());
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         // Stopping rerenders the wheel. Keep keyboard users on its replacement, on the same

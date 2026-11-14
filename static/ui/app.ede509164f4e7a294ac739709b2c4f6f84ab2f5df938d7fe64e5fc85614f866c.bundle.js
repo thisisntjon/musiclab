@@ -19920,6 +19920,8 @@ var PlayFlow = class {
   async _melodyFieldAction(key) {
     const field = this.melodyField, scheduler = this.app.scheduler;
     if (key === "melody-field-back-top") key = "melody-field-back";
+    const beforeGuide = key === "melody-field-back" ? field.guide?.before : null;
+    const returnChoice = beforeGuide ? field._candidate(beforeGuide, beforeGuide.bandBalance, beforeGuide.soundPatch, beforeGuide.bassMove) : null;
     if (key === "melody-field-guide") {
       if (field.startGuide()) {
         this.render();
@@ -19935,7 +19937,7 @@ var PlayFlow = class {
       }
       return;
     }
-    if (field.guide && key !== "melody-field-play") return;
+    if (field.guide && !["melody-field-play", "melody-field-back"].includes(key)) return;
     if (key === "melody-field-sound-mode" || key === "melody-field-tune-mode" || key === "melody-field-bass-mode") {
       const before = field.wheel;
       if (before !== key.split("-")[2]) {
@@ -20061,7 +20063,7 @@ var PlayFlow = class {
         field.paint();
         return this.app._announce(readiness.message);
       }
-      const candidate = heardMelodyCandidate(field, scheduler);
+      const candidate = returnChoice || heardMelodyCandidate(field, scheduler);
       if (!candidate) return this.app._announce("Your melody is joining. Keep it when it plays.");
       const capture = field.hasPlayed ? scheduler.capturePerformance?.() || scheduler.lastStoppedPerformance : null;
       const hasNewPersonal = Boolean(capture?.events?.some((r) => r.event?.provenance === "user_placed"));
@@ -20434,8 +20436,26 @@ var PlayFlow = class {
       }
     }
   }
+  async returnToJam() {
+    if (!this.doc?.jam_session) return;
+    if (this.melodyField) await this._melodyFieldAction("melody-field-back");
+    else if (this.stage !== "jam") {
+      this._stopForScopeChange();
+      this._finishPartEdit();
+      this._go("jam");
+    } else if (this.melodyPreparing || this.bassPreparing) {
+      this._stopForScopeChange();
+      this.render();
+    }
+    if (!this.melodyField && this.stage === "jam") {
+      window.scrollTo?.(0, 0);
+      this.root?.querySelector('[data-music-circle], [data-music-field], [data-key="play"]')?.focus({ preventScroll: true });
+    }
+  }
   render() {
     if (!this.root) return;
+    const jamButton = document.getElementById("btn-back-jam");
+    if (jamButton) jamButton.hidden = !this.doc?.jam_session || this.stage === "start";
     if (this.melodyField?.dragging) {
       this.melodyField.needsRender = true;
       this.melodyField.paint();
@@ -25925,6 +25945,7 @@ var PlayFlow = class {
     const prefix = [
       document.getElementById("btn-calm"),
       document.getElementById("btn-stop-sound"),
+      document.getElementById("btn-back-jam"),
       this.root.querySelector('[data-key="back"]')
     ].filter(Boolean);
     return [.../* @__PURE__ */ new Set([...prefix, ...this.root.querySelectorAll("[data-key]")])].filter((el) => {
@@ -25970,7 +25991,7 @@ var PlayFlow = class {
       return;
     }
     if (active && (active.tagName === "INPUT" && active.type !== "range" || active.tagName === "TEXTAREA" || active.tagName === "SELECT" || active.isContentEditable)) return;
-    if (active?.tagName === "BUTTON" && !this.root.contains(active) && !["btn-calm", "btn-stop-sound"].includes(active.id)) return;
+    if (active?.tagName === "BUTTON" && !this.root.contains(active) && !["btn-calm", "btn-stop-sound", "btn-back-jam"].includes(active.id)) return;
     if (ev.target?.hasAttribute?.("data-timeline") && /^(ArrowLeft|ArrowRight|Home|End)$/.test(ev.key)) {
       ev.preventDefault();
       const m = this._timelineModel();
@@ -27369,6 +27390,7 @@ var MusicLabStudioApp = class _MusicLabStudioApp {
       this._announce("Sound stopped.", { speak: false });
     };
     document.getElementById("btn-stop-sound").addEventListener("click", stopSound);
+    document.getElementById("btn-back-jam")?.addEventListener("click", () => this.playFlow?.returnToJam());
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         const active = document.activeElement;

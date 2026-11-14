@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "recipe_sha256": "ffabf730409130b69a2f64607fd2a0781699548102c0dd25c1c64583d55651a2",
+  "version": 2,
+  "recipe_sha256": "0a743d4e2f5bba362a44443a5046ebffefa696fb233b5b7c8c315afa7a967a91",
   "tool": {
     "version": "0.28.2",
     "api_sha256": "61ec0ba144ff93f4bf0e96ad6fab6f430ede0aa13e27ace8063ed63ba416b3cd",
@@ -22,6 +22,7 @@
     "worker_external": []
   },
   "source_inputs": {
+    "static/css/studio.css": "5908eeda7af835e2ca6c8969673d6188520a55657c591489467336396659b991",
     "static/js/audio/hum_keying.js": "5c6bb0579b6510eb857ec6eb3a8d38f2ea115584c6e02a67fe91327807b2a2c1",
     "static/js/audio/master_bus.js": "89880340f3d66a41a0b04b39cb3cf4de7c424af1cda4781e37ad7c0fec0426dc",
     "static/js/audio/melody_field_view.js": "117f5093bf8b32326041fb495b300665a3ddf6ce5c6b3c3d4052c49e43bc7016",
@@ -158,7 +159,7 @@
     "static/js/visual/look.js": "5c3813c547bee8d1ee718984925ee010f3f8894369c454e2ceb64dbb0e699409",
     "static/js/visual/particle_canvas.js": "3440db99d6cf104f3481033947a4aa466b6f8222c48bca4c00faa643acfab0af",
     "static/js/visual/particles.js": "0128912524da5266841eb94444495f1db7edee004019246bd83af3a94701f061",
-    "static/ui/app.js": "58680f3e71a5cbd57480e9908a085e4e2bd9030f7a33860ea4161957a5e88c0b",
+    "static/ui/app.js": "bcc184162f2a7359eb9a8c457546b6b8cb9126d86ab24ac4378d5970c3f97fe0",
     "static/ui/arranger.js": "d4c22cf9d53bcc58eef2317b647dd7e3c99afed504b5b1d900bd02a10bce8ec9",
     "static/ui/band_view.js": "8f50bd2b2620d7acea1fb2b024a3d6a88b3709520466c2fc496d67defcb52109",
     "static/ui/big_moment.js": "a95ebdba8a4783026dcf04fe3d51c3215d9e1931b8869b2b56bfcea52c65c17f",
@@ -174,7 +175,7 @@
     "static/ui/noise_sculptor.js": "1658084091d29a756214cd6f67ffccb0aebb25b8da3dfe8da8df7a207861984c",
     "static/ui/pitch_rows.js": "cb6ea1bf175d723fb185965d573d8dd2a746c529b53de3ac45c83e3d2e4377b9",
     "static/ui/returning_part.js": "a907c9cf9afad459d44b03db4f3aba23b092402c440da42636b3a56cc9f4e7c9",
-    "static/ui/stages/play_flow.js": "84ad1b22b4ea422cf90c2280cc911f004b6d39f46b3cd4aca372e3ce99a9c3eb",
+    "static/ui/stages/play_flow.js": "637fd80b61e2c969b6b6d35fe703b0c3428f552d8e9b05cb30a51066beb107fb",
     "static/ui/standalone_compiler.js": "140ec72c82fdbc414a25571b65d2158fa1208ab9eada56f411afc36d38e99ed2",
     "static/ui/starter_song.js": "2d4c62729bdeada976689ba88d95bffdf0e6b21ef388b09ada1c2eeb1b82e3b2",
     "static/ui/xray.js": "77255cbaf34997047f83d7dd593de2f9afe3de3703b721f013371c3c01472a63"
@@ -213,14 +214,20 @@
       "file": "static/ui/stages/play_flow.js"
     }
   ],
-  "original_index_sha256": "145591f76a7d7092a20e6facd0596612dd8ccb52f0e9186473488396b3ef3554",
-  "index_sha256": "2daa7d149d0b4990ac38d9dd5684e3fd68fb3c1e6260f3c32624e32946486e20",
+  "stylesheet": {
+    "path": "static/css/studio.css",
+    "sha256": "5908eeda7af835e2ca6c8969673d6188520a55657c591489467336396659b991",
+    "original_entry": "href=\"./css/studio.css?v=5908eeda7af835e2ca6c8969673d6188520a55657c591489467336396659b991\"",
+    "entry": "href=\"./css/studio.css?v=5908eeda7af835e2ca6c8969673d6188520a55657c591489467336396659b991\""
+  },
+  "original_index_sha256": "d02766404ec267be03a3f37b2dfa3c8d1bad9f25fff9fb608f204115659493bb",
+  "index_sha256": "bf5244cb841eb65eccb784a2521a7884691746c3f7e81a4f2ac18e061df4ee09",
   "outputs": [
     {
       "kind": "app",
-      "path": "static/ui/app.672ca5d4da8376c7e1df4d4923b4c34e0df31f273232ed176293d7996e5476e9.bundle.js",
-      "bytes": 1656527,
-      "sha256": "672ca5d4da8376c7e1df4d4923b4c34e0df31f273232ed176293d7996e5476e9"
+      "path": "static/ui/app.ede509164f4e7a294ac739709b2c4f6f84ab2f5df938d7fe64e5fc85614f866c.bundle.js",
+      "bytes": 1657733,
+      "sha256": "ede509164f4e7a294ac739709b2c4f6f84ab2f5df938d7fe64e5fc85614f866c"
     },
     {
       "kind": "worker",

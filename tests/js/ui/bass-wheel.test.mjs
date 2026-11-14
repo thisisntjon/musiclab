@@ -334,6 +334,18 @@ test('after Back to jam with a kept bass, the next wheel session finds the band 
   assert.equal(without.bassReason,'band-bass-unknown');assert.equal(without.bassReady,false);
 });
 
+test('Back to Jam leaves Show me without silently accepting its preview mix',async()=>{
+  const {field,scheduler,score}=bassSession('soul-v1');
+  field.request({x:.4,y:.6});hear(field,scheduler);
+  const original=field._candidate(field.position);
+  assert.equal(field.startGuide(),true);hear(field,scheduler);
+  assert.notEqual(field.bandBalance,original.bandBalance);
+  const flow=await keepFlow(field,scheduler,score.doc,'melody-field-back');
+  assert.equal(flow.stage,'jam');
+  assert.equal(flow.doc.capture_notes.melody_field.context.bandBalance||0,original.bandBalance?1:0);
+  assert.deepEqual(bassOf(flow.doc.notes).map(music),bassOf(original.song.events).map(music));
+});
+
 test('a played take with a bass move keeps the band record beside it',async()=>{
   const {field,scheduler,score}=bassSession('soul-v1');field.setWheel('bass');
   field.selectBass('bounce-full');hear(field,scheduler);field.selectBass(BASS_BAND);

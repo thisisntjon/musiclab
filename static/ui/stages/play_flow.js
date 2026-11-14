@@ -1026,9 +1026,12 @@ export class PlayFlow {
   async _melodyFieldAction(key) {
     const field=this.melodyField,scheduler=this.app.scheduler;
     if(key==='melody-field-back-top')key='melody-field-back'; // the Bass wheel's top-row Back to jam
+    // Leaving an optional guide is Put back, never implicit acceptance of its preview.
+    const beforeGuide=key==='melody-field-back'?field.guide?.before:null;
+    const returnChoice=beforeGuide?field._candidate(beforeGuide,beforeGuide.bandBalance,beforeGuide.soundPatch,beforeGuide.bassMove):null;
     if(key==='melody-field-guide'){if(field.startGuide()){this.render();this.root.querySelector('[data-key="melody-field-guide-back"]')?.focus();}return;}
     if(key==='melody-field-guide-use'||key==='melody-field-guide-back'){const ok=field.finishGuide(key.endsWith('-use'));if(ok){this.render();this.root.querySelector(field.guide?'[data-key="melody-field-play"]':'[data-melody-disk]')?.focus();}return;}
-    if(field.guide&&key!=='melody-field-play')return;
+    if(field.guide&&!['melody-field-play','melody-field-back'].includes(key))return;
 
     // Entering the Sound wheel always shows the group ring; focusing the disk lands on the chosen hub, group or sound.
     if(key==='melody-field-sound-mode'||key==='melody-field-tune-mode'||key==='melody-field-bass-mode'){const before=field.wheel;if(before!==key.split('-')[2]){field.setWheel(key.split('-')[2]);if(field.wheel!==before)this.render();}this.root.querySelector('[data-melody-disk]')?.focus();return;}
@@ -1091,7 +1094,7 @@ export class PlayFlow {
         return;
       }
       if(!readiness.ok){field.paint();return this.app._announce(readiness.message);}
-      const candidate=heardMelodyCandidate(field,scheduler);
+      const candidate=returnChoice||heardMelodyCandidate(field,scheduler);
       if(!candidate)return this.app._announce('Your melody is joining. Keep it when it plays.');
       const capture=field.hasPlayed?(scheduler.capturePerformance?.()||scheduler.lastStoppedPerformance):null;
       const hasNewPersonal=Boolean(capture?.events?.some(r=>r.event?.provenance==='user_placed'));
@@ -1473,8 +1476,25 @@ export class PlayFlow {
     }
   }
 
+  async returnToJam() {
+    if(!this.doc?.jam_session)return;
+    if(this.melodyField)await this._melodyFieldAction('melody-field-back');
+    else if(this.stage!=='jam') {
+      this._stopForScopeChange();this._finishPartEdit();this._go('jam');
+    } else if(this.melodyPreparing||this.bassPreparing) {
+      // Cancel the pending entry by the same intent generation used by Stop.
+      this._stopForScopeChange();this.render();
+    }
+    if(!this.melodyField&&this.stage==='jam') {
+      window.scrollTo?.(0,0);
+      this.root?.querySelector('[data-music-circle], [data-music-field], [data-key="play"]')?.focus({preventScroll:true});
+    }
+  }
+
   render() {
     if (!this.root) return;
+    const jamButton=document.getElementById('btn-back-jam');
+    if(jamButton)jamButton.hidden=!this.doc?.jam_session||this.stage==='start';
     if(this.melodyField?.dragging){this.melodyField.needsRender=true;this.melodyField.paint();return;}
     const oldPitchScroll=this.root.querySelector?.(".pf-pitch-scroll");
     const oldPitchView=oldPitchScroll ? {top:oldPitchScroll.scrollTop,...this.phraseRange} : null;
@@ -6622,7 +6642,7 @@ export class PlayFlow {
   // Focus stays silent. Enter acts on the visibly focused control.
 
   _scanItems() {
-    const prefix = [document.getElementById("btn-calm"), document.getElementById("btn-stop-sound"),
+    const prefix = [document.getElementById("btn-calm"), document.getElementById("btn-stop-sound"), document.getElementById("btn-back-jam"),
       this.root.querySelector('[data-key="back"]')].filter(Boolean);
     return [...new Set([...prefix, ...this.root.querySelectorAll("[data-key]")])].filter((el) => {
       if (el.disabled || el.offsetParent === null) return false;
@@ -6678,7 +6698,7 @@ export class PlayFlow {
     }
     if (active && ((active.tagName === "INPUT" && active.type !== "range") || active.tagName === "TEXTAREA" || active.tagName === "SELECT" || active.isContentEditable)) return;
     if (active?.tagName === "BUTTON" && !this.root.contains(active)
-        && !["btn-calm", "btn-stop-sound"].includes(active.id)) return;
+        && !["btn-calm", "btn-stop-sound", "btn-back-jam"].includes(active.id)) return;
     if (ev.target?.hasAttribute?.("data-timeline") && /^(ArrowLeft|ArrowRight|Home|End)$/.test(ev.key)) {
       ev.preventDefault();
       const m = this._timelineModel(); if (!m) return;
