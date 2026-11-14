@@ -2,7 +2,7 @@
 
 MusicLab includes its original source beside a checked release bundle, with zero accounts, zero cloud services, and zero mandatory build tools for local source editing so anyone — from a teacher or assistive-tech specialist tweaking keys for one player, to a musician adding new styles and instruments — can make it their own.
 
-> **New to GitHub or want to customize MusicLab using an AI coding harness** (Claude Code, Codex, Cursor, Antigravity, Gemini CLI, or GitHub Copilot)? Start with **[`START_HERE.md`](START_HERE.md)** for a plain-English GitHub walkthrough and ready-to-paste prompt ideas! This repo also includes [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) so AI coding tools automatically understand MusicLab's layout and safety rules.
+> **New to GitHub or want to customize MusicLab using an AI coding harness** (Claude Code, Codex, Cursor, Antigravity, Gemini CLI, or GitHub Copilot)? Start with **[`START_HERE.md`](START_HERE.md)** for a plain-English GitHub walkthrough and ready-to-paste prompt ideas! This repo also includes [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) for the project's layout and safety rules. Ask your coding tool to read both explicitly; automatic instruction discovery varies by tool.
 
 ## Before your first edit
 
@@ -13,6 +13,8 @@ The release page loads `./ui/app.<hash>.bundle.js`, a generated copy of the Java
 3. Start `python3 app.py` and open http://127.0.0.1:8765. On Windows, `launch.cmd` instead opens http://127.0.0.1:8777; use the tab it opens. Hard-refresh after edits (`Ctrl+Shift+R` / `Cmd+Shift+R`). Source edits now load without a build step.
 
 For the Bigger buttons example below, use a fresh browser profile: a previously saved comfort preference takes precedence over the new default. Do not clear browser storage containing songs just to test a default.
+
+**If source mode does not load:** A Windows development check observed an intermittent failed load with refused module requests; two subsequent source-mode starts succeeded. The bundled entry loaded successfully in that check. The cause is not established, and this is not a guarantee for every device. For normal play, keep the shipped bundled entry. When developing, keep the server window visible, confirm it is running and serving the expected address, then use **Try again** once. If it still fails, record the browser error and server output rather than repeatedly restarting. **Do not clear browser storage or saved songs to fix startup.**
 
 This is a local development copy, not a rebuilt release. Its shipped `MANIFEST.json` and `BUNDLE-PROVENANCE.json` no longer certify changed files. For publishing a fork, follow [`hosting/BUNDLING.md`](hosting/BUNDLING.md) and regenerate release evidence; do not copy old hashes onto new code.
 
