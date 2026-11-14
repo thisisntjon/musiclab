@@ -49,7 +49,7 @@ If you want an offline copy for home, a classroom, or a therapy room without usi
 
 ### 3. Run from the command line or static server (for tinkering & remixing)
 
-The browser app runs directly as unbundled ES modules with zero build step — edit any file under `static/`, save, and refresh:
+The downloaded release runs immediately using a checked bundle. Before editing JavaScript, switch to the no-build source entry using [the customization setup](CUSTOMIZING.md#before-your-first-edit). Then edit, save, and refresh:
 
 ```bash
 python app.py

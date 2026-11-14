@@ -67,7 +67,7 @@ node --test "tests/js/**/*.test.mjs"
 python -B -m pytest -q
 ```
 
-With the released bundle entry, the two entry checks in `tests/js/ui/boot_check.test.mjs` (and the Python test that runs the JS suite) fail until `static/index.html` loads `./ui/app.js`, as described below.
+The boot checks accept both the released hashed bundle and the modular source entry, preserving the same load-order and error-handler requirements. For bundles, they also verify the filename hash against the entry bytes. Switch to the source entry before trying source edits, as described below.
 
 
 ## Released bundle and local edits
