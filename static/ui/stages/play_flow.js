@@ -453,9 +453,13 @@ export class PlayFlow {
       if(this.scrub?.pointerId===e.pointerId)return this._endScrub();
       if(this.noteDrag?.pointerId===e.pointerId)return this._endNoteDrag();
       if(this.fieldPointer!==e.pointerId)return;
-      this._flushMusicField();this.fieldPointer=null;this.fieldGesture=false;
+      this._flushMusicField();this.fieldPointer=null;this.fieldGesture=false;this._finishFieldRender();
     });
-    this.root.addEventListener('pointercancel', () => { this.partCircleGesture=null; this._endScrub(); if (this.noteDrag) this._endNoteDrag({ cancelled: true }); this.cancelFieldGesture(); });
+    this.root.addEventListener('pointercancel', () => { this.partCircleGesture=null; this._endScrub(); if (this.noteDrag) this._endNoteDrag({ cancelled: true }); this.cancelFieldGesture(); this._finishFieldRender(); });
+    this.root.addEventListener('lostpointercapture', e => {
+      if(this.fieldPointer!==e.pointerId)return;
+      this.cancelFieldGesture();this._finishFieldRender();
+    });
     this.root.addEventListener('input', e => {
       if(e.target.matches('[data-circle-blend]')){const x=Number(e.target.value);this._requestCircle(['ska-v1','rocksteady-v1','reggae-v1'][Math.round(x*2)],true,{version:5,x,y:.5});return;}
       const axis=e.target.dataset?.fieldAxis;if(!axis)return;
@@ -1496,6 +1500,9 @@ export class PlayFlow {
     const jamButton=document.getElementById('btn-back-jam');
     if(jamButton)jamButton.hidden=!this.doc?.jam_session||this.stage==='start';
     if(this.melodyField?.dragging){this.melodyField.needsRender=true;this.melodyField.paint();return;}
+    // Loading callbacks must not replace the captured wheel or move its target mid-gesture.
+    if(this.fieldPointer!=null){this.fieldNeedsRender=true;this._paintMusicField();return;}
+    this.fieldNeedsRender=false;
     const oldPitchScroll=this.root.querySelector?.(".pf-pitch-scroll");
     const oldPitchView=oldPitchScroll ? {top:oldPitchScroll.scrollTop,...this.phraseRange} : null;
     this.eventTimingOpen=this.root.querySelector('.pf-event-timing')?.open??this.eventTimingOpen;
@@ -1515,6 +1522,7 @@ export class PlayFlow {
     const scrollX = typeof window !== "undefined" ? window.scrollX : 0;
     const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
     const focusKey = document.activeElement?.dataset?.key;
+    const focusOnField=document.activeElement?.matches?.("[data-music-circle], [data-music-field]");
     // A redraw right after a screen change must not throw keyboard users back to the page top.
     const focusOnHeading = document.activeElement?.classList?.contains?.("pf-heading");
     if (this.allAtOnce && this.doc && this.stage !== "start" && this.editingCard == null) {
@@ -1550,7 +1558,13 @@ export class PlayFlow {
       ${this._btn('settings',this.comfortOpen?'Close help':'Help','pf-btn pf-small',`aria-expanded="${Boolean(this.comfortOpen)}"`)}</div>${this.comfortOpen?this._helpPanelHtml():''}</section>`);
     if(this.partComparison && this.stage==='song'){this.root.insertAdjacentHTML('afterbegin',this._comparisonHtml());this._syncPartAudition();}
     this._clearCompletedSoundMessage();
-    if (this.pianoMessage) this.root.insertAdjacentHTML('afterbegin', `<p role="status">${esc(this.pianoMessage)}</p>${this.app.scheduler?.loadingSession?.state === "failed" ? this._btn('sounds-retry', 'Load sounds again', 'pf-btn pf-small') : ''}`);
+    if (this.pianoMessage) {
+      const message=`<p role="status" data-sound-status>${esc(this.pianoMessage)}</p>${this.app.scheduler?.loadingSession?.state === "failed" ? this._btn('sounds-retry', 'Load sounds again', 'pf-btn pf-small') : ''}`;
+      // Status follows the Jam wheel: appearing/clearing it cannot shift the musical target.
+      const field=wheelJam&&!this.melodyField?this.root.querySelector('[data-music-circle], [data-music-field]'):null;
+      if(field)field.insertAdjacentHTML('afterend',message);
+      else this.root.insertAdjacentHTML('afterbegin',message);
+    }
     if (this.deleteMessage) this.root.insertAdjacentHTML('afterbegin', `<p role="status">${esc(this.deleteMessage)}</p>`);
     if (this.stage !== 'start' && (isSampledPatch(this.doc?.lead_patch_id) || this.app.compiledSong?.events?.some(n => isSampledPatch(n.patch_id)))
       && (!this.app.scheduler?.masterBus?.piano || this.app.scheduler.masterBus.disposed))
@@ -1596,6 +1610,7 @@ export class PlayFlow {
         if (this.scanFocusKey) this.scanFocusKey = el.dataset?.key || el.id || null; // a scanning person keeps the scan
       }
     }
+    if(focusOnField&&!focusKey)this.root.querySelector('[data-music-circle], [data-music-field]')?.focus({preventScroll:true});
     if (focusOnHeading && !focusKey) {
       const heading = this.root.querySelector(".pf-heading");
       if (heading) {
@@ -2164,6 +2179,11 @@ export class PlayFlow {
   _requestedField() { return this.fieldIntent?.field || this.doc.jam_session?.music_field || {version:1,x:.5,y:.5}; }
 
   cancelFieldGesture() { this.circleIntent=null;this.fieldIntent=null;this.fieldPointer=null;this.fieldGesture=false; }
+
+  _finishFieldRender() {
+    if(!this.fieldNeedsRender)return;
+    this.fieldNeedsRender=false;this.render();
+  }
 
   _pointMusicField(event,element) {
     if(!element)return;

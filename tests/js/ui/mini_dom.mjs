@@ -38,6 +38,12 @@ class Node {
   get innerHTML() { return this.childNodes.map(serialize).join(""); }
   set innerHTML(html) { this.childNodes = adopt(parseHtml(html), this); }
   insertAdjacentHTML(where, html) {
+    if(where === "afterend") {
+      if(!this.parentElement)throw new Error('afterend requires a parent');
+      const siblings=this.parentElement.childNodes;
+      siblings.splice(siblings.indexOf(this)+1,0,...adopt(parseHtml(html),this.parentElement));
+      return;
+    }
     const nodes = adopt(parseHtml(html), this);
     if (where === "afterbegin") this.childNodes.unshift(...nodes);
     else if (where === "beforeend") this.childNodes.push(...nodes);

@@ -1,5 +1,11 @@
 # Release notes
 
+## 2026-11-14: A steady genre wheel while sounds load
+
+Finishing the sound download no longer moves the genre wheel under your pointer. Sound status and its retry button sit below the wheel; active drags keep their pointer capture and intended style, and keyboard focus stays on the wheel after a redraw. No sound-bank, audio-engine or saved-song format changes.
+
+App candidate: `c553aebca55be06498acd84f3c8364191c9d0694`. Checked with deterministic Edge mouse and emulated-touch drags through the loading transition. Physical-device and spoken-screen-reader acceptance remain separate checks.
+
 ## 2026-11-14: Accurate sound-loading feedback
 
 After Stop followed by Make my tune, the page now removes the old loading message once the sounds are ready. Active loading and failed-download retry messages remain visible. No music, sound-bank or saved-song format changes.
