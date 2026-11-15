@@ -408,3 +408,21 @@ test('while the band plays, the card asks the bass wheel itself, with the saved 
   flow._paintCircle();
   assert.equal(el.disabled,false);assert.equal(caption.textContent,'Bass wheel. Pick how the bass moves.');
 });
+
+
+test('unavailable Bass stays discoverable from Sound without changing music or switching to Tune',async()=>{
+  const {field,scheduler}=session('house-v1');field.setWheel('sound');
+  field.bassCtx=null;field.bassReason='scene';
+  const html=field.html();
+  assert.match(html,/data-key="melody-field-bass-mode" aria-pressed="false" aria-disabled="true" aria-describedby="mf-bass-availability"/);
+  assert.match(html,/id="mf-bass-availability">For bass changes, try House, Reggae, Soul, Ska, Rocksteady or Swing in Jam\./);
+  const before=JSON.stringify({song:field.source,doc:field.sourceDoc,position:field.position,history:field.history,sound:field.soundPatch,request:field.requestId});
+  assert.equal(field.setWheel('bass'),false);assert.equal(field.wheel,'sound');
+  const words=[];const flow=Object.create(PlayFlow.prototype);flow.melodyField=field;
+  flow.app={scheduler,_announce:s=>words.push(s)};flow.render=()=>assert.fail('no redraw');flow.root={querySelector:()=>assert.fail('no focus jump')};
+  await flow._melodyFieldAction('melody-field-bass-mode');
+  assert.equal(field.wheel,'sound');assert.deepEqual(words,[field.bassAvailabilityText]);
+  assert.equal(JSON.stringify({song:field.source,doc:field.sourceDoc,position:field.position,history:field.history,sound:field.soundPatch,request:field.requestId}),before);
+  assert.equal(scheduler.queued.length,0,'no musical request or hidden band change');
+  field.bassReason='mixed-bass';assert.match(field.html(),/Bass is not ready for this band. Your tune and sound stay./);
+});

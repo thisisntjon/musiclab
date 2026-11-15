@@ -1037,6 +1037,8 @@ export class PlayFlow {
     if(key==='melody-field-guide-use'||key==='melody-field-guide-back'){const ok=field.finishGuide(key.endsWith('-use'));if(ok){this.render();this.root.querySelector(field.guide?'[data-key="melody-field-play"]':'[data-melody-disk]')?.focus();}return;}
     if(field.guide&&!['melody-field-play','melody-field-back'].includes(key))return;
 
+    // An unavailable Bass tab explains its limit without switching away from the person's current wheel.
+    if(key==='melody-field-bass-mode'&&!field.bassReady){this.app._announce(field.bassAvailabilityText);return;}
     // Entering the Sound wheel always shows the group ring; focusing the disk lands on the chosen hub, group or sound.
     if(key==='melody-field-sound-mode'||key==='melody-field-tune-mode'||key==='melody-field-bass-mode'){const before=field.wheel;if(before!==key.split('-')[2]){field.setWheel(key.split('-')[2]);if(field.wheel!==before)this.render();}this.root.querySelector('[data-melody-disk]')?.focus();return;}
     // Bass wheel: the middle plays the band's own bass; a way plays at Full, and pressing the chosen way changes its size.

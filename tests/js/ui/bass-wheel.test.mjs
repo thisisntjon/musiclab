@@ -67,7 +67,9 @@ test('the Bass wheel opens only over an admitted band with its tune choices; els
   const score=jamScore('house-v1');
   const older=bassSession('house-v1',{context:{...score.context,composerVersion:5}}).field;
   assert.equal(older.bassReason,'composer');assert.equal(older.bassReady,false);assert.equal(older.initialBassMove,null);
-  assert.doesNotMatch(older.html(),/melody-field-bass-mode/);
+  assert.match(older.html(),/data-key="melody-field-bass-mode" aria-pressed="false" aria-disabled="true"/);
+  assert.match(older.html(),/Bass is not ready for this band. Your tune and sound stay./);
+  assert.doesNotMatch(older.html(),/For bass changes, try House/);
   older.setWheel('bass');assert.equal(older.wheel,'tune');
   // The six scenes, every variant: ready (Reggae and Ska 'answer' anchor bar 4 on the band's inversion bass).
   for(const scene of ['house-v1','reggae-v1','soul-v1','ska-v1','rocksteady-v1','swing-v1'])for(const variant of ['base','answer','space']) {

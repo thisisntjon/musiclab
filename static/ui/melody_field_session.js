@@ -512,6 +512,7 @@ export class MelodyFieldSession {
    * same pinned song while it keeps playing; a tab change never enters history, candidates or the saved state.
    * The Sound wheel opens on its group ring. 'Hear tune clearly' would dim the bass, so the Bass wheel ends it. */
   setWheel(wheel) {
+    if(wheel==='bass'&&!this.bassReady)return false;
     const next=wheel==='sound'||(wheel==='bass'&&this.bassReady)?wheel:'tune';
     this.wheel=next;this.soundView=null;this.soundZoom=null;
     if(next!=='tune')this.exploring=null;
@@ -524,6 +525,9 @@ export class MelodyFieldSession {
   get bassMode() {return this.wheel==='bass';}
   /** The Bass wheel needs an admitted context (bass_wheel.js bassAdmission) and the tune choices to play over. */
   get bassReady() {return Boolean(this.bassCtx&&this.palette);}
+  get bassAvailabilityText() {return this.bassReason==='scene'
+    ?'For bass changes, try House, Reggae, Soul, Ska, Rocksteady or Swing in Jam.'
+    :'Bass is not ready for this band. Your tune and sound stay.';}
 
   /** Sound wheel view (UI only): null shows the group ring, a group name shows that group's sounds.
    * It never enters history, candidates, candidate ids, comparison state or the saved sound. */
@@ -685,8 +689,8 @@ export class MelodyFieldSession {
   }
 
   _wheelTabsHtml() {
-    const tab=(key,on,title)=>`<button class="pf-btn pf-wheel-tab" data-key="${key}" aria-pressed="${on}">${title}</button>`;
-    return `<div class="pf-wheel-tabs" role="group" aria-label="Wheels">${tab('melody-field-tune-mode',this.wheel==='tune','Tune wheel')}${tab('melody-field-sound-mode',Boolean(this.soundMode),'Sound wheel')}${this.bassReady?tab('melody-field-bass-mode',this.bassMode,'Bass wheel'):''}</div>`;
+    const tab=(key,on,title,extra='')=>`<button class="pf-btn pf-wheel-tab" data-key="${key}" aria-pressed="${on}"${extra}>${title}</button>`;
+    return `<div class="pf-wheel-tabs" role="group" aria-label="Wheels">${tab('melody-field-tune-mode',this.wheel==='tune','Tune wheel')}${tab('melody-field-sound-mode',Boolean(this.soundMode),'Sound wheel')}${tab('melody-field-bass-mode',this.bassMode,'Bass wheel',this.bassReady?'':' aria-disabled="true" aria-describedby="mf-bass-availability"')}</div>${this.bassReady?'':`<p class="pf-sub" id="mf-bass-availability">${this.bassAvailabilityText}</p>`}`;
   }
 
   /** The Bass wheel disk: the disk owns pointer input (its picture and buttons take none); the buttons serve keys,
