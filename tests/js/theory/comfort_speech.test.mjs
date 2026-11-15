@@ -44,8 +44,22 @@ test("the voice volume moves in steps and stays between 0.2 and 1", () => {
   assert.equal(c.voiceVolume, 0.2);
 });
 
-test("less moving and bigger buttons map to page classes", () => {
-  assert.deepEqual(comfortClasses({ ...COMFORT_DEFAULTS, lessMotion: true }), { "pf-less-motion": true, "pf-bigger": false });
+test("less moving and bigger buttons map to page classes independently of defaults", () => {
+  for (const lessMotion of [false, true]) {
+    for (const bigger of [false, true]) {
+      assert.deepEqual(
+        comfortClasses({ ...COMFORT_DEFAULTS, lessMotion, bigger }),
+        { "pf-less-motion": lessMotion, "pf-bigger": bigger },
+      );
+    }
+  }
+});
+
+test("custom comfort defaults are reflected in page classes", () => {
+  assert.deepEqual(comfortClasses(COMFORT_DEFAULTS), {
+    "pf-less-motion": COMFORT_DEFAULTS.lessMotion,
+    "pf-bigger": COMFORT_DEFAULTS.bigger,
+  });
 });
 
 const remote = { name: "Cloud voice", lang: "en-US", localService: false };

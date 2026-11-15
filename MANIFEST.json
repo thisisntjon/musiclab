@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "commit": "c553aebca55be06498acd84f3c8364191c9d0694",
+  "commit": "45dafd84ff413f4ad50fb9ed1b14bc645acaaf61",
   "files": {
     ".gitattributes": "23183e8a3fa56753e1f294404b2c462a2b0ce981a0e3aa4990409cd4b527bbc9",
     ".github/ISSUE_TEMPLATE/accessibility_feedback.yml": "cd42cd6d694f781eb936444e75bfb1841e41db966d6b2ed04513d4e7e37c396a",
@@ -312,7 +312,7 @@
     "tests/js/theory/carbon-lead-wheel-and-entry.test.mjs": "6e1da00f922d977a7ee46d5371bc0f56fec46ad82283dfc3a256a6898585d5dc",
     "tests/js/theory/chicago_form.test.mjs": "6d4cd76a607fb07e82344181261095e4a1ece915fd6d5f2b8b10c9e992d2a027",
     "tests/js/theory/club_trap_scenes.test.mjs": "855ab7ca9c7f0543693cf009af61127c028b33edeb466ff37b2504d20a0127ee",
-    "tests/js/theory/comfort_speech.test.mjs": "5d392247c9ebdf65edfc71719e5e1c1273e6033bfabacc67d8070da49e2a24d0",
+    "tests/js/theory/comfort_speech.test.mjs": "d18143fbea3c93fef3b1ac58f45ca062e1f2808297f1e2df6944689a68b08e1c",
     "tests/js/theory/composer-v5-golden.json": "c893422bf05f06672155666897acb9f6cf15b1afe36b8723a7d5b086df9a1c81",
     "tests/js/theory/composer-v5-saved-songs-stable.test.mjs": "0ca3130acdd992f90ca3f30a239aed9d7581daa3ef7ff7357129764427622f45",
     "tests/js/theory/death_metal_form.test.mjs": "0fc1899e0af175de7a02f973bd7d72431bf574d9582ad48a3dbf65fc3e162611",
