@@ -417,6 +417,39 @@ class Phase12SynthAndHarmonyTest(unittest.TestCase):
             _, _, metrics = render_compiled_song_to_pcm(compiled, sample_rate=11025, role_filter=rf)
             self.assertLessEqual(metrics["peak_dbfs"], -3.0 + 0.01)
 
+    def test_dsp_spectral_and_metrics_edge_cases(self):
+        """Regression tests for non-power-of-two DFT windows, near-mono stereo width, and non-finite fallback."""
+        import math
+        from src.audio_engine.dsp import compute_wav_metrics
+
+        # Short / empty / non-power-of-two spectral_centroid windows
+        self.assertEqual(spectral_centroid([], 22050), 0.0)
+        self.assertEqual(spectral_centroid([0.1] * 63, 22050), 0.0)
+        non_pow2 = [math.sin(2.0 * math.pi * 440.0 * i / 22050.0) for i in range(300)]
+        c300 = spectral_centroid(non_pow2, 22050)
+        self.assertTrue(400.0 <= c300 <= 500.0, f"Unexpected non-pow2 centroid: {c300}")
+
+        # Near-mono buffers must not suffer catastrophic cancellation in stereo_diff_db
+        near_mono = compute_wav_metrics([0.5] * 1024, [0.5 + 1e-7] * 1024, 22050)
+        self.assertAlmostEqual(near_mono["stereo_diff_db"], -140.0, places=2)
+        self.assertEqual(near_mono["clipped_samples"], 0)
+
+        # Clipping boundary (0.9989 vs 0.999) and mid-buffer NaN fallback
+        clip_m = compute_wav_metrics([0.9989, 0.999, -0.999], [0.0, 0.0, 0.0], 22050)
+        self.assertEqual(clip_m["clipped_samples"], 2)
+        nan_m = compute_wav_metrics([0.1, float("nan"), -0.1], [0.1, 0.1, -0.1], 22050)
+        self.assertEqual(nan_m["samples"], 3)
+
+        # Drums role takes precedence over patch_id and sampled_* refuses Python export
+        drum_l, _ = synthesize_event(
+            {"role": "drums", "patch_id": "supersaw_stab", "duration_sec": 0.2, "velocity": 0.85, "concrete": {"freq_hz": 220.0}},
+            bpm=110.0,
+            sample_rate=22050,
+        )
+        self.assertGreater(len(drum_l), 64)
+        with self.assertRaises(ValueError):
+            synthesize_event({"role": "lead", "patch_id": "sampled_piano_v1", "duration_sec": 0.2}, 110.0, 22050)
+
 
 if __name__ == "__main__":
     unittest.main()
