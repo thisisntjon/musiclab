@@ -1,9 +1,11 @@
 """Deterministic Python stdlib PCM & WAV synthesizer implementing the 7 Heavy Bass voices + 3-Band OTT."""
 from __future__ import annotations
 
+from array import array
 import math
+from operator import mul
 from pathlib import Path
-import struct
+import sys
 from typing import Any
 import wave
 
@@ -399,45 +401,113 @@ def _synth_supersaw_stab(
     n = max(64, int(dur_sec * sample_rate))
     bright, warmth, width = _extract_sound_seed(event)
     spread = 0.65 + 0.70 * width
-    detunes = [-0.011 * spread, -0.0045 * spread, 0.0, 0.005 * spread, 0.012 * spread]
-    pans = [-0.65 * spread, -0.30 * spread, 0.0, 0.30 * spread, 0.65 * spread]
-    phases = [[0.0 for _ in detunes] for _ in voiced_freqs]
+    detunes = (-0.011 * spread, -0.0045 * spread, 0.0, 0.005 * spread, 0.012 * spread)
+    pans = (-0.65 * spread, -0.30 * spread, 0.0, 0.30 * spread, 0.65 * spread)
 
-    svf_lp_l = CytomicSVF(3200.0, 1.1, sample_rate)
-    svf_lp_r = CytomicSVF(3200.0, 1.1, sample_rate)
-    svf_hp_l = CytomicSVF(180.0, 0.707, sample_rate)
-    svf_hp_r = CytomicSVF(180.0, 0.707, sample_rate)
+    dt = 1.0 / float(sample_rate)
+    two_pi = 2.0 * math.pi
+    steps_rad: list[float] = []
+    gains_l: list[float] = []
+    gains_r: list[float] = []
+    for base_f in voiced_freqs:
+        for d_idx, det in enumerate(detunes):
+            steps_rad.append(two_pi * (base_f * (1.0 + det)) * dt)
+            pan = max(-0.95, min(0.95, pans[d_idx]))
+            gains_l.append(0.5 * (1.0 - pan))
+            gains_r.append(0.5 * (1.0 + pan))
+    n_osc = len(steps_rad)
+    phases = [0.0] * n_osc
+
+    sr_f = float(sample_rate)
+    max_cut = sample_rate * 0.46
+    pi_over_sr = math.pi / sr_f
+    tan = math.tan
+    exp = math.exp
+
+    lp_k = 1.0 / 1.15
+    lp_a1 = lp_a2 = lp_a3 = 0.0
+    lp_l_ic1 = lp_l_ic2 = 0.0
+    lp_r_ic1 = lp_r_ic2 = 0.0
+
+    hp_g = tan(pi_over_sr * max(25.0, min(max_cut, 180.0)))
+    hp_k = 1.0 / 0.707
+    hp_a1 = 1.0 / (1.0 + hp_g * (hp_g + hp_k))
+    hp_a2 = hp_g * hp_a1
+    hp_a3 = hp_g * hp_a2
+    hp_l_ic1 = hp_l_ic2 = 0.0
+    hp_r_ic1 = hp_r_ic2 = 0.0
 
     left: list[float] = [0.0] * n
     right: list[float] = [0.0] * n
-    dt = 1.0 / float(sample_rate)
     norm_scale = 0.22 / max(1.0, math.sqrt(len(voiced_freqs)))
     base_cut = 900.0 + 900.0 * bright
     env_cut = 2200.0 + 2400.0 * bright
+    cut_decay = -(4.8 - 1.2 * warmth)
+    n_f = float(n)
+    atk_samples = max(1, int(0.003 * sample_rate))
+    rel_samples = max(1, int(0.025 * sample_rate))
+    atk_f = float(atk_samples)
+    rel_f = float(rel_samples)
+    rel_start = n - rel_samples
 
+    osc_range = range(n_osc)
     for i in range(n):
-        nt = i / float(n)
-        if i % 16 == 0:
-            cutoff = base_cut + env_cut * math.exp(-nt * (4.8 - 1.2 * warmth))
-            svf_lp_l.update_coeffs(cutoff, 1.15, sample_rate)
-            svf_lp_r.update_coeffs(cutoff, 1.15, sample_rate)
+        nt = i / n_f
+        if (i & 15) == 0:
+            cutoff = base_cut + env_cut * exp(nt * cut_decay)
+            nyq = 25.0 if cutoff < 25.0 else (max_cut if cutoff > max_cut else cutoff)
+            g = tan(pi_over_sr * nyq)
+            lp_a1 = 1.0 / (1.0 + g * (g + lp_k))
+            lp_a2 = g * lp_a1
+            lp_a3 = g * lp_a2
 
         sum_l = 0.0
         sum_r = 0.0
-        for f_idx, base_f in enumerate(voiced_freqs):
-            for d_idx, det in enumerate(detunes):
-                phases[f_idx][d_idx] += 2.0 * math.pi * (base_f * (1.0 + det)) * dt
-                saw = 2.0 * ((phases[f_idx][d_idx] / (2.0 * math.pi)) % 1.0) - 1.0
-                pan = max(-0.95, min(0.95, pans[d_idx]))
-                sum_l += saw * (0.5 * (1.0 - pan))
-                sum_r += saw * (0.5 * (1.0 + pan))
+        for idx in osc_range:
+            p = phases[idx] + steps_rad[idx]
+            phases[idx] = p
+            saw = 2.0 * ((p / two_pi) % 1.0) - 1.0
+            sum_l += saw * gains_l[idx]
+            sum_r += saw * gains_r[idx]
 
-        lp_l, _, _, _ = svf_lp_l.step(sum_l * norm_scale)
-        lp_r, _, _, _ = svf_lp_r.step(sum_r * norm_scale)
-        _, _, hp_l, _ = svf_hp_l.step(lp_l)
-        _, _, hp_r, _ = svf_hp_r.step(lp_r)
+        xl = sum_l * norm_scale
+        v3 = xl - lp_l_ic2
+        v1 = lp_a1 * lp_l_ic1 + lp_a2 * v3
+        v2 = lp_l_ic2 + lp_a2 * lp_l_ic1 + lp_a3 * v3
+        lp_l_ic1 = 2.0 * v1 - lp_l_ic1
+        lp_l_ic2 = 2.0 * v2 - lp_l_ic2
+        lp_l = v2
 
-        env = _amp_envelope(i, n, sample_rate, 0.003, 0.025) * vel * math.exp(-nt * 1.4)
+        xr = sum_r * norm_scale
+        v3 = xr - lp_r_ic2
+        v1 = lp_a1 * lp_r_ic1 + lp_a2 * v3
+        v2 = lp_r_ic2 + lp_a2 * lp_r_ic1 + lp_a3 * v3
+        lp_r_ic1 = 2.0 * v1 - lp_r_ic1
+        lp_r_ic2 = 2.0 * v2 - lp_r_ic2
+        lp_r = v2
+
+        v3 = lp_l - hp_l_ic2
+        v1 = hp_a1 * hp_l_ic1 + hp_a2 * v3
+        v2 = hp_l_ic2 + hp_a2 * hp_l_ic1 + hp_a3 * v3
+        hp_l_ic1 = 2.0 * v1 - hp_l_ic1
+        hp_l_ic2 = 2.0 * v2 - hp_l_ic2
+        hp_l = lp_l - hp_k * v1 - v2
+
+        v3 = lp_r - hp_r_ic2
+        v1 = hp_a1 * hp_r_ic1 + hp_a2 * v3
+        v2 = hp_r_ic2 + hp_a2 * hp_r_ic1 + hp_a3 * v3
+        hp_r_ic1 = 2.0 * v1 - hp_r_ic1
+        hp_r_ic2 = 2.0 * v2 - hp_r_ic2
+        hp_r = lp_r - hp_k * v1 - v2
+
+        if i < atk_samples:
+            amp = i / atk_f
+        elif i > rel_start:
+            rem = (n - i) / rel_f
+            amp = rem if rem > 0.0 else 0.0
+        else:
+            amp = 1.0
+        env = amp * vel * exp(-nt * 1.4)
         left[i] = env * hp_l
         right[i] = env * hp_r
 
@@ -488,38 +558,83 @@ def _synth_warm_keys(
     """Warm electric piano (Rhodes-style tine + fundamental) with gentle stereo chorus/tremolo."""
     n = max(64, int(dur_sec * sample_rate))
     bright, warmth, width = _extract_sound_seed(event)
-    phases = [0.0 for _ in voiced_freqs]
-    lp_cut = 1400.0 + 1800.0 * bright
-    svf_lp_l = CytomicSVF(lp_cut, 0.8, sample_rate)
-    svf_lp_r = CytomicSVF(lp_cut, 0.8, sample_rate)
-    left: list[float] = [0.0] * n
-    right: list[float] = [0.0] * n
     dt = 1.0 / float(sample_rate)
-    norm_scale = 0.34 / max(1.0, math.sqrt(len(voiced_freqs)))
+    two_pi = 2.0 * math.pi
     pan_amt = 0.15 + 0.30 * width
 
+    n_voices = len(voiced_freqs)
+    steps_rad = [two_pi * f * dt for f in voiced_freqs]
+    gains_l = [0.5 * (1.0 - (-pan_amt if (idx & 1) == 0 else pan_amt)) for idx in range(n_voices)]
+    gains_r = [0.5 * (1.0 + (-pan_amt if (idx & 1) == 0 else pan_amt)) for idx in range(n_voices)]
+    phases = [0.0] * n_voices
+
+    sr_f = float(sample_rate)
+    lp_cut = max(25.0, min(sample_rate * 0.46, 1400.0 + 1800.0 * bright))
+    lp_g = math.tan(math.pi * lp_cut / sr_f)
+    lp_k = 1.0 / 0.8
+    lp_a1 = 1.0 / (1.0 + lp_g * (lp_g + lp_k))
+    lp_a2 = lp_g * lp_a1
+    lp_a3 = lp_g * lp_a2
+    lp_l_ic1 = lp_l_ic2 = 0.0
+    lp_r_ic1 = lp_r_ic2 = 0.0
+
+    left: list[float] = [0.0] * n
+    right: list[float] = [0.0] * n
+    norm_scale = 0.34 / max(1.0, math.sqrt(n_voices))
+    tine_gain = 0.08 + 0.14 * bright
+    mod_gain = 0.25 + 0.25 * warmth
+    body_decay = -(1.55 - 0.45 * warmth)
+    trem_depth = 0.04 + 0.08 * width
+    trem_omega = two_pi * 4.2 * dt
+    n_f = float(n)
+    atk_samples = max(1, int(0.006 * sample_rate))
+    rel_samples = max(1, int(0.035 * sample_rate))
+    atk_f = float(atk_samples)
+    rel_f = float(rel_samples)
+    rel_start = n - rel_samples
+
+    sin = math.sin
+    exp = math.exp
+    v_range = range(n_voices)
     for i in range(n):
-        t = i * dt
-        nt = i / float(n)
-        tine_env = math.exp(-nt * 6.5)
-        body_env = math.exp(-nt * (1.55 - 0.45 * warmth))
+        nt = i / n_f
+        tine_coeff = tine_gain * exp(-nt * 6.5)
+        body_env = exp(nt * body_decay)
+        mod_coeff = mod_gain * body_env
         sum_l = 0.0
         sum_r = 0.0
-        for idx, f in enumerate(voiced_freqs):
-            phases[idx] += 2.0 * math.pi * f * dt
-            p = phases[idx]
-            # Rhodes FM tine (ratio 7:1 gentle bell attack) + warm fundamental + 2nd harmonic
-            tine = (0.08 + 0.14 * bright) * tine_env * math.sin(7.0 * p)
-            voice = math.sin(p + (0.25 + 0.25 * warmth) * body_env * math.sin(2.0 * p) + tine)
-            pan = -pan_amt if (idx % 2 == 0) else pan_amt
-            sum_l += voice * (0.5 * (1.0 - pan))
-            sum_r += voice * (0.5 * (1.0 + pan))
+        for idx in v_range:
+            p = phases[idx] + steps_rad[idx]
+            phases[idx] = p
+            voice = sin(p + mod_coeff * sin(2.0 * p) + tine_coeff * sin(7.0 * p))
+            sum_l += voice * gains_l[idx]
+            sum_r += voice * gains_r[idx]
 
-        # Gentle 4.2 Hz stereo tremolo pan
-        trem = (0.04 + 0.08 * width) * math.sin(2.0 * math.pi * 4.2 * t)
-        lp_l, _, _, _ = svf_lp_l.step(sum_l * norm_scale * (1.0 + trem))
-        lp_r, _, _, _ = svf_lp_r.step(sum_r * norm_scale * (1.0 - trem))
-        env = _amp_envelope(i, n, sample_rate, 0.006, 0.035) * vel * body_env
+        trem = trem_depth * sin(trem_omega * i)
+        xl = sum_l * norm_scale * (1.0 + trem)
+        v3 = xl - lp_l_ic2
+        v1 = lp_a1 * lp_l_ic1 + lp_a2 * v3
+        v2 = lp_l_ic2 + lp_a2 * lp_l_ic1 + lp_a3 * v3
+        lp_l_ic1 = 2.0 * v1 - lp_l_ic1
+        lp_l_ic2 = 2.0 * v2 - lp_l_ic2
+        lp_l = v2
+
+        xr = sum_r * norm_scale * (1.0 - trem)
+        v3 = xr - lp_r_ic2
+        v1 = lp_a1 * lp_r_ic1 + lp_a2 * v3
+        v2 = lp_r_ic2 + lp_a2 * lp_r_ic1 + lp_a3 * v3
+        lp_r_ic1 = 2.0 * v1 - lp_r_ic1
+        lp_r_ic2 = 2.0 * v2 - lp_r_ic2
+        lp_r = v2
+
+        if i < atk_samples:
+            amp = i / atk_f
+        elif i > rel_start:
+            rem = (n - i) / rel_f
+            amp = rem if rem > 0.0 else 0.0
+        else:
+            amp = 1.0
+        env = amp * vel * body_env
         left[i] = env * lp_l
         right[i] = env * lp_r
 
@@ -815,23 +930,24 @@ def render_compiled_song_to_pcm(
         out_r[i] = drum_r[i] + synth_r[i] + rev_r
 
     # Remove DC offset and normalize peak cleanly into [-1.8 dBFS, -0.8 dBFS] (0.81 .. 0.91)
-    mean_l = sum(out_l) / float(total_samples)
-    mean_r = sum(out_r) / float(total_samples)
-    peak = 1e-6
+    inv_total = 1.0 / float(total_samples)
+    mean_l = sum(out_l) * inv_total
+    mean_r = sum(out_r) * inv_total
+    tanh = math.tanh
     for i in range(total_samples):
-        out_l[i] = math.tanh(0.85 * (out_l[i] - mean_l))
-        out_r[i] = math.tanh(0.85 * (out_r[i] - mean_r))
-        if abs(out_l[i]) > peak:
-            peak = abs(out_l[i])
-        if abs(out_r[i]) > peak:
-            peak = abs(out_r[i])
+        out_l[i] = tanh(0.85 * (out_l[i] - mean_l))
+        out_r[i] = tanh(0.85 * (out_r[i] - mean_r))
+
+    min_l, max_l = min(out_l), max(out_l)
+    min_r, max_r = min(out_r), max(out_r)
+    peak = max(1e-6, -min_l if min_l < 0.0 else min_l, max_l, -min_r if min_r < 0.0 else min_r, max_r)
 
     # Phase 8.0 safe sound: same -3 dBFS ceiling as the browser safety clip (master_bus.js SAFETY_CEILING),
     # applied only as a reduction so exports never come out louder than the mix.
     scale = min(1.0, TARGET_PEAK / peak)
-    for i in range(total_samples):
-        out_l[i] *= scale
-        out_r[i] *= scale
+    if scale < 1.0:
+        out_l = [x * scale for x in out_l]
+        out_r = [x * scale for x in out_r]
 
     metrics = compute_wav_metrics(out_l, out_r, sample_rate=sample_rate)
     section_rms: dict[str, float] = {}
@@ -842,11 +958,9 @@ def render_compiled_song_to_pcm(
         s_idx = max(0, int(float(sec.get("start_sec", 0.0)) * sample_rate))
         e_idx = min(total_samples, int(float(sec.get("end_sec", total_dur)) * sample_rate))
         if e_idx > s_idx:
-            seg_len = e_idx - s_idx
-            power = sum(
-                0.5 * (out_l[k] * out_l[k] + out_r[k] * out_r[k])
-                for k in range(s_idx, e_idx)
-            ) / float(seg_len)
+            seg_l = out_l[s_idx:e_idx]
+            seg_r = out_r[s_idx:e_idx]
+            power = 0.5 * (sum(map(mul, seg_l, seg_l)) + sum(map(mul, seg_r, seg_r))) / float(e_idx - s_idx)
             rms_val = math.sqrt(max(1e-12, power))
             section_rms[str(sec.get("id", "sec"))] = round(20.0 * math.log10(rms_val), 3)
 
@@ -854,10 +968,9 @@ def render_compiled_song_to_pcm(
                 w_start = max(s_idx, int((float(sec.get("end_sec", total_dur)) - 3.0 * step_sec) * sample_rate))
                 w_end = e_idx
                 if w_end > w_start:
-                    w_pow = sum(
-                        0.5 * (out_l[k] * out_l[k] + out_r[k] * out_r[k])
-                        for k in range(w_start, w_end)
-                    ) / float(w_end - w_start)
+                    wl = out_l[w_start:w_end]
+                    wr = out_r[w_start:w_end]
+                    w_pow = 0.5 * (sum(map(mul, wl, wl)) + sum(map(mul, wr, wr))) / float(w_end - w_start)
                     pre_drop_window_rms_dbfs = round(20.0 * math.log10(math.sqrt(max(1e-12, w_pow))), 3)
 
     metrics["section_rms_dbfs"] = section_rms
@@ -869,25 +982,41 @@ def render_compiled_song_to_wav(
     compiled_song: dict[str, Any],
     wav_path: str | Path,
     sample_rate: int = 22050,
+    role_filter: str | None = None,
 ) -> dict[str, Any]:
     """Render a CompiledSong schedule to a 16-bit stereo PCM .wav file and return verification metrics."""
-    out_l, out_r, metrics = render_compiled_song_to_pcm(compiled_song, sample_rate=sample_rate)
+    out_l, out_r, metrics = render_compiled_song_to_pcm(
+        compiled_song, sample_rate=sample_rate, role_filter=role_filter
+    )
     dest = Path(wav_path)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    pcm_frames = bytearray(len(out_l) * 4)
-    offset = 0
+    buf = [0] * (len(out_l) * 2)
+    idx = 0
     for l_val, r_val in zip(out_l, out_r):
-        s_l = int(max(-32767, min(32767, round(l_val * 32767.0))))
-        s_r = int(max(-32767, min(32767, round(r_val * 32767.0))))
-        struct.pack_into("<hh", pcm_frames, offset, s_l, s_r)
-        offset += 4
+        s_l = int(round(l_val * 32767.0))
+        if s_l > 32767:
+            s_l = 32767
+        elif s_l < -32767:
+            s_l = -32767
+        s_r = int(round(r_val * 32767.0))
+        if s_r > 32767:
+            s_r = 32767
+        elif s_r < -32767:
+            s_r = -32767
+        buf[idx] = s_l
+        buf[idx + 1] = s_r
+        idx += 2
+    pcm = array("h")
+    pcm.fromlist(buf)
+    if sys.byteorder != "little":
+        pcm.byteswap()
 
     with wave.open(str(dest), "wb") as wf:
         wf.setnchannels(2)
         wf.setsampwidth(2)
         wf.setframerate(sample_rate)
-        wf.writeframes(pcm_frames)
+        wf.writeframes(pcm.tobytes())
 
     metrics["wav_path"] = str(dest)
     metrics["file_size_bytes"] = dest.stat().st_size

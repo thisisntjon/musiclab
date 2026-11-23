@@ -1,7 +1,9 @@
 """Core DSP primitives for heavy-bass synthesis: Cytomic SVF, Formant Vowel Tables, Wavefolder, 3-Band OTT & Spectral Metrics."""
 from __future__ import annotations
 
+from functools import lru_cache
 import math
+from operator import mul, sub
 from typing import Any
 
 # (F1_hz, F2_hz, F3_hz, F_notch_hz)
@@ -124,6 +126,49 @@ def gesture_curve_at(shape: str, norm_t: float, lfo_rate: str, bpm: float, dur_s
     return nt
 
 
+@lru_cache(maxsize=16)
+def _hann_window(n: int) -> tuple[float, ...]:
+    inv = 2.0 * math.pi / float(n - 1)
+    cos = math.cos
+    return tuple(0.5 - 0.5 * cos(inv * i) for i in range(n))
+
+
+@lru_cache(maxsize=12)
+def _fft_plan(n: int) -> tuple[tuple[int, ...], tuple[tuple[int, int, tuple[complex, ...]], ...]]:
+    bits = n.bit_length() - 1
+    bitrev = []
+    for i in range(n):
+        rev = 0
+        x = i
+        for _ in range(bits):
+            rev = (rev << 1) | (x & 1)
+            x >>= 1
+        bitrev.append(rev)
+    stages = []
+    size = 2
+    while size <= n:
+        half = size >> 1
+        ang = -2.0 * math.pi / float(size)
+        twiddles = tuple(complex(math.cos(ang * j), math.sin(ang * j)) for j in range(half))
+        stages.append((size, half, twiddles))
+        size <<= 1
+    return tuple(bitrev), tuple(stages)
+
+
+def _fft_radix2(real_samples: list[float]) -> list[complex]:
+    n = len(real_samples)
+    bitrev, stages = _fft_plan(n)
+    a = [complex(real_samples[bitrev[i]], 0.0) for i in range(n)]
+    for size, half, twiddles in stages:
+        for start in range(0, n, size):
+            for j in range(half):
+                u = a[start + j]
+                v = a[start + j + half] * twiddles[j]
+                a[start + j] = u + v
+                a[start + j + half] = u - v
+    return a
+
+
 def spectral_centroid(samples: list[float], sample_rate: int = 22050) -> float:
     """Compute spectral centroid in Hz using a discrete Fourier transform over a representative window."""
     n = min(len(samples), 1024)
@@ -131,25 +176,41 @@ def spectral_centroid(samples: list[float], sample_rate: int = 22050) -> float:
         return 0.0
     # Use middle window of note where vowel/grit is fullest
     start = max(0, (len(samples) - n) // 2)
-    windowed = [
-        samples[start + i] * (0.5 - 0.5 * math.cos(2.0 * math.pi * i / (n - 1)))
-        for i in range(n)
-    ]
+    win = _hann_window(n)
+    windowed = list(map(mul, samples[start : start + n], win))
     num = 0.0
     den = 0.0
     max_k = n // 2
+    df = sample_rate / n
+
+    if (n & (n - 1)) == 0:
+        spec = _fft_radix2(windowed)
+        for k in range(1, max_k):
+            freq = k * df
+            if freq > 7500.0:
+                break
+            mag = abs(spec[k])
+            num += freq * mag
+            den += mag
+        return round(num / den, 2) if den > 1e-9 else 0.0
+
+    # Exact Goertzel recurrence for non-power-of-two window lengths
+    two_pi_over_n = 2.0 * math.pi / n
+    cos = math.cos
+    sqrt = math.sqrt
     for k in range(1, max_k):
-        freq = k * sample_rate / n
+        freq = k * df
         if freq > 7500.0:
             break
-        re = 0.0
-        im = 0.0
-        two_pi_k_n = 2.0 * math.pi * k / n
-        for idx, s in enumerate(windowed):
-            angle = two_pi_k_n * idx
-            re += s * math.cos(angle)
-            im -= s * math.sin(angle)
-        mag = math.hypot(re, im)
+        coeff = 2.0 * cos(two_pi_over_n * k)
+        s1 = 0.0
+        s2 = 0.0
+        for s in windowed:
+            s0 = s + coeff * s1 - s2
+            s2 = s1
+            s1 = s0
+        power = s1 * s1 + s2 * s2 - coeff * s1 * s2
+        mag = sqrt(power) if power > 0.0 else 0.0
         num += freq * mag
         den += mag
     return round(num / den, 2) if den > 1e-9 else 0.0
@@ -165,25 +226,26 @@ def estimate_fundamental_hz(
     if n < 256:
         return 0.0
     start = max(0, (len(samples) - n) // 2)
-    seg = [
-        samples[start + i] * (0.5 - 0.5 * math.cos(2.0 * math.pi * i / (n - 1)))
-        for i in range(n)
-    ]
+    win = _hann_window(n)
+    seg = list(map(mul, samples[start : start + n], win))
     low_hz = max(25.0, expected_hz * 0.75)
     high_hz = min(sample_rate * 0.4, expected_hz * 1.25)
     best_freq = low_hz
     best_mag = -1.0
     steps = 160
+    span = high_hz - low_hz
+    two_pi_over_sr = 2.0 * math.pi / sample_rate
+    cos = math.cos
     for step_idx in range(steps + 1):
-        cand_hz = low_hz + (high_hz - low_hz) * (step_idx / steps)
-        omega = 2.0 * math.pi * cand_hz / sample_rate
-        re = 0.0
-        im = 0.0
-        for idx, val in enumerate(seg):
-            angle = omega * idx
-            re += val * math.cos(angle)
-            im -= val * math.sin(angle)
-        mag = re * re + im * im
+        cand_hz = low_hz + span * (step_idx / steps)
+        coeff = 2.0 * cos(two_pi_over_sr * cand_hz)
+        s1 = 0.0
+        s2 = 0.0
+        for val in seg:
+            s0 = val + coeff * s1 - s2
+            s2 = s1
+            s1 = s0
+        mag = s1 * s1 + s2 * s2 - coeff * s1 * s2
         if mag > best_mag:
             best_mag = mag
             best_freq = cand_hz
@@ -201,25 +263,34 @@ def karplus_strong_pluck(
     n = max(16, int(n_samples))
     safe_freq = max(35.0, min(sample_rate * 0.42, float(freq_hz)))
     period = max(2, int(round(sample_rate / safe_freq)))
-    buf = [0.0] * period
+    sin = math.sin
+    cos = math.cos
+    pi_over_p = math.pi / float(period)
     # Deterministic velvet/pinkish excitation burst
-    for k in range(period):
-        noise = math.sin(k * 12.9898 + 4.1414) * math.cos(k * 78.233 + 1.618)
-        window = math.sin(math.pi * (k + 0.5) / float(period))
-        buf[k] = noise * window
+    buf = [
+        sin(k * 12.9898 + 4.1414) * cos(k * 78.233 + 1.618) * sin(pi_over_p * (k + 0.5))
+        for k in range(period)
+    ]
 
     out = [0.0] * n
     alpha = max(0.20, min(0.92, float(brightness)))
+    half_one_minus_alpha = (1.0 - alpha) * 0.5
+    cur_weight = alpha + half_one_minus_alpha
     damp = max(0.95, min(0.998, float(damping)))
+    d75 = damp * 0.75
+    d25 = damp * 0.25
     prev = 0.0
+    idx = 0
     for i in range(n):
-        idx = i % period
-        nxt = (i + 1) % period
+        nxt = idx + 1
+        if nxt == period:
+            nxt = 0
         cur = buf[idx]
         out[i] = cur
-        avg = alpha * cur + (1.0 - alpha) * 0.5 * (cur + buf[nxt])
-        prev = damp * (0.75 * avg + 0.25 * prev)
+        avg = cur_weight * cur + half_one_minus_alpha * buf[nxt]
+        prev = d75 * avg + d25 * prev
         buf[idx] = prev
+        idx = nxt
     return out
 
 
@@ -238,27 +309,53 @@ def compute_wav_metrics(
             "clipped_samples": 0,
             "stereo_diff_db": -120.0,
         }
-    peak = 0.0
-    sum_sq = 0.0
-    sum_dc = 0.0
-    diff_sq = 0.0
-    clipped = 0
+    ls = left if len(left) == n else left[:n]
+    rs = right if len(right) == n else right[:n]
 
-    for i in range(n):
-        l_val = left[i]
-        r_val = right[i]
-        al = abs(l_val)
-        ar = abs(r_val)
-        if al > peak:
-            peak = al
-        if ar > peak:
-            peak = ar
-        if al >= 0.999 or ar >= 0.999:
-            clipped += 1
-        sum_sq += 0.5 * (l_val * l_val + r_val * r_val)
-        sum_dc += 0.5 * (l_val + r_val)
-        diff = l_val - r_val
-        diff_sq += diff * diff
+    min_l = min(ls)
+    max_l = max(ls)
+    min_r = min(rs)
+    max_r = max(rs)
+    sum_l2 = sum(map(mul, ls, ls))
+    sum_r2 = sum(map(mul, rs, rs))
+
+    if (
+        math.isfinite(min_l)
+        and math.isfinite(max_l)
+        and math.isfinite(min_r)
+        and math.isfinite(max_r)
+        and math.isfinite(sum_l2)
+        and math.isfinite(sum_r2)
+    ):
+        peak = max(-min_l if min_l < 0.0 else min_l, max_l, -min_r if min_r < 0.0 else min_r, max_r)
+        if peak < 0.999:
+            clipped = 0
+        else:
+            clipped = sum(1 for l_val, r_val in zip(ls, rs) if abs(l_val) >= 0.999 or abs(r_val) >= 0.999)
+        sum_sq = 0.5 * (sum_l2 + sum_r2)
+        diffs = list(map(sub, ls, rs))
+        diff_sq = sum(map(mul, diffs, diffs))
+        sum_dc = 0.5 * (sum(ls) + sum(rs))
+    else:
+        # Exact scalar fallback for buffers containing NaN/Inf
+        peak = 0.0
+        sum_sq = 0.0
+        sum_dc = 0.0
+        diff_sq = 0.0
+        clipped = 0
+        for l_val, r_val in zip(ls, rs):
+            al = abs(l_val)
+            ar = abs(r_val)
+            if al > peak:
+                peak = al
+            if ar > peak:
+                peak = ar
+            if al >= 0.999 or ar >= 0.999:
+                clipped += 1
+            sum_sq += 0.5 * (l_val * l_val + r_val * r_val)
+            sum_dc += 0.5 * (l_val + r_val)
+            diff = l_val - r_val
+            diff_sq += diff * diff
 
     rms = math.sqrt(sum_sq / n)
     diff_rms = math.sqrt(diff_sq / n)
