@@ -113,7 +113,12 @@ def resolve_note_pitch(
     resolved["provenance"] = str(resolved.get("provenance") or "seed_template")
 
     if role == "drums":
-        midi_pitch = int(resolved.get("concrete", {}).get("midi_pitch", 36))
+        raw_midi = resolved.get("concrete", {}).get("midi_pitch", 36)
+        midi_pitch = (
+            max(0, min(127, int(raw_midi)))
+            if isinstance(raw_midi, (int, float)) and not isinstance(raw_midi, bool) and math.isfinite(raw_midi)
+            else 36
+        )
         resolved["concrete"] = {
             "midi_pitch": midi_pitch,
             "freq_hz": midi_to_freq(midi_pitch),
@@ -132,7 +137,12 @@ def resolve_note_pitch(
     scale_pcs = [(int(root_pc) + off) % 12 for off in scale_offsets]
 
     if lock_mode == "concrete" and isinstance(resolved.get("concrete"), dict) and "midi_pitch" in resolved["concrete"]:
-        midi_pitch = int(resolved["concrete"]["midi_pitch"])
+        raw_midi = resolved["concrete"]["midi_pitch"]
+        midi_pitch = (
+            max(0, min(127, int(raw_midi)))
+            if isinstance(raw_midi, (int, float)) and not isinstance(raw_midi, bool) and math.isfinite(raw_midi)
+            else 60
+        )
     else:
         anchor = rel.get("anchor", "chord_tone")
         ct_idx = int(rel.get("chord_tone_index", 0))

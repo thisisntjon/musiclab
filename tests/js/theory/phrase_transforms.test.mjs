@@ -95,3 +95,17 @@ test("12b-6 (#2, #14): mutateDejaVu and decoratePhraseNotes never mutate input a
     assert.ok(toggledOff.every((n) => n.transition === undefined));
   }
 });
+
+test("negative rootPc normalizes pitch classes into 0..11 without skipping tones or hanging", () => {
+  const lead = [{ id: "n0", step: 4, duration_steps: 4, concrete: { midi_pitch: 60 }, provenance: "user_performed" }];
+  // rootPc = -3 is equivalent to rootPc = 9 (A major: [9, 11, 1, 2, 4, 6, 8]); next tone above C4 (60) is C#4 (61)
+  const neg3 = transformPhraseEnding(lead, "climb", -3, "major");
+  const pos9 = transformPhraseEnding(lead, "climb", 9, "major");
+  assert.deepEqual(neg3, pos9);
+  assert.equal(neg3[0].concrete.midi_pitch, 61);
+  // rootPc = -12 is equivalent to rootPc = 0 (C major); previously hung in an infinite loop
+  const neg12 = transformPhraseEnding(lead, "climb", -12, "major");
+  const pos0 = transformPhraseEnding(lead, "climb", 0, "major");
+  assert.deepEqual(neg12, pos0);
+  assert.equal(neg12[0].concrete.midi_pitch, 62);
+});
