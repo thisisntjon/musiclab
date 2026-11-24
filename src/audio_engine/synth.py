@@ -47,6 +47,17 @@ def _sidechain_events(compiled_song: dict[str, Any], step_sec: float) -> list[tu
     return sorted((at, weight) for at, weight in weights.items() if weight > 0)
 
 
+def _sanitize_freq(raw: Any, sample_rate: int, fallback: float = 55.0) -> float:
+    """Return a finite positive frequency in Hz safe for oscillators and filters."""
+    try:
+        val = float(raw)
+    except (TypeError, ValueError):
+        return fallback
+    if not math.isfinite(val) or val <= 0.0:
+        return fallback
+    return max(1.0, min(sample_rate * 0.48, val))
+
+
 def synthesize_event(
     event: dict[str, Any],
     bpm: float = 110.0,
@@ -63,7 +74,7 @@ def synthesize_event(
     if vel == 0:
         silence = [0.0] * max(1, math.ceil(dur_sec * sample_rate))
         return silence, silence.copy()
-    freq_hz = float(event.get("concrete", {}).get("freq_hz", 55.0))
+    freq_hz = _sanitize_freq(event.get("concrete", {}).get("freq_hz", 55.0), sample_rate, fallback=55.0)
     gesture = event.get("gesture") or {}
     pan = event.get("pan")
 
@@ -88,14 +99,16 @@ def synthesize_event(
         l_buf, r_buf = _synth_vocal_chop(freq_hz, dur_sec, vel, gesture, bpm, sample_rate)
         return _apply_event_pan(l_buf, r_buf, pan)
     if patch_id == "warm_keys":
-        voiced_freqs = event.get("voiced_freqs") or [freq_hz]
+        raw_vf = event.get("voiced_freqs") or [freq_hz]
+        voiced_freqs = [_sanitize_freq(f, sample_rate, fallback=freq_hz) for f in raw_vf]
         l_buf, r_buf = _synth_warm_keys(voiced_freqs, dur_sec, vel, sample_rate, event=event)
         return _apply_event_pan(l_buf, r_buf, pan)
     if patch_id == "pluck_lead":
         l_buf, r_buf = _synth_pluck_lead(freq_hz, dur_sec, vel, sample_rate, event=event)
         return _apply_event_pan(l_buf, r_buf, pan)
     if patch_id == "supersaw_stab" or role in ("harmony", "lead"):
-        voiced_freqs = event.get("voiced_freqs") or ([freq_hz] if role == "lead" else [freq_hz, freq_hz * 1.2, freq_hz * 1.5])
+        raw_vf = event.get("voiced_freqs") or ([freq_hz] if role == "lead" else [freq_hz, freq_hz * 1.2, freq_hz * 1.5])
+        voiced_freqs = [_sanitize_freq(f, sample_rate, fallback=freq_hz) for f in raw_vf]
         l_buf, r_buf = _synth_supersaw_stab(voiced_freqs, dur_sec, vel, gesture, sample_rate, event=event)
         return _apply_event_pan(l_buf, r_buf, pan)
 
@@ -145,8 +158,8 @@ def _synth_growl(
     r1 = 2.0
     r2 = 3.0 if is_yoi else 4.0
 
-    # Ensure sub frequency is in 40..95 Hz
-    sub_hz = freq_hz
+    # Ensure sub frequency is in 40..95 Hz (defensive guard against <=0 / non-finite direct calls)
+    sub_hz = _sanitize_freq(freq_hz, sample_rate, fallback=55.0)
     while sub_hz > 95.0:
         sub_hz *= 0.5
     while sub_hz < 38.0:

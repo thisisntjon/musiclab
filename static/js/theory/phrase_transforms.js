@@ -48,7 +48,7 @@ export function transformPhraseEnding(leadNotes, shape, rootPc = 0, scaleType = 
   if (!PHRASE_SHAPES.includes(shape)) throw new Error(`Unknown phrase shape: ${shape}`);
   const lead = JSON.parse(JSON.stringify(leadNotes || []));
   if (lead.length === 0) return lead;
-  const pcs = (SCALES[scaleType] || SCALES.major).map((o) => (Number(rootPc) + o) % 12);
+  const pcs = (SCALES[scaleType] || SCALES.major).map((o) => (((Number(rootPc) + o) % 12) + 12) % 12);
   const endings = barEndings(lead);
   const firstBar = Math.min(...endings.keys());
   const reference = endings.get(firstBar);

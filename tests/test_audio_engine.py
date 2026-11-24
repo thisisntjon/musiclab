@@ -417,6 +417,61 @@ class Phase12SynthAndHarmonyTest(unittest.TestCase):
             _, _, metrics = render_compiled_song_to_pcm(compiled, sample_rate=11025, role_filter=rf)
             self.assertLessEqual(metrics["peak_dbfs"], -3.0 + 0.01)
 
+    def test_hostile_frequencies_and_extreme_midi_never_hang_or_poison_mix(self):
+        """Non-positive or non-finite frequencies and extreme concrete MIDI must never hang, crash, or emit NaN."""
+        import math
+        from src.audio_engine.synth import render_compiled_song_to_pcm
+
+        hostile_freqs = (0.0, -55.0, float("nan"), float("inf"))
+        for patch_id, role in (
+            ("monster_growl", "hocket"),
+            ("talking_yoi", "hocket"),
+            ("wobble_bass", "bass"),
+            ("clean_bass", "bass"),
+            ("laser_screech", "hocket"),
+            ("vocal_chop", "hocket"),
+            ("warm_keys", "harmony"),
+            ("pluck_lead", "lead"),
+            ("supersaw_stab", "harmony"),
+            ("reverse_swell", "fx"),
+        ):
+            for freq in hostile_freqs:
+                ev = {
+                    "role": role,
+                    "patch_id": patch_id,
+                    "duration_sec": 0.06,
+                    "velocity": 0.85,
+                    "concrete": {"freq_hz": freq},
+                    "voiced_freqs": [freq],
+                }
+                l_buf, r_buf = synthesize_event(ev, bpm=110.0, sample_rate=11025)
+                self.assertTrue(all(math.isfinite(x) for x in l_buf), f"{patch_id} freq={freq} emitted non-finite L")
+                self.assertTrue(all(math.isfinite(x) for x in r_buf), f"{patch_id} freq={freq} emitted non-finite R")
+
+        # Extreme concrete MIDI pitches through compile_song -> render_compiled_song_to_pcm
+        for extreme_midi in (-20000, 20000):
+            doc = {
+                "id": "extreme-midi-test",
+                "global_context": {"bpm": 110, "root_pc": 0, "scale_type": "major", "bars": 1},
+                "notes": [
+                    {
+                        "id": "n0",
+                        "step": 0,
+                        "duration_steps": 4,
+                        "role": "hocket",
+                        "patch_id": "monster_growl",
+                        "pitch_lock_mode": "concrete",
+                        "concrete": {"midi_pitch": extreme_midi},
+                    }
+                ],
+            }
+            compiled = compile_song(doc)
+            out_l, out_r, metrics = render_compiled_song_to_pcm(compiled, sample_rate=11025)
+            self.assertTrue(all(math.isfinite(x) for x in out_l))
+            self.assertTrue(all(math.isfinite(x) for x in out_r))
+            self.assertLessEqual(metrics["peak_dbfs"], -3.0 + 0.01)
+            self.assertEqual(metrics["clipped_samples"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()
